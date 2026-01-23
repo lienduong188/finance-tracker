@@ -27,6 +27,17 @@ export interface AuthResponse {
   userId: string
   email: string
   fullName: string
+  defaultCurrency: string
+}
+
+export interface UpdateProfileRequest {
+  fullName: string
+  defaultCurrency: string
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string
+  newPassword: string
 }
 
 // Account types

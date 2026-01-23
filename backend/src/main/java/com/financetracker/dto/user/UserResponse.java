@@ -1,23 +1,22 @@
-package com.financetracker.dto.auth;
+package com.financetracker.dto.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthResponse {
+public class UserResponse {
 
-    private String accessToken;
-    private String refreshToken;
-    private String tokenType = "Bearer";
-    private UUID userId;
+    private UUID id;
     private String email;
     private String fullName;
     private String defaultCurrency;
+    private LocalDateTime createdAt;
 }

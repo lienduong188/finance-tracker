@@ -55,6 +55,22 @@ public class JwtService {
         return buildToken(claims, userDetails, refreshExpiration);
     }
 
+    public String generatePasswordResetToken(UserDetails userDetails, UUID userId) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", userId.toString());
+        claims.put("purpose", "password_reset");
+        // 15 minutes expiration for password reset
+        return buildToken(claims, userDetails, 15 * 60 * 1000);
+    }
+
+    public boolean isPasswordResetTokenValid(String token, UserDetails userDetails) {
+        final String username = extractUsername(token);
+        final String purpose = extractClaim(token, claims -> claims.get("purpose", String.class));
+        return username.equals(userDetails.getUsername())
+                && "password_reset".equals(purpose)
+                && !isTokenExpired(token);
+    }
+
     private String buildToken(Map<String, Object> extraClaims, UserDetails userDetails, long expiration) {
         return Jwts.builder()
                 .claims(extraClaims)

@@ -33,7 +33,24 @@
     "defaultCurrency": "デフォルト通貨",
     "loginFailed": "ログインに失敗しました。メールアドレスとパスワードを確認してください。",
     "registerFailed": "登録に失敗しました。もう一度お試しください。",
-    "networkError": "ネットワークエラーです。もう一度お試しください。"
+    "networkError": "ネットワークエラーです。もう一度お試しください。",
+    "forgotPasswordTitle": "パスワードを忘れた方",
+    "forgotPasswordDescription": "パスワードリセットリンクを受け取るメールアドレスを入力",
+    "forgotPasswordFailed": "パスワードリセットリンクを送信できません",
+    "sendResetLink": "リセットリンクを送信",
+    "backToLogin": "ログインに戻る",
+    "resetTokenSent": "パスワードリセットトークンが生成されました",
+    "resetTokenInfo": "このトークンを使用してパスワードをリセットします（本番環境ではメールで送信されます）：",
+    "resetPasswordNow": "今すぐパスワードをリセット",
+    "resetPasswordTitle": "パスワードをリセット",
+    "resetPasswordDescription": "アカウントの新しいパスワードを入力",
+    "resetPassword": "パスワードをリセット",
+    "resetPasswordFailed": "パスワードをリセットできません。トークンが期限切れの可能性があります。",
+    "passwordResetSuccess": "パスワードが正常にリセットされました！",
+    "redirectingToLogin": "ログインページにリダイレクトしています...",
+    "goToLogin": "ログインへ",
+    "invalidResetToken": "無効または期限切れのリセットトークン",
+    "requestNewToken": "新しいトークンをリクエスト"
   },
   "validation": {
     "required": "この項目は必須です",
@@ -139,6 +156,19 @@
       "vi": "Tiếng Việt",
       "en": "English",
       "ja": "日本語"
-    }
+    },
+    "profile": "プロフィール",
+    "profileDescription": "個人情報を更新",
+    "security": "セキュリティ",
+    "securityDescription": "アカウントのパスワードを変更",
+    "currentPassword": "現在のパスワード",
+    "newPassword": "新しいパスワード",
+    "confirmNewPassword": "新しいパスワードの確認",
+    "changePassword": "パスワードを変更",
+    "updateProfile": "プロフィールを更新",
+    "profileUpdated": "プロフィールが更新されました",
+    "passwordChanged": "パスワードが変更されました",
+    "passwordChangeFailed": "パスワードの変更に失敗しました",
+    "currentPasswordWrong": "現在のパスワードが正しくありません"
   }
 }

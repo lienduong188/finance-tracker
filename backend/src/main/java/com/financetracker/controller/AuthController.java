@@ -1,9 +1,11 @@
 package com.financetracker.controller;
 
 import com.financetracker.dto.auth.AuthResponse;
+import com.financetracker.dto.auth.ForgotPasswordRequest;
 import com.financetracker.dto.auth.LoginRequest;
 import com.financetracker.dto.auth.RefreshTokenRequest;
 import com.financetracker.dto.auth.RegisterRequest;
+import com.financetracker.dto.auth.ResetPasswordRequest;
 import com.financetracker.security.CustomUserDetails;
 import com.financetracker.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -40,6 +42,24 @@ public class AuthController {
         return ResponseEntity.ok(authService.refreshToken(request));
     }
 
+    @PostMapping("/forgot-password")
+    @Operation(summary = "Request password reset")
+    public ResponseEntity<java.util.Map<String, String>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        String token = authService.forgotPassword(request);
+        // In production, send this token via email instead of returning it
+        return ResponseEntity.ok(java.util.Map.of(
+                "message", "Password reset token generated",
+                "token", token
+        ));
+    }
+
+    @PostMapping("/reset-password")
+    @Operation(summary = "Reset password with token")
+    public ResponseEntity<java.util.Map<String, String>> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request);
+        return ResponseEntity.ok(java.util.Map.of("message", "Password reset successful"));
+    }
+
     @GetMapping("/me")
     @Operation(summary = "Get current user info")
     public ResponseEntity<AuthResponse> getCurrentUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -47,6 +67,7 @@ public class AuthController {
                 .userId(userDetails.getId())
                 .email(userDetails.getEmail())
                 .fullName(userDetails.getFullName())
+                .defaultCurrency(userDetails.getDefaultCurrency())
                 .build());
     }
 }

@@ -41,14 +41,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     initAuth()
   }, [])
 
-  const handleAuthResponse = (response: AuthResponse, defaultCurrency?: string) => {
+  const handleAuthResponse = (response: AuthResponse) => {
     localStorage.setItem("accessToken", response.accessToken)
     localStorage.setItem("refreshToken", response.refreshToken)
     setUser({
       id: response.userId,
       email: response.email,
       fullName: response.fullName,
-      defaultCurrency: defaultCurrency || "VND",
+      defaultCurrency: response.defaultCurrency || "VND",
       createdAt: new Date().toISOString(),
     })
   }
@@ -60,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = async (data: RegisterRequest) => {
     const response = await authApi.register(data)
-    handleAuthResponse(response, data.defaultCurrency)
+    handleAuthResponse(response)
   }
 
   const logout = () => {

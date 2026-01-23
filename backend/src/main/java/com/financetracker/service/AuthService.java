@@ -1,9 +1,11 @@
 package com.financetracker.service;
 
 import com.financetracker.dto.auth.AuthResponse;
+import com.financetracker.dto.auth.ForgotPasswordRequest;
 import com.financetracker.dto.auth.LoginRequest;
 import com.financetracker.dto.auth.RefreshTokenRequest;
 import com.financetracker.dto.auth.RegisterRequest;
+import com.financetracker.dto.auth.ResetPasswordRequest;
 import com.financetracker.entity.User;
 import com.financetracker.exception.ApiException;
 import com.financetracker.repository.UserRepository;
@@ -51,6 +53,7 @@ public class AuthService {
                 .userId(user.getId())
                 .email(user.getEmail())
                 .fullName(user.getFullName())
+                .defaultCurrency(user.getDefaultCurrency())
                 .build();
     }
 
@@ -73,6 +76,7 @@ public class AuthService {
                 .userId(user.getId())
                 .email(user.getEmail())
                 .fullName(user.getFullName())
+                .defaultCurrency(user.getDefaultCurrency())
                 .build();
     }
 
@@ -97,6 +101,33 @@ public class AuthService {
                 .userId(user.getId())
                 .email(user.getEmail())
                 .fullName(user.getFullName())
+                .defaultCurrency(user.getDefaultCurrency())
                 .build();
+    }
+
+    public String forgotPassword(ForgotPasswordRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> ApiException.notFound("User with this email not found"));
+
+        CustomUserDetails userDetails = new CustomUserDetails(user);
+        // Generate a short-lived token (15 minutes) for password reset
+        return jwtService.generatePasswordResetToken(userDetails, user.getId());
+    }
+
+    @Transactional
+    public void resetPassword(ResetPasswordRequest request) {
+        String userEmail = jwtService.extractUsername(request.getToken());
+
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> ApiException.notFound("User"));
+
+        CustomUserDetails userDetails = new CustomUserDetails(user);
+
+        if (!jwtService.isPasswordResetTokenValid(request.getToken(), userDetails)) {
+            throw ApiException.badRequest("Invalid or expired reset token");
+        }
+
+        user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
     }
 }

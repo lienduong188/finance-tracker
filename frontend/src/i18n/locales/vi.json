@@ -33,7 +33,24 @@
     "defaultCurrency": "Tiền tệ mặc định",
     "loginFailed": "Đăng nhập thất bại. Vui lòng kiểm tra email và mật khẩu.",
     "registerFailed": "Đăng ký thất bại. Vui lòng thử lại.",
-    "networkError": "Lỗi kết nối mạng. Vui lòng thử lại."
+    "networkError": "Lỗi kết nối mạng. Vui lòng thử lại.",
+    "forgotPasswordTitle": "Quên mật khẩu",
+    "forgotPasswordDescription": "Nhập email để nhận link đặt lại mật khẩu",
+    "forgotPasswordFailed": "Không thể gửi link đặt lại mật khẩu",
+    "sendResetLink": "Gửi link đặt lại",
+    "backToLogin": "Quay lại đăng nhập",
+    "resetTokenSent": "Đã tạo token đặt lại mật khẩu",
+    "resetTokenInfo": "Token này dùng để đặt lại mật khẩu (trong thực tế sẽ gửi qua email):",
+    "resetPasswordNow": "Đặt lại mật khẩu ngay",
+    "resetPasswordTitle": "Đặt lại mật khẩu",
+    "resetPasswordDescription": "Nhập mật khẩu mới cho tài khoản của bạn",
+    "resetPassword": "Đặt lại mật khẩu",
+    "resetPasswordFailed": "Không thể đặt lại mật khẩu. Token có thể đã hết hạn.",
+    "passwordResetSuccess": "Mật khẩu đã được đặt lại thành công!",
+    "redirectingToLogin": "Đang chuyển hướng đến trang đăng nhập...",
+    "goToLogin": "Đi đến đăng nhập",
+    "invalidResetToken": "Token không hợp lệ hoặc đã hết hạn",
+    "requestNewToken": "Yêu cầu token mới"
   },
   "validation": {
     "required": "Trường này là bắt buộc",
@@ -139,6 +156,19 @@
       "vi": "Tiếng Việt",
       "en": "English",
       "ja": "日本語"
-    }
+    },
+    "profile": "Hồ sơ",
+    "profileDescription": "Cập nhật thông tin cá nhân của bạn",
+    "security": "Bảo mật",
+    "securityDescription": "Đổi mật khẩu tài khoản",
+    "currentPassword": "Mật khẩu hiện tại",
+    "newPassword": "Mật khẩu mới",
+    "confirmNewPassword": "Xác nhận mật khẩu mới",
+    "changePassword": "Đổi mật khẩu",
+    "updateProfile": "Cập nhật hồ sơ",
+    "profileUpdated": "Hồ sơ đã được cập nhật",
+    "passwordChanged": "Mật khẩu đã được thay đổi",
+    "passwordChangeFailed": "Đổi mật khẩu thất bại",
+    "currentPasswordWrong": "Mật khẩu hiện tại không đúng"
   }
 }

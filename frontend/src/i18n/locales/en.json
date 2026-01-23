@@ -33,7 +33,24 @@
     "defaultCurrency": "Default currency",
     "loginFailed": "Login failed. Please check your email and password.",
     "registerFailed": "Registration failed. Please try again.",
-    "networkError": "Network error. Please try again."
+    "networkError": "Network error. Please try again.",
+    "forgotPasswordTitle": "Forgot Password",
+    "forgotPasswordDescription": "Enter your email to receive a password reset link",
+    "forgotPasswordFailed": "Unable to send password reset link",
+    "sendResetLink": "Send Reset Link",
+    "backToLogin": "Back to login",
+    "resetTokenSent": "Password reset token generated",
+    "resetTokenInfo": "Use this token to reset your password (in production, this would be sent via email):",
+    "resetPasswordNow": "Reset password now",
+    "resetPasswordTitle": "Reset Password",
+    "resetPasswordDescription": "Enter a new password for your account",
+    "resetPassword": "Reset Password",
+    "resetPasswordFailed": "Unable to reset password. Token may have expired.",
+    "passwordResetSuccess": "Password has been reset successfully!",
+    "redirectingToLogin": "Redirecting to login page...",
+    "goToLogin": "Go to login",
+    "invalidResetToken": "Invalid or expired reset token",
+    "requestNewToken": "Request new token"
   },
   "validation": {
     "required": "This field is required",
@@ -139,6 +156,19 @@
       "vi": "Tiếng Việt",
       "en": "English",
       "ja": "日本語"
-    }
+    },
+    "profile": "Profile",
+    "profileDescription": "Update your personal information",
+    "security": "Security",
+    "securityDescription": "Change your account password",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "confirmNewPassword": "Confirm new password",
+    "changePassword": "Change password",
+    "updateProfile": "Update profile",
+    "profileUpdated": "Profile updated successfully",
+    "passwordChanged": "Password changed successfully",
+    "passwordChangeFailed": "Failed to change password",
+    "currentPasswordWrong": "Current password is incorrect"
   }
 }
