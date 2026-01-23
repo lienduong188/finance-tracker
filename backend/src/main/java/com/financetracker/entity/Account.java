@@ -24,7 +24,7 @@ public class Account extends BaseEntity {
     private String name;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "account_type")
+    @Column(nullable = false, length = 50)
     private AccountType type;
 
     @Column(length = 3, nullable = false)

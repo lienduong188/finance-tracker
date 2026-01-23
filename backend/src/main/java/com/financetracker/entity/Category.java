@@ -23,7 +23,7 @@ public class Category extends BaseEntity {
     private String name;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "category_type")
+    @Column(nullable = false, length = 50)
     private CategoryType type;
 
     @Column(length = 50)

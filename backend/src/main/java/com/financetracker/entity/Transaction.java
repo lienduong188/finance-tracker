@@ -28,7 +28,7 @@ public class Transaction extends BaseEntity {
     private Category category;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "transaction_type")
+    @Column(nullable = false, length = 50)
     private TransactionType type;
 
     @Column(nullable = false, precision = 19, scale = 4)

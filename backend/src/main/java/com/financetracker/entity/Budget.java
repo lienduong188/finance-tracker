@@ -34,7 +34,7 @@ public class Budget extends BaseEntity {
     private String currency = "VND";
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "budget_period")
+    @Column(nullable = false, length = 50)
     @Builder.Default
     private BudgetPeriod period = BudgetPeriod.MONTHLY;
 
