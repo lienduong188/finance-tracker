@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useTranslation } from "react-i18next"
 import { X } from "lucide-react"
-import { Button, Input, Label, Select } from "@/components/ui"
+import { Button, Input, Label, Select, EmojiPicker } from "@/components/ui"
 import { accountsApi } from "@/api"
 import type { Account, AccountRequest } from "@/types"
 
@@ -35,6 +35,8 @@ export function AccountFormModal({ isOpen, onClose, account }: AccountFormModalP
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<AccountForm>({
     resolver: zodResolver(accountSchema),
@@ -44,6 +46,8 @@ export function AccountFormModal({ isOpen, onClose, account }: AccountFormModalP
       initialBalance: 0,
     },
   })
+
+  const iconValue = watch("icon")
 
   useEffect(() => {
     if (account) {
@@ -160,11 +164,10 @@ export function AccountFormModal({ isOpen, onClose, account }: AccountFormModalP
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="icon">{t("accounts.icon")}</Label>
-              <Input
-                id="icon"
-                placeholder="💰"
-                {...register("icon")}
+              <Label>{t("accounts.icon")}</Label>
+              <EmojiPicker
+                value={iconValue}
+                onChange={(emoji) => setValue("icon", emoji)}
               />
             </div>
 

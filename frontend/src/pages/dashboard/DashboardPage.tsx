@@ -22,13 +22,14 @@ import {
 import { format, subDays } from "date-fns"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui"
 import { dashboardApi } from "@/api"
-import { formatCurrency } from "@/lib/utils"
+import { formatCurrency, formatShortDate, formatFullDate } from "@/lib/utils"
 import { useAuth } from "@/context/AuthContext"
 
 export function DashboardPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { user } = useAuth()
   const currency = user?.defaultCurrency || "VND"
+  const lang = i18n.language
 
   const today = new Date()
   const startDate = format(subDays(today, 30), "yyyy-MM-dd")
@@ -151,7 +152,7 @@ export function DashboardPage() {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis
                     dataKey="date"
-                    tickFormatter={(value) => format(new Date(value), "dd/MM")}
+                    tickFormatter={(value) => formatShortDate(value, lang)}
                     fontSize={12}
                   />
                   <YAxis
@@ -164,7 +165,7 @@ export function DashboardPage() {
                   />
                   <Tooltip
                     formatter={(value) => formatCurrency(Number(value) || 0, currency)}
-                    labelFormatter={(label) => format(new Date(label), "dd/MM/yyyy")}
+                    labelFormatter={(label) => formatFullDate(label, lang).split(", ")[1]}
                   />
                   <Area
                     type="monotone"

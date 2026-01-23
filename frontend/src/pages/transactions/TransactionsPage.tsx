@@ -2,10 +2,9 @@ import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
 import { Plus, TrendingUp, TrendingDown, ArrowLeftRight, Pencil, Trash2 } from "lucide-react"
-import { format } from "date-fns"
 import { Button, Card, CardContent, Select } from "@/components/ui"
 import { transactionsApi, accountsApi } from "@/api"
-import { formatCurrency, cn } from "@/lib/utils"
+import { formatCurrency, formatFullDate, cn } from "@/lib/utils"
 import type { Transaction, TransactionType } from "@/types"
 import { TransactionFormModal } from "./TransactionFormModal"
 
@@ -22,7 +21,8 @@ const transactionTypeColors: Record<TransactionType, string> = {
 }
 
 export function TransactionsPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const lang = i18n.language
   const queryClient = useQueryClient()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
@@ -135,7 +135,7 @@ export function TransactionsPage() {
           {groupedTransactions && Object.entries(groupedTransactions).map(([date, txns]) => (
             <div key={date}>
               <h3 className="mb-3 text-sm font-medium text-muted-foreground">
-                {format(new Date(date), "EEEE, dd/MM/yyyy")}
+                {formatFullDate(date, lang)}
               </h3>
               <Card>
                 <CardContent className="divide-y p-0">

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
+import { useTranslation } from "react-i18next"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { X } from "lucide-react"
@@ -10,17 +11,17 @@ import { transactionsApi, accountsApi, categoriesApi } from "@/api"
 import { cn } from "@/lib/utils"
 import type { Transaction, TransactionRequest, TransactionType } from "@/types"
 
-const transactionSchema = z.object({
-  accountId: z.string().min(1, "Chọn tài khoản"),
+const baseTransactionSchema = z.object({
+  accountId: z.string().min(1),
   categoryId: z.string().optional(),
   type: z.enum(["INCOME", "EXPENSE", "TRANSFER"]),
-  amount: z.number().positive("Số tiền phải lớn hơn 0"),
+  amount: z.number().positive(),
   description: z.string().optional(),
   transactionDate: z.string(),
   toAccountId: z.string().optional(),
 })
 
-type TransactionForm = z.infer<typeof transactionSchema>
+type TransactionForm = z.infer<typeof baseTransactionSchema>
 
 interface TransactionFormModalProps {
   isOpen: boolean
@@ -33,9 +34,20 @@ export function TransactionFormModal({
   onClose,
   transaction,
 }: TransactionFormModalProps) {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const isEditing = !!transaction
   const [selectedType, setSelectedType] = useState<TransactionType>("EXPENSE")
+
+  const transactionSchema = z.object({
+    accountId: z.string().min(1, t("validation.required")),
+    categoryId: z.string().optional(),
+    type: z.enum(["INCOME", "EXPENSE", "TRANSFER"]),
+    amount: z.number().positive(t("validation.balanceMin")),
+    description: z.string().optional(),
+    transactionDate: z.string(),
+    toAccountId: z.string().optional(),
+  })
 
   const {
     register,
@@ -144,7 +156,7 @@ export function TransactionFormModal({
       <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg bg-background p-6 shadow-lg">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-xl font-semibold">
-            {isEditing ? "Chỉnh sửa giao dịch" : "Thêm giao dịch mới"}
+            {isEditing ? t("transactions.editTransaction") : t("transactions.addTransaction")}
           </h2>
           <button
             onClick={onClose}
@@ -173,18 +185,14 @@ export function TransactionFormModal({
                     : "hover:bg-background"
                 )}
               >
-                {type === "INCOME"
-                  ? "Thu nhập"
-                  : type === "EXPENSE"
-                    ? "Chi tiêu"
-                    : "Chuyển khoản"}
+                {t(`transactions.types.${type}`)}
               </button>
             ))}
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="amount" required>
-              Số tiền
+              {t("transactions.amount")}
             </Label>
             <Input
               id="amount"
@@ -197,10 +205,10 @@ export function TransactionFormModal({
 
           <div className="space-y-2">
             <Label htmlFor="accountId" required>
-              {watchType === "TRANSFER" ? "Từ tài khoản" : "Tài khoản"}
+              {watchType === "TRANSFER" ? t("transactions.account") : t("transactions.account")}
             </Label>
             <Select id="accountId" error={errors.accountId?.message} {...register("accountId")}>
-              <option value="">Chọn tài khoản</option>
+              <option value="">{t("validation.required")}</option>
               {accounts?.map((account) => (
                 <option key={account.id} value={account.id}>
                   {account.name} ({account.currentBalance.toLocaleString()} {account.currency})
@@ -212,10 +220,10 @@ export function TransactionFormModal({
           {watchType === "TRANSFER" && (
             <div className="space-y-2">
               <Label htmlFor="toAccountId" required>
-                Đến tài khoản
+                {t("transactions.toAccount")}
               </Label>
               <Select id="toAccountId" {...register("toAccountId")}>
-                <option value="">Chọn tài khoản</option>
+                <option value="">{t("validation.required")}</option>
                 {accounts?.map((account) => (
                   <option key={account.id} value={account.id}>
                     {account.name}
@@ -227,9 +235,9 @@ export function TransactionFormModal({
 
           {watchType !== "TRANSFER" && (
             <div className="space-y-2">
-              <Label htmlFor="categoryId">Danh mục</Label>
+              <Label htmlFor="categoryId">{t("transactions.category")}</Label>
               <Select id="categoryId" {...register("categoryId")}>
-                <option value="">Chọn danh mục</option>
+                <option value="">{t("common.all")}</option>
                 {categories?.map((category) => (
                   <option key={category.id} value={category.id}>
                     {category.icon} {category.name}
@@ -241,7 +249,7 @@ export function TransactionFormModal({
 
           <div className="space-y-2">
             <Label htmlFor="transactionDate" required>
-              Ngày giao dịch
+              {t("transactions.date")}
             </Label>
             <Input
               id="transactionDate"
@@ -251,20 +259,20 @@ export function TransactionFormModal({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Ghi chú</Label>
+            <Label htmlFor="description">{t("transactions.description")}</Label>
             <Input
               id="description"
-              placeholder="Mô tả giao dịch..."
+              placeholder={t("transactions.description")}
               {...register("description")}
             />
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
             <Button type="button" variant="outline" onClick={onClose}>
-              Hủy
+              {t("common.cancel")}
             </Button>
             <Button type="submit" isLoading={isLoading}>
-              {isEditing ? "Cập nhật" : "Thêm"}
+              {isEditing ? t("common.update") : t("common.add")}
             </Button>
           </div>
         </form>
