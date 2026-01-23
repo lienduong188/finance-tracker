@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Data
@@ -18,5 +18,5 @@ public class UserResponse {
     private String email;
     private String fullName;
     private String defaultCurrency;
-    private LocalDateTime createdAt;
+    private OffsetDateTime createdAt;
 }
