@@ -11,6 +11,7 @@ import type { AuthResponse, LoginRequest, RegisterRequest, User } from "@/types"
 interface AuthContextType {
   user: User | null
   isAuthenticated: boolean
+  isAdmin: boolean
   isLoading: boolean
   login: (data: LoginRequest) => Promise<void>
   register: (data: RegisterRequest) => Promise<void>
@@ -49,6 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email: response.email,
       fullName: response.fullName,
       defaultCurrency: response.defaultCurrency || "VND",
+      role: response.role || "USER",
       createdAt: new Date().toISOString(),
     })
   }
@@ -74,6 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         user,
         isAuthenticated: !!user,
+        isAdmin: user?.role === "ADMIN",
         isLoading,
         login,
         register,

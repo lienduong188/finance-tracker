@@ -28,6 +28,15 @@ public class User extends BaseEntity {
     @Builder.Default
     private String defaultCurrency = "VND";
 
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    @Builder.Default
+    private Role role = Role.USER;
+
+    @Column
+    @Builder.Default
+    private Boolean enabled = true;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Account> accounts = new ArrayList<>();

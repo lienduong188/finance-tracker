@@ -54,6 +54,7 @@ public class AuthService {
                 .email(user.getEmail())
                 .fullName(user.getFullName())
                 .defaultCurrency(user.getDefaultCurrency())
+                .role(user.getRole().name())
                 .build();
     }
 
@@ -77,6 +78,7 @@ public class AuthService {
                 .email(user.getEmail())
                 .fullName(user.getFullName())
                 .defaultCurrency(user.getDefaultCurrency())
+                .role(user.getRole().name())
                 .build();
     }
 
@@ -102,6 +104,7 @@ public class AuthService {
                 .email(user.getEmail())
                 .fullName(user.getFullName())
                 .defaultCurrency(user.getDefaultCurrency())
+                .role(user.getRole().name())
                 .build();
     }
 

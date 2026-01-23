@@ -1,9 +1,13 @@
+// Role type
+export type Role = "USER" | "ADMIN"
+
 // User types
 export interface User {
   id: string
   email: string
   fullName: string
   defaultCurrency: string
+  role: Role
   createdAt: string
 }
 
@@ -28,6 +32,7 @@ export interface AuthResponse {
   email: string
   fullName: string
   defaultCurrency: string
+  role: Role
 }
 
 export interface UpdateProfileRequest {
@@ -212,4 +217,30 @@ export interface ApiError {
   code: string
   message: string
   errors?: Record<string, string>
+}
+
+// Admin types
+export interface AdminUser {
+  id: string
+  email: string
+  fullName: string
+  defaultCurrency: string
+  role: Role
+  enabled: boolean
+  createdAt: string
+  updatedAt: string
+  accountsCount: number
+  transactionsCount: number
+}
+
+export interface UpdateUserRoleRequest {
+  role: Role
+}
+
+export interface AdminCategoryRequest {
+  name: string
+  type: CategoryType
+  icon?: string
+  color?: string
+  parentId?: string
 }

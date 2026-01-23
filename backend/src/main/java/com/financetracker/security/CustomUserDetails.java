@@ -1,5 +1,6 @@
 package com.financetracker.security;
 
+import com.financetracker.entity.Role;
 import com.financetracker.entity.User;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
@@ -18,6 +19,8 @@ public class CustomUserDetails implements UserDetails {
     private final String password;
     private final String fullName;
     private final String defaultCurrency;
+    private final Role role;
+    private final Boolean enabled;
     private final Collection<? extends GrantedAuthority> authorities;
 
     public CustomUserDetails(User user) {
@@ -26,7 +29,9 @@ public class CustomUserDetails implements UserDetails {
         this.password = user.getPasswordHash();
         this.fullName = user.getFullName();
         this.defaultCurrency = user.getDefaultCurrency();
-        this.authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
+        this.role = user.getRole() != null ? user.getRole() : Role.USER;
+        this.enabled = user.getEnabled() != null ? user.getEnabled() : true;
+        this.authorities = List.of(new SimpleGrantedAuthority("ROLE_" + this.role.name()));
     }
 
     @Override
@@ -61,6 +66,6 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return enabled;
     }
 }

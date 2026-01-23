@@ -24,9 +24,17 @@ public class DataSeeder implements CommandLineRunner {
     private final BudgetRepository budgetRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @org.springframework.beans.factory.annotation.Value("${admin.email:admin@financetracker.com}")
+    private String adminEmail;
+
+    @org.springframework.beans.factory.annotation.Value("${admin.password:}")
+    private String adminPassword;
+
     @Override
     @Transactional
     public void run(String... args) {
+        // Seed admin user first
+        seedAdminUser();
         // Check if demo user already exists
         if (userRepository.findByEmail("demo@example.com").isPresent()) {
             log.info("Demo data already exists, skipping seeding");
@@ -487,6 +495,31 @@ public class DataSeeder implements CommandLineRunner {
 
         log.info("Japanese demo user seeding completed!");
         log.info("Japanese demo credentials: demo.jp@example.com / demo123");
+    }
+
+    private void seedAdminUser() {
+        // Only seed admin if ADMIN_PASSWORD is set
+        if (adminPassword == null || adminPassword.isBlank()) {
+            log.info("ADMIN_PASSWORD not set, skipping admin user creation");
+            return;
+        }
+
+        // Check if admin already exists
+        if (userRepository.findByEmail(adminEmail).isPresent()) {
+            log.info("Admin user {} already exists", adminEmail);
+            return;
+        }
+
+        User admin = User.builder()
+                .email(adminEmail)
+                .passwordHash(passwordEncoder.encode(adminPassword))
+                .fullName("Administrator")
+                .defaultCurrency("VND")
+                .role(Role.ADMIN)
+                .enabled(true)
+                .build();
+        userRepository.save(admin);
+        log.info("Created admin user: {}", adminEmail);
     }
 
     private void createTransaction(User user, Account account, Category category,

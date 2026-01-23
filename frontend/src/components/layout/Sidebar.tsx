@@ -7,6 +7,8 @@ import {
   PiggyBank,
   Settings,
   LogOut,
+  Shield,
+  X,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/context/AuthContext"
@@ -19,74 +21,132 @@ const navItems = [
   { to: "/budgets", icon: PiggyBank, labelKey: "nav.budgets" },
 ]
 
-export function Sidebar() {
-  const { user, logout } = useAuth()
+interface SidebarProps {
+  isOpen?: boolean
+  onClose?: () => void
+}
+
+export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
+  const { user, isAdmin, logout } = useAuth()
   const { t } = useTranslation()
 
+  const handleNavClick = () => {
+    // Close sidebar on mobile after navigation
+    if (onClose && window.innerWidth < 768) {
+      onClose()
+    }
+  }
+
   return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r bg-card">
-      <div className="flex h-full flex-col">
-        {/* Logo */}
-        <div className="flex h-16 items-center border-b px-6">
-          <h1 className="text-xl font-bold text-primary">Finance Tracker</h1>
-        </div>
+    <>
+      {/* Overlay for mobile */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/50 md:hidden"
+          onClick={onClose}
+        />
+      )}
 
-        {/* Navigation */}
-        <nav className="flex-1 space-y-1 p-4">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={({ isActive }) =>
-                cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                  isActive
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                )
-              }
-            >
-              <item.icon className="h-5 w-5" />
-              {t(item.labelKey)}
-            </NavLink>
-          ))}
-        </nav>
-
-        {/* Language Switch */}
-        <div className="border-t">
-          <LanguageSwitch />
-        </div>
-
-        {/* User section */}
-        <div className="border-t p-4">
-          <div className="mb-3 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground">
-              {user?.fullName?.charAt(0).toUpperCase() || "U"}
-            </div>
-            <div className="flex-1 truncate">
-              <p className="text-sm font-medium">{user?.fullName}</p>
-              <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
-            </div>
-          </div>
-
-          <div className="flex gap-2">
-            <NavLink
-              to="/settings"
-              className="flex flex-1 items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm text-muted-foreground hover:bg-accent"
-            >
-              <Settings className="h-4 w-4" />
-              {t("nav.settings")}
-            </NavLink>
+      {/* Sidebar */}
+      <aside
+        className={cn(
+          "fixed left-0 top-0 z-40 h-screen w-64 border-r bg-card transition-transform duration-300 ease-in-out",
+          // Mobile: slide in/out
+          isOpen ? "translate-x-0" : "-translate-x-full",
+          // Desktop: always visible
+          "md:translate-x-0"
+        )}
+      >
+        <div className="flex h-full flex-col">
+          {/* Header with close button on mobile */}
+          <div className="flex h-16 items-center justify-between border-b px-6">
+            <h1 className="text-xl font-bold text-primary">Finance Tracker</h1>
             <button
-              onClick={logout}
-              className="flex items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm text-destructive hover:bg-destructive/10"
-              title={t("auth.logout")}
+              onClick={onClose}
+              className="rounded-lg p-1 hover:bg-accent md:hidden"
             >
-              <LogOut className="h-4 w-4" />
+              <X className="h-5 w-5" />
             </button>
           </div>
+
+          {/* Navigation */}
+          <nav className="flex-1 space-y-1 p-4">
+            {navItems.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                onClick={handleNavClick}
+                className={({ isActive }) =>
+                  cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                    isActive
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  )
+                }
+              >
+                <item.icon className="h-5 w-5" />
+                {t(item.labelKey)}
+              </NavLink>
+            ))}
+
+            {/* Admin Panel Link */}
+            {isAdmin && (
+              <NavLink
+                to="/admin/users"
+                onClick={handleNavClick}
+                className={({ isActive }) =>
+                  cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors mt-4 border-t pt-4",
+                    isActive
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  )
+                }
+              >
+                <Shield className="h-5 w-5" />
+                Admin Panel
+              </NavLink>
+            )}
+          </nav>
+
+          {/* Language Switch */}
+          <div className="border-t">
+            <LanguageSwitch />
+          </div>
+
+          {/* User section */}
+          <div className="border-t p-4">
+            <div className="mb-3 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                {user?.fullName?.charAt(0).toUpperCase() || "U"}
+              </div>
+              <div className="flex-1 truncate">
+                <p className="text-sm font-medium">{user?.fullName}</p>
+                <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <NavLink
+                to="/settings"
+                onClick={handleNavClick}
+                className="flex flex-1 items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm text-muted-foreground hover:bg-accent"
+              >
+                <Settings className="h-4 w-4" />
+                {t("nav.settings")}
+              </NavLink>
+              <button
+                onClick={logout}
+                className="flex items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm text-destructive hover:bg-destructive/10"
+                title={t("auth.logout")}
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
-    </aside>
+      </aside>
+    </>
   )
 }
