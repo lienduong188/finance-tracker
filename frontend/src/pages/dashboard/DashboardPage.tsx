@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
+import { useTranslation } from "react-i18next"
 import {
   Wallet,
   TrendingUp,
@@ -25,6 +26,7 @@ import { formatCurrency } from "@/lib/utils"
 import { useAuth } from "@/context/AuthContext"
 
 export function DashboardPage() {
+  const { t } = useTranslation()
   const { user } = useAuth()
   const currency = user?.defaultCurrency || "VND"
 
@@ -57,28 +59,28 @@ export function DashboardPage() {
 
   const summaryCards = [
     {
-      title: "Tổng số dư",
+      titleKey: "dashboard.totalBalance",
       value: summary?.totalBalance || 0,
       icon: Wallet,
       color: "text-primary",
       bgColor: "bg-primary/10",
     },
     {
-      title: "Thu nhập tháng này",
+      titleKey: "dashboard.monthlyIncome",
       value: summary?.totalIncome || 0,
       icon: TrendingUp,
       color: "text-income",
       bgColor: "bg-income/10",
     },
     {
-      title: "Chi tiêu tháng này",
+      titleKey: "dashboard.monthlyExpense",
       value: summary?.totalExpense || 0,
       icon: TrendingDown,
       color: "text-expense",
       bgColor: "bg-expense/10",
     },
     {
-      title: "Dòng tiền ròng",
+      titleKey: "dashboard.netCashflow",
       value: summary?.netCashflow || 0,
       icon: ArrowLeftRight,
       color: (summary?.netCashflow || 0) >= 0 ? "text-income" : "text-expense",
@@ -89,20 +91,20 @@ export function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <h1 className="text-3xl font-bold">{t("dashboard.title")}</h1>
         <p className="text-muted-foreground">
-          Xin chào, {user?.fullName}! Đây là tổng quan tài chính của bạn.
+          {t("dashboard.greeting", { name: user?.fullName })}
         </p>
       </div>
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {summaryCards.map((card) => (
-          <Card key={card.title}>
+          <Card key={card.titleKey}>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">{card.title}</p>
+                  <p className="text-sm text-muted-foreground">{t(card.titleKey)}</p>
                   <p className={`text-2xl font-bold ${card.color}`}>
                     {formatCurrency(card.value, currency)}
                   </p>
@@ -122,9 +124,9 @@ export function DashboardPage() {
           <CardContent className="flex items-center gap-4 p-4">
             <AlertTriangle className="h-6 w-6 text-warning" />
             <div>
-              <p className="font-medium">Cảnh báo ngân sách</p>
+              <p className="font-medium">{t("dashboard.budgetWarning")}</p>
               <p className="text-sm text-muted-foreground">
-                Bạn có {summary.budgetsOverLimit} ngân sách đã vượt hạn mức.
+                {t("dashboard.budgetsOverLimit", { count: summary.budgetsOverLimit })}
               </p>
             </div>
           </CardContent>
@@ -136,7 +138,7 @@ export function DashboardPage() {
         {/* Cashflow Chart */}
         <Card>
           <CardHeader>
-            <CardTitle>Dòng tiền 30 ngày qua</CardTitle>
+            <CardTitle>{t("dashboard.cashflowChart")}</CardTitle>
           </CardHeader>
           <CardContent>
             {cashflowLoading ? (
@@ -171,7 +173,7 @@ export function DashboardPage() {
                     stroke="#22c55e"
                     fill="#22c55e"
                     fillOpacity={0.6}
-                    name="Thu nhập"
+                    name={t("transactions.types.INCOME")}
                   />
                   <Area
                     type="monotone"
@@ -180,7 +182,7 @@ export function DashboardPage() {
                     stroke="#ef4444"
                     fill="#ef4444"
                     fillOpacity={0.6}
-                    name="Chi tiêu"
+                    name={t("transactions.types.EXPENSE")}
                   />
                 </AreaChart>
               </ResponsiveContainer>
@@ -191,7 +193,7 @@ export function DashboardPage() {
         {/* Category Breakdown */}
         <Card>
           <CardHeader>
-            <CardTitle>Chi tiêu theo danh mục</CardTitle>
+            <CardTitle>{t("dashboard.categoryChart")}</CardTitle>
           </CardHeader>
           <CardContent>
             {categoryReport && categoryReport.categories.length > 0 ? (
@@ -236,7 +238,7 @@ export function DashboardPage() {
               </div>
             ) : (
               <div className="flex h-64 items-center justify-center text-muted-foreground">
-                Chưa có dữ liệu chi tiêu
+                {t("dashboard.noExpenseData")}
               </div>
             )}
           </CardContent>

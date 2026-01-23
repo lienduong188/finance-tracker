@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { useTranslation } from "react-i18next"
 import { Plus, TrendingUp, TrendingDown, ArrowLeftRight, Pencil, Trash2 } from "lucide-react"
 import { format } from "date-fns"
 import { Button, Card, CardContent, Select } from "@/components/ui"
@@ -14,12 +15,6 @@ const transactionTypeIcons: Record<TransactionType, typeof TrendingUp> = {
   TRANSFER: ArrowLeftRight,
 }
 
-const transactionTypeLabels: Record<TransactionType, string> = {
-  INCOME: "Thu nhập",
-  EXPENSE: "Chi tiêu",
-  TRANSFER: "Chuyển khoản",
-}
-
 const transactionTypeColors: Record<TransactionType, string> = {
   INCOME: "text-income",
   EXPENSE: "text-expense",
@@ -27,6 +22,7 @@ const transactionTypeColors: Record<TransactionType, string> = {
 }
 
 export function TransactionsPage() {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
@@ -61,7 +57,7 @@ export function TransactionsPage() {
   }
 
   const handleDelete = async (id: string) => {
-    if (confirm("Bạn có chắc muốn xóa giao dịch này?")) {
+    if (confirm(t("common.confirm") + "?")) {
       await deleteMutation.mutateAsync(id)
     }
   }
@@ -88,14 +84,14 @@ export function TransactionsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Giao dịch</h1>
+          <h1 className="text-3xl font-bold">{t("transactions.title")}</h1>
           <p className="text-muted-foreground">
-            Theo dõi các khoản thu chi của bạn
+            {t("transactions.createFirst").split(".")[0]}
           </p>
         </div>
         <Button onClick={() => setIsModalOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
-          Thêm giao dịch
+          {t("transactions.addTransaction")}
         </Button>
       </div>
 
@@ -107,7 +103,7 @@ export function TransactionsPage() {
               value={filters.accountId}
               onChange={(e) => setFilters({ ...filters, accountId: e.target.value })}
             >
-              <option value="">Tất cả tài khoản</option>
+              <option value="">{t("common.all")} {t("accounts.title").toLowerCase()}</option>
               {accounts?.map((account) => (
                 <option key={account.id} value={account.id}>
                   {account.name}
@@ -120,10 +116,10 @@ export function TransactionsPage() {
               value={filters.type}
               onChange={(e) => setFilters({ ...filters, type: e.target.value })}
             >
-              <option value="">Tất cả loại</option>
-              <option value="INCOME">Thu nhập</option>
-              <option value="EXPENSE">Chi tiêu</option>
-              <option value="TRANSFER">Chuyển khoản</option>
+              <option value="">{t("common.all")} {t("transactions.type").toLowerCase()}</option>
+              <option value="INCOME">{t("transactions.types.INCOME")}</option>
+              <option value="EXPENSE">{t("transactions.types.EXPENSE")}</option>
+              <option value="TRANSFER">{t("transactions.types.TRANSFER")}</option>
             </Select>
           </div>
         </CardContent>
@@ -172,7 +168,7 @@ export function TransactionsPage() {
                           </div>
                           <div>
                             <p className="font-medium">
-                              {transaction.categoryName || transactionTypeLabels[transaction.type]}
+                              {transaction.categoryName || t(`transactions.types.${transaction.type}`)}
                             </p>
                             <p className="text-sm text-muted-foreground">
                               {transaction.accountName}
@@ -228,14 +224,14 @@ export function TransactionsPage() {
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-12">
                 <ArrowLeftRight className="mb-4 h-12 w-12 text-muted-foreground" />
-                <p className="text-muted-foreground">Chưa có giao dịch nào</p>
+                <p className="text-muted-foreground">{t("transactions.noTransactions")}</p>
                 <Button
                   variant="outline"
                   className="mt-4"
                   onClick={() => setIsModalOpen(true)}
                 >
                   <Plus className="mr-2 h-4 w-4" />
-                  Thêm giao dịch đầu tiên
+                  {t("transactions.addTransaction")}
                 </Button>
               </CardContent>
             </Card>
@@ -249,17 +245,17 @@ export function TransactionsPage() {
                 disabled={filters.page === 0}
                 onClick={() => setFilters({ ...filters, page: filters.page - 1 })}
               >
-                Trước
+                ←
               </Button>
               <span className="flex items-center px-4">
-                Trang {filters.page + 1} / {transactions.totalPages}
+                {filters.page + 1} / {transactions.totalPages}
               </span>
               <Button
                 variant="outline"
                 disabled={filters.page >= transactions.totalPages - 1}
                 onClick={() => setFilters({ ...filters, page: filters.page + 1 })}
               >
-                Sau
+                →
               </Button>
             </div>
           )}

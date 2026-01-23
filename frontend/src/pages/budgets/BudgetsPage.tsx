@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { useTranslation } from "react-i18next"
 import { Plus, PiggyBank, Pencil, Trash2, AlertTriangle } from "lucide-react"
 import { Button, Card, CardContent, CardHeader, CardTitle } from "@/components/ui"
 import { budgetsApi } from "@/api"
@@ -7,15 +8,8 @@ import { formatCurrency, formatPercent, cn } from "@/lib/utils"
 import type { Budget } from "@/types"
 import { BudgetFormModal } from "./BudgetFormModal"
 
-const periodLabels: Record<string, string> = {
-  DAILY: "Hằng ngày",
-  WEEKLY: "Hằng tuần",
-  MONTHLY: "Hằng tháng",
-  YEARLY: "Hằng năm",
-  CUSTOM: "Tùy chỉnh",
-}
-
 export function BudgetsPage() {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingBudget, setEditingBudget] = useState<Budget | null>(null)
@@ -38,7 +32,7 @@ export function BudgetsPage() {
   }
 
   const handleDelete = async (id: string) => {
-    if (confirm("Bạn có chắc muốn xóa ngân sách này?")) {
+    if (confirm(t("common.confirm") + "?")) {
       await deleteMutation.mutateAsync(id)
     }
   }
@@ -63,14 +57,14 @@ export function BudgetsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Ngân sách</h1>
+          <h1 className="text-3xl font-bold">{t("budgets.title")}</h1>
           <p className="text-muted-foreground">
-            Quản lý hạn mức chi tiêu của bạn
+            {t("budgets.createFirst").split(".")[0]}
           </p>
         </div>
         <Button onClick={() => setIsModalOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
-          Thêm ngân sách
+          {t("budgets.addBudget")}
         </Button>
       </div>
 
@@ -81,7 +75,7 @@ export function BudgetsPage() {
             <AlertTriangle className="h-6 w-6 text-destructive" />
             <div>
               <p className="font-medium text-destructive">
-                {overLimitBudgets.length} ngân sách đã vượt hạn mức
+                {overLimitBudgets.length} {t("budgets.overBudget").toLowerCase()}
               </p>
               <p className="text-sm text-muted-foreground">
                 {overLimitBudgets.map((b) => b.name).join(", ")}
@@ -97,7 +91,7 @@ export function BudgetsPage() {
             <AlertTriangle className="h-6 w-6 text-warning" />
             <div>
               <p className="font-medium">
-                {nearLimitBudgets.length} ngân sách sắp đạt hạn mức
+                {nearLimitBudgets.length} {t("budgets.nearLimit").toLowerCase()}
               </p>
               <p className="text-sm text-muted-foreground">
                 {nearLimitBudgets.map((b) => b.name).join(", ")}
@@ -141,8 +135,8 @@ export function BudgetsPage() {
                 <div>
                   <CardTitle className="text-base">{budget.name}</CardTitle>
                   <p className="text-xs text-muted-foreground">
-                    {budget.categoryName || "Tất cả chi tiêu"} •{" "}
-                    {periodLabels[budget.period]}
+                    {budget.categoryName || t("common.all")} •{" "}
+                    {t(`budgets.periods.${budget.period}`)}
                   </p>
                 </div>
               </div>
@@ -171,7 +165,7 @@ export function BudgetsPage() {
               {/* Progress Bar */}
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Đã chi</span>
+                  <span className="text-muted-foreground">{t("budgets.spent")}</span>
                   <span
                     className={cn(
                       "font-medium",
@@ -202,9 +196,9 @@ export function BudgetsPage() {
                   />
                 </div>
                 <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>{formatPercent(budget.spentPercentage)} đã dùng</span>
+                  <span>{formatPercent(budget.spentPercentage)}</span>
                   <span>
-                    Còn lại:{" "}
+                    {t("budgets.remaining")}:{" "}
                     {formatCurrency(
                       Math.max(budget.remainingAmount, 0),
                       budget.currency
@@ -223,7 +217,7 @@ export function BudgetsPage() {
         >
           <CardContent className="flex flex-col items-center p-6 text-muted-foreground">
             <Plus className="mb-2 h-8 w-8" />
-            <p>Thêm ngân sách mới</p>
+            <p>{t("budgets.addBudget")}</p>
           </CardContent>
         </Card>
       </div>

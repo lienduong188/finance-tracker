@@ -3,21 +3,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
+import { useTranslation } from "react-i18next"
 import { X } from "lucide-react"
 import { Button, Input, Label, Select } from "@/components/ui"
 import { accountsApi } from "@/api"
 import type { Account, AccountRequest } from "@/types"
-
-const accountSchema = z.object({
-  name: z.string().min(1, "Tên tài khoản là bắt buộc"),
-  type: z.enum(["CASH", "BANK", "E_WALLET", "CREDIT_CARD"]),
-  currency: z.string(),
-  initialBalance: z.number().min(0, "Số dư không được âm"),
-  icon: z.string().optional(),
-  color: z.string().optional(),
-})
-
-type AccountForm = z.infer<typeof accountSchema>
 
 interface AccountFormModalProps {
   isOpen: boolean
@@ -26,8 +16,20 @@ interface AccountFormModalProps {
 }
 
 export function AccountFormModal({ isOpen, onClose, account }: AccountFormModalProps) {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const isEditing = !!account
+
+  const accountSchema = z.object({
+    name: z.string().min(1, t("validation.required")),
+    type: z.enum(["CASH", "BANK", "E_WALLET", "CREDIT_CARD"]),
+    currency: z.string(),
+    initialBalance: z.number().min(0, t("validation.balanceMin")),
+    icon: z.string().optional(),
+    color: z.string().optional(),
+  })
+
+  type AccountForm = z.infer<typeof accountSchema>
 
   const {
     register,
@@ -107,7 +109,7 @@ export function AccountFormModal({ isOpen, onClose, account }: AccountFormModalP
       <div className="w-full max-w-md rounded-lg bg-background p-6 shadow-lg">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-xl font-semibold">
-            {isEditing ? "Chỉnh sửa tài khoản" : "Thêm tài khoản mới"}
+            {isEditing ? t("accounts.editAccount") : t("accounts.addAccount")}
           </h2>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
             <X className="h-5 w-5" />
@@ -116,10 +118,10 @@ export function AccountFormModal({ isOpen, onClose, account }: AccountFormModalP
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name" required>Tên tài khoản</Label>
+            <Label htmlFor="name" required>{t("accounts.accountName")}</Label>
             <Input
               id="name"
-              placeholder="VD: Vietcombank, Tiền mặt, MoMo"
+              placeholder="VD: Vietcombank, Cash, MoMo"
               error={errors.name?.message}
               {...register("name")}
             />
@@ -127,17 +129,17 @@ export function AccountFormModal({ isOpen, onClose, account }: AccountFormModalP
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="type" required>Loại tài khoản</Label>
+              <Label htmlFor="type" required>{t("accounts.accountType")}</Label>
               <Select id="type" {...register("type")}>
-                <option value="CASH">Tiền mặt</option>
-                <option value="BANK">Ngân hàng</option>
-                <option value="E_WALLET">Ví điện tử</option>
-                <option value="CREDIT_CARD">Thẻ tín dụng</option>
+                <option value="CASH">{t("accounts.types.CASH")}</option>
+                <option value="BANK">{t("accounts.types.BANK")}</option>
+                <option value="E_WALLET">{t("accounts.types.E_WALLET")}</option>
+                <option value="CREDIT_CARD">{t("accounts.types.CREDIT_CARD")}</option>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="currency" required>Tiền tệ</Label>
+              <Label htmlFor="currency" required>{t("accounts.currency")}</Label>
               <Select id="currency" {...register("currency")}>
                 <option value="VND">VND</option>
                 <option value="JPY">JPY</option>
@@ -146,7 +148,7 @@ export function AccountFormModal({ isOpen, onClose, account }: AccountFormModalP
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="initialBalance" required>Số dư ban đầu</Label>
+            <Label htmlFor="initialBalance" required>{t("accounts.initialBalance")}</Label>
             <Input
               id="initialBalance"
               type="number"
@@ -158,7 +160,7 @@ export function AccountFormModal({ isOpen, onClose, account }: AccountFormModalP
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="icon">Icon (emoji)</Label>
+              <Label htmlFor="icon">{t("accounts.icon")}</Label>
               <Input
                 id="icon"
                 placeholder="💰"
@@ -167,7 +169,7 @@ export function AccountFormModal({ isOpen, onClose, account }: AccountFormModalP
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="color">Màu sắc</Label>
+              <Label htmlFor="color">{t("accounts.color")}</Label>
               <Input
                 id="color"
                 type="color"
@@ -179,10 +181,10 @@ export function AccountFormModal({ isOpen, onClose, account }: AccountFormModalP
 
           <div className="flex justify-end gap-2 pt-4">
             <Button type="button" variant="outline" onClick={onClose}>
-              Hủy
+              {t("common.cancel")}
             </Button>
             <Button type="submit" isLoading={isLoading}>
-              {isEditing ? "Cập nhật" : "Thêm"}
+              {isEditing ? t("common.update") : t("common.add")}
             </Button>
           </div>
         </form>

@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { useTranslation } from "react-i18next"
 import { Plus, Wallet, Building2, Smartphone, CreditCard, Pencil, Trash2 } from "lucide-react"
 import { Button, Card, CardContent, CardHeader, CardTitle } from "@/components/ui"
 import { accountsApi } from "@/api"
@@ -14,14 +15,8 @@ const accountTypeIcons: Record<AccountType, typeof Wallet> = {
   CREDIT_CARD: CreditCard,
 }
 
-const accountTypeLabels: Record<AccountType, string> = {
-  CASH: "Tiền mặt",
-  BANK: "Ngân hàng",
-  E_WALLET: "Ví điện tử",
-  CREDIT_CARD: "Thẻ tín dụng",
-}
-
 export function AccountsPage() {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingAccount, setEditingAccount] = useState<Account | null>(null)
@@ -46,7 +41,7 @@ export function AccountsPage() {
   }
 
   const handleDelete = async (id: string) => {
-    if (confirm("Bạn có chắc muốn xóa tài khoản này?")) {
+    if (confirm(t("common.confirm") + "?")) {
       await deleteMutation.mutateAsync(id)
     }
   }
@@ -68,24 +63,24 @@ export function AccountsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Tài khoản</h1>
+          <h1 className="text-3xl font-bold">{t("accounts.title")}</h1>
           <p className="text-muted-foreground">
-            Quản lý các nguồn tiền của bạn
+            {t("accounts.createFirst").split(".")[0]}
           </p>
         </div>
         <Button onClick={() => setIsModalOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
-          Thêm tài khoản
+          {t("accounts.addAccount")}
         </Button>
       </div>
 
       {/* Total Balance Card */}
       <Card className="bg-primary text-primary-foreground">
         <CardContent className="p-6">
-          <p className="text-sm opacity-90">Tổng số dư</p>
+          <p className="text-sm opacity-90">{t("dashboard.totalBalance")}</p>
           <p className="text-3xl font-bold">{formatCurrency(totalBalance)}</p>
           <p className="mt-2 text-sm opacity-75">
-            {accounts?.length || 0} tài khoản đang hoạt động
+            {accounts?.length || 0} {t("accounts.title").toLowerCase()}
           </p>
         </CardContent>
       </Card>
@@ -111,7 +106,7 @@ export function AccountsPage() {
                   <div>
                     <CardTitle className="text-base">{account.name}</CardTitle>
                     <p className="text-xs text-muted-foreground">
-                      {accountTypeLabels[account.type]}
+                      {t(`accounts.types.${account.type}`)}
                     </p>
                   </div>
                 </div>
@@ -141,7 +136,7 @@ export function AccountsPage() {
                   {formatCurrency(account.currentBalance, account.currency)}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Số dư ban đầu: {formatCurrency(account.initialBalance, account.currency)}
+                  {t("accounts.initialBalance")}: {formatCurrency(account.initialBalance, account.currency)}
                 </p>
               </CardContent>
             </Card>
@@ -155,7 +150,7 @@ export function AccountsPage() {
         >
           <CardContent className="flex flex-col items-center p-6 text-muted-foreground">
             <Plus className="mb-2 h-8 w-8" />
-            <p>Thêm tài khoản mới</p>
+            <p>{t("accounts.addAccount")}</p>
           </CardContent>
         </Card>
       </div>
