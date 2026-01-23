@@ -93,3 +93,6 @@ coverage/
 *.swp
 *.swo
 *~
+
+CLAUDE.md
+.claude/settings.local.json

@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #ffffff;
+  --color-foreground: #0f172a;
+  --color-card: #ffffff;
+  --color-card-foreground: #0f172a;
+  --color-primary: #2563eb;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #f1f5f9;
+  --color-secondary-foreground: #0f172a;
+  --color-muted: #f1f5f9;
+  --color-muted-foreground: #64748b;
+  --color-accent: #f1f5f9;
+  --color-accent-foreground: #0f172a;
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+  --color-border: #e2e8f0;
+  --color-input: #e2e8f0;
+  --color-ring: #2563eb;
+
+  /* Finance specific colors */
+  --color-income: #22c55e;
+  --color-expense: #ef4444;
+  --color-transfer: #3b82f6;
+  --color-warning: #f59e0b;
+
+  --radius: 0.5rem;
+  --font-sans: "Inter", system-ui, sans-serif;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    margin: 0;
+    min-height: 100vh;
+  }
+
+  #root {
+    min-height: 100vh;
+  }
+}
+
+@layer utilities {
+  .text-income {
+    color: var(--color-income);
+  }
+
+  .text-expense {
+    color: var(--color-expense);
+  }
+
+  .text-transfer {
+    color: var(--color-transfer);
+  }
+
+  .bg-income {
+    background-color: var(--color-income);
+  }
+
+  .bg-expense {
+    background-color: var(--color-expense);
+  }
+
+  .bg-transfer {
+    background-color: var(--color-transfer);
+  }
+}

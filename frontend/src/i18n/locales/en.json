@@ -1,0 +1,144 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "update": "Update",
+    "search": "Search",
+    "filter": "Filter",
+    "all": "All",
+    "noData": "No data",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "fullName": "Full name",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "loginTitle": "Login",
+    "loginDescription": "Login to manage your finances",
+    "registerTitle": "Register",
+    "registerDescription": "Create an account to start managing your finances",
+    "defaultCurrency": "Default currency",
+    "loginFailed": "Login failed. Please check your email and password.",
+    "registerFailed": "Registration failed. Please try again.",
+    "networkError": "Network error. Please try again."
+  },
+  "validation": {
+    "required": "This field is required",
+    "emailInvalid": "Invalid email",
+    "passwordMin": "Password must be at least {{min}} characters",
+    "nameMin": "Name must be at least {{min}} characters",
+    "passwordMismatch": "Passwords do not match",
+    "balanceMin": "Balance cannot be negative"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "accounts": "Accounts",
+    "transactions": "Transactions",
+    "budgets": "Budgets",
+    "categories": "Categories",
+    "settings": "Settings"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "greeting": "Hello, {{name}}! Here's your financial overview.",
+    "totalBalance": "Total Balance",
+    "monthlyIncome": "Monthly Income",
+    "monthlyExpense": "Monthly Expense",
+    "netCashflow": "Net Cashflow",
+    "budgetWarning": "Budget Warning",
+    "budgetsOverLimit": "You have {{count}} budget(s) over the limit.",
+    "cashflowChart": "Cashflow - Last 30 Days",
+    "categoryChart": "Expenses by Category",
+    "noExpenseData": "No expense data yet"
+  },
+  "accounts": {
+    "title": "Accounts",
+    "addAccount": "Add Account",
+    "editAccount": "Edit Account",
+    "accountName": "Account Name",
+    "accountType": "Account Type",
+    "currency": "Currency",
+    "initialBalance": "Initial Balance",
+    "currentBalance": "Current Balance",
+    "icon": "Icon (emoji)",
+    "color": "Color",
+    "types": {
+      "CASH": "Cash",
+      "BANK": "Bank",
+      "E_WALLET": "E-Wallet",
+      "CREDIT_CARD": "Credit Card"
+    },
+    "noAccounts": "No accounts yet",
+    "createFirst": "Create your first account to start managing your finances"
+  },
+  "transactions": {
+    "title": "Transactions",
+    "addTransaction": "Add Transaction",
+    "editTransaction": "Edit Transaction",
+    "amount": "Amount",
+    "type": "Type",
+    "category": "Category",
+    "account": "Account",
+    "toAccount": "To Account",
+    "date": "Date",
+    "description": "Description",
+    "exchangeRate": "Exchange Rate",
+    "types": {
+      "INCOME": "Income",
+      "EXPENSE": "Expense",
+      "TRANSFER": "Transfer"
+    },
+    "noTransactions": "No transactions yet",
+    "createFirst": "Add your first transaction to track your spending"
+  },
+  "budgets": {
+    "title": "Budgets",
+    "addBudget": "Add Budget",
+    "editBudget": "Edit Budget",
+    "budgetName": "Budget Name",
+    "amount": "Limit",
+    "spent": "Spent",
+    "remaining": "Remaining",
+    "period": "Period",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "alertThreshold": "Alert Threshold",
+    "periods": {
+      "DAILY": "Daily",
+      "WEEKLY": "Weekly",
+      "MONTHLY": "Monthly",
+      "YEARLY": "Yearly",
+      "CUSTOM": "Custom"
+    },
+    "noBudgets": "No budgets yet",
+    "createFirst": "Create a budget to control your spending",
+    "overBudget": "Over budget",
+    "nearLimit": "Near limit"
+  },
+  "currencies": {
+    "VND": "VND - Vietnamese Dong",
+    "JPY": "JPY - Japanese Yen"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "languages": {
+      "vi": "Tiếng Việt",
+      "en": "English",
+      "ja": "日本語"
+    }
+  }
+}

@@ -44,3 +44,7 @@ logging:
   level:
     com.financetracker: DEBUG
     org.springframework.security: DEBUG
+
+# CORS
+cors:
+  allowed-origins: http://localhost:3000,http://localhost:5173

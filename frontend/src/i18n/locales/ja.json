@@ -1,0 +1,144 @@
+{
+  "common": {
+    "loading": "読み込み中...",
+    "save": "保存",
+    "cancel": "キャンセル",
+    "delete": "削除",
+    "edit": "編集",
+    "add": "追加",
+    "update": "更新",
+    "search": "検索",
+    "filter": "フィルター",
+    "all": "すべて",
+    "noData": "データがありません",
+    "confirm": "確認",
+    "yes": "はい",
+    "no": "いいえ"
+  },
+  "auth": {
+    "login": "ログイン",
+    "register": "登録",
+    "logout": "ログアウト",
+    "email": "メールアドレス",
+    "password": "パスワード",
+    "confirmPassword": "パスワード確認",
+    "fullName": "氏名",
+    "forgotPassword": "パスワードを忘れた方",
+    "noAccount": "アカウントをお持ちでない方",
+    "hasAccount": "アカウントをお持ちの方",
+    "loginTitle": "ログイン",
+    "loginDescription": "ログインして資産を管理しましょう",
+    "registerTitle": "登録",
+    "registerDescription": "アカウントを作成して資産管理を始めましょう",
+    "defaultCurrency": "デフォルト通貨",
+    "loginFailed": "ログインに失敗しました。メールアドレスとパスワードを確認してください。",
+    "registerFailed": "登録に失敗しました。もう一度お試しください。",
+    "networkError": "ネットワークエラーです。もう一度お試しください。"
+  },
+  "validation": {
+    "required": "この項目は必須です",
+    "emailInvalid": "メールアドレスが無効です",
+    "passwordMin": "パスワードは{{min}}文字以上必要です",
+    "nameMin": "名前は{{min}}文字以上必要です",
+    "passwordMismatch": "パスワードが一致しません",
+    "balanceMin": "残高は0以上である必要があります"
+  },
+  "nav": {
+    "dashboard": "ダッシュボード",
+    "accounts": "口座",
+    "transactions": "取引",
+    "budgets": "予算",
+    "categories": "カテゴリー",
+    "settings": "設定"
+  },
+  "dashboard": {
+    "title": "ダッシュボード",
+    "greeting": "こんにちは、{{name}}さん！資産状況をご覧ください。",
+    "totalBalance": "総残高",
+    "monthlyIncome": "今月の収入",
+    "monthlyExpense": "今月の支出",
+    "netCashflow": "純キャッシュフロー",
+    "budgetWarning": "予算警告",
+    "budgetsOverLimit": "{{count}}件の予算が上限を超えています。",
+    "cashflowChart": "過去30日間のキャッシュフロー",
+    "categoryChart": "カテゴリー別支出",
+    "noExpenseData": "支出データがありません"
+  },
+  "accounts": {
+    "title": "口座",
+    "addAccount": "口座を追加",
+    "editAccount": "口座を編集",
+    "accountName": "口座名",
+    "accountType": "口座タイプ",
+    "currency": "通貨",
+    "initialBalance": "初期残高",
+    "currentBalance": "現在の残高",
+    "icon": "アイコン（絵文字）",
+    "color": "色",
+    "types": {
+      "CASH": "現金",
+      "BANK": "銀行",
+      "E_WALLET": "電子マネー",
+      "CREDIT_CARD": "クレジットカード"
+    },
+    "noAccounts": "口座がありません",
+    "createFirst": "最初の口座を作成して資産管理を始めましょう"
+  },
+  "transactions": {
+    "title": "取引",
+    "addTransaction": "取引を追加",
+    "editTransaction": "取引を編集",
+    "amount": "金額",
+    "type": "種類",
+    "category": "カテゴリー",
+    "account": "口座",
+    "toAccount": "振替先口座",
+    "date": "日付",
+    "description": "説明",
+    "exchangeRate": "為替レート",
+    "types": {
+      "INCOME": "収入",
+      "EXPENSE": "支出",
+      "TRANSFER": "振替"
+    },
+    "noTransactions": "取引がありません",
+    "createFirst": "最初の取引を追加して支出を追跡しましょう"
+  },
+  "budgets": {
+    "title": "予算",
+    "addBudget": "予算を追加",
+    "editBudget": "予算を編集",
+    "budgetName": "予算名",
+    "amount": "上限額",
+    "spent": "使用済み",
+    "remaining": "残り",
+    "period": "期間",
+    "startDate": "開始日",
+    "endDate": "終了日",
+    "alertThreshold": "警告しきい値",
+    "periods": {
+      "DAILY": "毎日",
+      "WEEKLY": "毎週",
+      "MONTHLY": "毎月",
+      "YEARLY": "毎年",
+      "CUSTOM": "カスタム"
+    },
+    "noBudgets": "予算がありません",
+    "createFirst": "予算を作成して支出をコントロールしましょう",
+    "overBudget": "予算超過",
+    "nearLimit": "上限に近い"
+  },
+  "currencies": {
+    "VND": "VND - ベトナムドン",
+    "JPY": "JPY - 日本円"
+  },
+  "settings": {
+    "title": "設定",
+    "language": "言語",
+    "languages": {
+      "vi": "Tiếng Việt",
+      "en": "English",
+      "ja": "日本語"
+    }
+  }
+}
