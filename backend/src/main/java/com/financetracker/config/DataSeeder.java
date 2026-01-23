@@ -500,7 +500,7 @@ public class DataSeeder implements CommandLineRunner {
                 .amount(amount)
                 .currency(currency)
                 .description(description)
-                .transactionDate(date.atStartOfDay())
+                .transactionDate(date)
                 .build();
         transactionRepository.save(transaction);
 
