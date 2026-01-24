@@ -24,12 +24,6 @@ const formatNumberWithSeparator = (value: number | string, locale: string): stri
   return new Intl.NumberFormat(locale === "vi" ? "vi-VN" : locale === "ja" ? "ja-JP" : "en-US").format(num)
 }
 
-// Parse formatted string back to number
-const parseFormattedNumber = (value: string): number => {
-  const cleaned = value.replace(/[^\d.-]/g, "")
-  return parseFloat(cleaned) || 0
-}
-
 export function AccountFormModal({ isOpen, onClose, account }: AccountFormModalProps) {
   const { t, i18n } = useTranslation()
   const { user } = useAuth()
