@@ -244,3 +244,73 @@ export interface AdminCategoryRequest {
   color?: string
   parentId?: string
 }
+
+// Recurring Transaction types
+export type RecurrenceFrequency = "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY"
+export type RecurringStatus = "ACTIVE" | "PAUSED" | "COMPLETED" | "CANCELLED"
+
+export interface RecurringTransaction {
+  id: string
+  accountId: string
+  accountName: string
+  categoryId: string | null
+  categoryName: string | null
+  categoryIcon: string | null
+  type: TransactionType
+  amount: number
+  currency: string
+  description: string | null
+
+  toAccountId: string | null
+  toAccountName: string | null
+  exchangeRate: number | null
+
+  frequency: RecurrenceFrequency
+  intervalValue: number
+  dayOfWeek: number | null
+  dayOfMonth: number | null
+
+  startDate: string
+  endDate: string | null
+  nextExecutionDate: string
+  lastExecutionDate: string | null
+
+  status: RecurringStatus
+  executionCount: number
+  maxExecutions: number | null
+
+  createdAt: string
+}
+
+export interface RecurringTransactionRequest {
+  accountId: string
+  categoryId?: string
+  type: TransactionType
+  amount: number
+  currency?: string
+  description?: string
+
+  toAccountId?: string
+  exchangeRate?: number
+
+  frequency: RecurrenceFrequency
+  intervalValue?: number
+  dayOfWeek?: number
+  dayOfMonth?: number
+
+  startDate: string
+  endDate?: string
+  maxExecutions?: number
+}
+
+export interface UpcomingTransaction {
+  recurringId: string
+  description: string | null
+  amount: number
+  currency: string
+  type: TransactionType
+  accountName: string
+  categoryName: string | null
+  categoryIcon: string | null
+  scheduledDate: string
+}
