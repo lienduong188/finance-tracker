@@ -81,15 +81,15 @@ export function TransactionsPage() {
   )
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">{t("transactions.title")}</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl font-bold md:text-3xl">{t("transactions.title")}</h1>
+          <p className="text-sm text-muted-foreground md:text-base">
             {t("transactions.createFirst").split(".")[0]}
           </p>
         </div>
-        <Button onClick={() => setIsModalOpen(true)}>
+        <Button onClick={() => setIsModalOpen(true)} className="w-full sm:w-auto">
           <Plus className="mr-2 h-4 w-4" />
           {t("transactions.addTransaction")}
         </Button>
@@ -97,8 +97,8 @@ export function TransactionsPage() {
 
       {/* Filters */}
       <Card>
-        <CardContent className="flex flex-wrap gap-4 p-4">
-          <div className="w-48">
+        <CardContent className="flex flex-col gap-3 p-3 sm:flex-row sm:flex-wrap sm:gap-4 sm:p-4">
+          <div className="w-full sm:w-40 md:w-48">
             <Select
               value={filters.accountId}
               onChange={(e) => setFilters({ ...filters, accountId: e.target.value })}
@@ -111,7 +111,7 @@ export function TransactionsPage() {
               ))}
             </Select>
           </div>
-          <div className="w-48">
+          <div className="w-full sm:w-40 md:w-48">
             <Select
               value={filters.type}
               onChange={(e) => setFilters({ ...filters, type: e.target.value })}
@@ -131,10 +131,10 @@ export function TransactionsPage() {
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-4 md:space-y-6">
           {groupedTransactions && Object.entries(groupedTransactions).map(([date, txns]) => (
             <div key={date}>
-              <h3 className="mb-3 text-sm font-medium text-muted-foreground">
+              <h3 className="mb-2 text-xs font-medium text-muted-foreground md:mb-3 md:text-sm">
                 {formatFullDate(date, lang)}
               </h3>
               <Card>
@@ -144,72 +144,80 @@ export function TransactionsPage() {
                     return (
                       <div
                         key={transaction.id}
-                        className="group flex items-center justify-between p-4 hover:bg-accent/50"
+                        className="group p-3 hover:bg-accent/50 md:p-4"
                       >
-                        <div className="flex items-center gap-4">
+                        {/* Mobile layout - stacked */}
+                        <div className="flex items-start gap-3">
                           <div
                             className={cn(
-                              "flex h-10 w-10 items-center justify-center rounded-full",
+                              "flex h-9 w-9 shrink-0 items-center justify-center rounded-full md:h-10 md:w-10",
                               transaction.type === "INCOME" && "bg-income/10",
                               transaction.type === "EXPENSE" && "bg-expense/10",
                               transaction.type === "TRANSFER" && "bg-transfer/10"
                             )}
                           >
                             {transaction.categoryIcon ? (
-                              <span className="text-xl">{transaction.categoryIcon}</span>
+                              <span className="text-lg md:text-xl">{transaction.categoryIcon}</span>
                             ) : (
                               <Icon
                                 className={cn(
-                                  "h-5 w-5",
+                                  "h-4 w-4 md:h-5 md:w-5",
                                   transactionTypeColors[transaction.type]
                                 )}
                               />
                             )}
                           </div>
-                          <div>
-                            <p className="font-medium">
-                              {transaction.categoryName || t(`transactions.types.${transaction.type}`)}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {transaction.accountName}
-                              {transaction.type === "TRANSFER" &&
-                                ` → ${transaction.toAccountName}`}
-                            </p>
+
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="min-w-0">
+                                <p className="truncate text-sm font-medium md:text-base">
+                                  {transaction.categoryName || t(`transactions.types.${transaction.type}`)}
+                                </p>
+                                <p className="truncate text-xs text-muted-foreground md:text-sm">
+                                  {transaction.accountName}
+                                  {transaction.type === "TRANSFER" &&
+                                    ` → ${transaction.toAccountName}`}
+                                </p>
+                              </div>
+                              <p
+                                className={cn(
+                                  "shrink-0 text-sm font-semibold md:text-lg",
+                                  transactionTypeColors[transaction.type]
+                                )}
+                              >
+                                {transaction.type === "INCOME" ? "+" : "-"}
+                                {formatCurrency(transaction.amount, transaction.currency)}
+                              </p>
+                            </div>
+
                             {transaction.description && (
-                              <p className="text-sm text-muted-foreground">
+                              <p className="mt-1 truncate text-xs text-muted-foreground">
                                 {transaction.description}
                               </p>
                             )}
-                          </div>
-                        </div>
 
-                        <div className="flex items-center gap-4">
-                          <p
-                            className={cn(
-                              "text-lg font-semibold",
-                              transactionTypeColors[transaction.type]
-                            )}
-                          >
-                            {transaction.type === "INCOME" ? "+" : "-"}
-                            {formatCurrency(transaction.amount, transaction.currency)}
-                          </p>
-
-                          <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleEdit(transaction)}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleDelete(transaction.id)}
-                              className="text-destructive hover:text-destructive"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                            {/* Actions - visible on mobile, hover on desktop */}
+                            <div className="mt-2 flex gap-1 md:mt-0 md:opacity-0 md:transition-opacity md:group-hover:opacity-100">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 px-2 text-xs"
+                                onClick={() => handleEdit(transaction)}
+                              >
+                                <Pencil className="mr-1 h-3 w-3" />
+                                {t("common.edit")}
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 px-2 text-xs text-destructive hover:text-destructive"
+                                onClick={() => handleDelete(transaction.id)}
+                              >
+                                <Trash2 className="mr-1 h-3 w-3" />
+                                {t("common.delete")}
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -222,9 +230,9 @@ export function TransactionsPage() {
 
           {transactions?.content?.length === 0 && (
             <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <ArrowLeftRight className="mb-4 h-12 w-12 text-muted-foreground" />
-                <p className="text-muted-foreground">{t("transactions.noTransactions")}</p>
+              <CardContent className="flex flex-col items-center justify-center py-8 md:py-12">
+                <ArrowLeftRight className="mb-4 h-10 w-10 text-muted-foreground md:h-12 md:w-12" />
+                <p className="text-sm text-muted-foreground md:text-base">{t("transactions.noTransactions")}</p>
                 <Button
                   variant="outline"
                   className="mt-4"
@@ -242,16 +250,18 @@ export function TransactionsPage() {
             <div className="flex justify-center gap-2">
               <Button
                 variant="outline"
+                size="sm"
                 disabled={filters.page === 0}
                 onClick={() => setFilters({ ...filters, page: filters.page - 1 })}
               >
                 ←
               </Button>
-              <span className="flex items-center px-4">
+              <span className="flex items-center px-3 text-sm md:px-4 md:text-base">
                 {filters.page + 1} / {transactions.totalPages}
               </span>
               <Button
                 variant="outline"
+                size="sm"
                 disabled={filters.page >= transactions.totalPages - 1}
                 onClick={() => setFilters({ ...filters, page: filters.page + 1 })}
               >

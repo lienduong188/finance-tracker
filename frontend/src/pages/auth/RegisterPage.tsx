@@ -68,17 +68,17 @@ export function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted p-4">
+    <div className="flex min-h-screen items-center justify-center bg-muted px-4 py-8">
       <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl">{t("auth.registerTitle")}</CardTitle>
-          <CardDescription>
+        <CardHeader className="space-y-1 p-4 text-center md:p-6">
+          <CardTitle className="text-xl md:text-2xl">{t("auth.registerTitle")}</CardTitle>
+          <CardDescription className="text-sm">
             {t("auth.registerDescription")}
           </CardDescription>
         </CardHeader>
 
         <form onSubmit={handleSubmit(onSubmit)}>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3 p-4 pt-0 md:space-y-4 md:p-6 md:pt-0">
             {error && (
               <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
                 {error}
@@ -137,19 +137,19 @@ export function RegisterPage() {
             </div>
           </CardContent>
 
-          <CardFooter className="flex flex-col gap-4">
+          <CardFooter className="flex flex-col gap-3 p-4 pt-0 md:gap-4 md:p-6 md:pt-0">
             <Button type="submit" className="w-full" isLoading={isLoading}>
               {t("auth.register")}
             </Button>
 
-            <p className="text-center text-sm text-muted-foreground">
+            <p className="text-center text-xs text-muted-foreground md:text-sm">
               {t("auth.hasAccount")}{" "}
               <Link to="/login" className="text-primary hover:underline">
                 {t("auth.login")}
               </Link>
             </p>
 
-            <div className="w-full border-t pt-4">
+            <div className="w-full border-t pt-3 md:pt-4">
               <LanguageSwitch />
             </div>
           </CardFooter>
