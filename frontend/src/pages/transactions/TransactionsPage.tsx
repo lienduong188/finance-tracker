@@ -31,8 +31,13 @@ import {
   isSameDay,
   addMonths,
   subMonths,
+  addWeeks,
+  subWeeks,
+  addDays,
+  subDays,
   startOfWeek,
   endOfWeek,
+  isToday,
 } from "date-fns"
 import { vi, enUS, ja } from "date-fns/locale"
 import { Button, Card, CardContent, CardHeader, CardTitle, Select } from "@/components/ui"
@@ -43,6 +48,7 @@ import type { Transaction, TransactionType } from "@/types"
 import { TransactionFormModal } from "./TransactionFormModal"
 
 type ViewMode = "list" | "calendar" | "category" | "account"
+type CalendarViewMode = "month" | "week" | "day"
 
 const transactionTypeIcons: Record<TransactionType, typeof TrendingUp> = {
   INCOME: TrendingUp,
@@ -83,6 +89,7 @@ export function TransactionsPage() {
   const queryClient = useQueryClient()
 
   const [viewMode, setViewMode] = useState<ViewMode>("list")
+  const [calendarViewMode, setCalendarViewMode] = useState<CalendarViewMode>("month")
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
@@ -270,90 +277,321 @@ export function TransactionsPage() {
     </div>
   )
 
-  // Render Calendar View
-  const renderCalendarView = () => {
-    const weekDays = ["日", "月", "火", "水", "木", "金", "土"]
-    const weekDaysVi = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"]
-    const weekDaysEn = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-    const days = lang === "ja" ? weekDays : lang === "vi" ? weekDaysVi : weekDaysEn
+  // Calendar week days labels
+  const weekDaysJa = ["日", "月", "火", "水", "木", "金", "土"]
+  const weekDaysVi = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"]
+  const weekDaysEn = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+  const weekDayLabels = lang === "ja" ? weekDaysJa : lang === "vi" ? weekDaysVi : weekDaysEn
 
+  // Week days for week view
+  const weekDays = useMemo(() => {
+    const weekStart = startOfWeek(selectedDate, { locale })
+    const weekEnd = endOfWeek(selectedDate, { locale })
+    return eachDayOfInterval({ start: weekStart, end: weekEnd })
+  }, [selectedDate, locale])
+
+  // Navigation handlers for calendar
+  const handleCalendarPrev = () => {
+    if (calendarViewMode === "month") {
+      setCalendarMonth(subMonths(calendarMonth, 1))
+    } else if (calendarViewMode === "week") {
+      setSelectedDate(subWeeks(selectedDate, 1))
+    } else {
+      setSelectedDate(subDays(selectedDate, 1))
+    }
+  }
+
+  const handleCalendarNext = () => {
+    if (calendarViewMode === "month") {
+      setCalendarMonth(addMonths(calendarMonth, 1))
+    } else if (calendarViewMode === "week") {
+      setSelectedDate(addWeeks(selectedDate, 1))
+    } else {
+      setSelectedDate(addDays(selectedDate, 1))
+    }
+  }
+
+  const handleCalendarToday = () => {
+    const today = new Date()
+    setSelectedDate(today)
+    setCalendarMonth(today)
+  }
+
+  // Get calendar title based on view mode
+  const getCalendarTitle = () => {
+    if (calendarViewMode === "month") {
+      return format(calendarMonth, lang === "ja" ? "yyyy年MM月" : lang === "vi" ? "MM/yyyy" : "MMMM yyyy", { locale })
+    } else if (calendarViewMode === "week") {
+      const weekStart = startOfWeek(selectedDate, { locale })
+      const weekEnd = endOfWeek(selectedDate, { locale })
+      return `${format(weekStart, "MM/dd")} - ${format(weekEnd, "MM/dd")}`
+    } else {
+      return formatFullDate(format(selectedDate, "yyyy-MM-dd"), lang)
+    }
+  }
+
+  // Render transaction item
+  const renderTransactionItem = (tx: Transaction, showDate = false) => {
+    const Icon = transactionTypeIcons[tx.type]
     return (
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between p-4">
-          <Button variant="ghost" size="icon" onClick={() => setCalendarMonth(subMonths(calendarMonth, 1))}>
-            <ChevronLeft className="h-5 w-5" />
-          </Button>
-          <CardTitle className="text-base md:text-lg">
-            {format(calendarMonth, "yyyy年MM月", { locale })}
-          </CardTitle>
-          <Button variant="ghost" size="icon" onClick={() => setCalendarMonth(addMonths(calendarMonth, 1))}>
-            <ChevronRight className="h-5 w-5" />
-          </Button>
-        </CardHeader>
-        <CardContent className="p-2 md:p-4">
-          {/* Week headers */}
-          <div className="mb-2 grid grid-cols-7 text-center text-xs font-medium text-muted-foreground">
-            {days.map((d) => (
-              <div key={d} className="py-2">{d}</div>
-            ))}
+      <div
+        key={tx.id}
+        className="group flex items-center justify-between rounded-lg border p-2 hover:bg-accent/50"
+      >
+        <div className="flex items-center gap-2">
+          <div
+            className={cn(
+              "flex h-8 w-8 shrink-0 items-center justify-center rounded-full",
+              tx.type === "INCOME" && "bg-income/10",
+              tx.type === "EXPENSE" && "bg-expense/10",
+              tx.type === "TRANSFER" && "bg-transfer/10"
+            )}
+          >
+            {tx.categoryIcon ? (
+              <span className="text-sm">{tx.categoryIcon}</span>
+            ) : (
+              <Icon className={cn("h-4 w-4", transactionTypeColors[tx.type])} />
+            )}
           </div>
-          {/* Days grid */}
-          <div className="grid grid-cols-7 gap-1">
-            {calendarDays.map((day) => {
-              const dateKey = format(day, "yyyy-MM-dd")
-              const dayTxns = transactionsByDay[dateKey] || []
-              const income = dayTxns.filter((tx) => tx.type === "INCOME").reduce((s, tx) => s + tx.amount, 0)
-              const expense = dayTxns.filter((tx) => tx.type === "EXPENSE").reduce((s, tx) => s + tx.amount, 0)
-              const isSelected = isSameDay(day, selectedDate)
-              const isCurrentMonth = isSameMonth(day, calendarMonth)
-
-              return (
-                <button
-                  key={dateKey}
-                  onClick={() => setSelectedDate(day)}
-                  className={cn(
-                    "relative flex min-h-[60px] flex-col items-center rounded-lg border p-1 text-xs transition-colors md:min-h-[80px] md:p-2",
-                    isCurrentMonth ? "bg-background" : "bg-muted/30 text-muted-foreground",
-                    isSelected && "border-primary ring-1 ring-primary",
-                    !isSelected && "hover:border-primary/50"
-                  )}
-                >
-                  <span className={cn("font-medium", isSameDay(day, new Date()) && "rounded-full bg-primary px-1.5 text-primary-foreground")}>
-                    {format(day, "d")}
-                  </span>
-                  {dayTxns.length > 0 && (
-                    <div className="mt-1 w-full space-y-0.5 text-[10px]">
-                      {income > 0 && <div className="truncate text-income">+{formatCurrency(income, defaultCurrency)}</div>}
-                      {expense > 0 && <div className="truncate text-expense">-{formatCurrency(expense, defaultCurrency)}</div>}
-                    </div>
-                  )}
-                </button>
-              )
-            })}
+          <div>
+            <p className="text-sm font-medium">
+              {tx.categoryName ? t(`categories.${tx.categoryName}`, tx.categoryName) : t(`transactions.types.${tx.type}`)}
+            </p>
+            {showDate && (
+              <p className="text-xs text-muted-foreground">{formatFullDate(tx.transactionDate, lang)}</p>
+            )}
+            {tx.description && (
+              <p className="text-xs text-muted-foreground">{tx.description}</p>
+            )}
           </div>
-          {/* Selected date transactions */}
-          {transactionsByDay[format(selectedDate, "yyyy-MM-dd")]?.length > 0 && (
-            <div className="mt-4 border-t pt-4">
-              <h4 className="mb-2 text-sm font-medium">{formatFullDate(format(selectedDate, "yyyy-MM-dd"), lang)}</h4>
-              <div className="space-y-2">
-                {transactionsByDay[format(selectedDate, "yyyy-MM-dd")].map((tx) => (
-                  <div key={tx.id} className="flex items-center justify-between rounded-lg border p-2">
-                    <div className="flex items-center gap-2">
-                      <span>{tx.categoryIcon || "💰"}</span>
-                      <span className="text-sm">{tx.categoryName ? t(`categories.${tx.categoryName}`, tx.categoryName) : t(`transactions.types.${tx.type}`)}</span>
-                    </div>
-                    <span className={cn("text-sm font-medium", transactionTypeColors[tx.type])}>
-                      {tx.type === "INCOME" ? "+" : "-"}{formatCurrency(tx.amount, tx.currency)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className={cn("text-sm font-medium", transactionTypeColors[tx.type])}>
+            {tx.type === "INCOME" ? "+" : "-"}{formatCurrency(tx.amount, tx.currency)}
+          </span>
+          <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+            <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => handleEdit(tx)}>
+              <Pencil className="h-3 w-3" />
+            </Button>
+            <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-destructive" onClick={() => handleDelete(tx.id)}>
+              <Trash2 className="h-3 w-3" />
+            </Button>
+          </div>
+        </div>
+      </div>
     )
   }
+
+  // Render Month View
+  const renderMonthView = () => (
+    <>
+      {/* Week headers */}
+      <div className="mb-2 grid grid-cols-7 text-center text-xs font-medium text-muted-foreground">
+        {weekDayLabels.map((d) => (
+          <div key={d} className="py-2">{d}</div>
+        ))}
+      </div>
+      {/* Days grid */}
+      <div className="grid grid-cols-7 gap-1">
+        {calendarDays.map((day) => {
+          const dateKey = format(day, "yyyy-MM-dd")
+          const dayTxns = transactionsByDay[dateKey] || []
+          const income = dayTxns.filter((tx) => tx.type === "INCOME").reduce((s, tx) => s + tx.amount, 0)
+          const expense = dayTxns.filter((tx) => tx.type === "EXPENSE").reduce((s, tx) => s + tx.amount, 0)
+          const isSelected = isSameDay(day, selectedDate)
+          const isCurrentMonth = isSameMonth(day, calendarMonth)
+
+          return (
+            <button
+              key={dateKey}
+              onClick={() => {
+                setSelectedDate(day)
+                setCalendarViewMode("day")
+              }}
+              className={cn(
+                "relative flex min-h-[60px] flex-col items-center rounded-lg border p-1 text-xs transition-colors md:min-h-[80px] md:p-2",
+                isCurrentMonth ? "bg-background" : "bg-muted/30 text-muted-foreground",
+                isSelected && "border-primary ring-1 ring-primary",
+                !isSelected && "hover:border-primary/50"
+              )}
+            >
+              <span className={cn("font-medium", isToday(day) && "rounded-full bg-primary px-1.5 text-primary-foreground")}>
+                {format(day, "d")}
+              </span>
+              {dayTxns.length > 0 && (
+                <div className="mt-1 w-full space-y-0.5 text-[10px]">
+                  {income > 0 && <div className="truncate text-income">+{formatCurrency(income, defaultCurrency)}</div>}
+                  {expense > 0 && <div className="truncate text-expense">-{formatCurrency(expense, defaultCurrency)}</div>}
+                </div>
+              )}
+            </button>
+          )
+        })}
+      </div>
+    </>
+  )
+
+  // Render Week View
+  const renderWeekView = () => {
+    const weekIncome = weekDays.reduce((sum, day) => {
+      const txns = transactionsByDay[format(day, "yyyy-MM-dd")] || []
+      return sum + txns.filter((tx) => tx.type === "INCOME").reduce((s, tx) => s + tx.amount, 0)
+    }, 0)
+    const weekExpense = weekDays.reduce((sum, day) => {
+      const txns = transactionsByDay[format(day, "yyyy-MM-dd")] || []
+      return sum + txns.filter((tx) => tx.type === "EXPENSE").reduce((s, tx) => s + tx.amount, 0)
+    }, 0)
+
+    return (
+      <div className="space-y-4">
+        {/* Week summary */}
+        <div className="flex justify-center gap-6 text-sm">
+          <div>
+            <span className="text-muted-foreground">{t("transactions.totalIncome")}: </span>
+            <span className="font-medium text-income">{formatCurrency(weekIncome, defaultCurrency)}</span>
+          </div>
+          <div>
+            <span className="text-muted-foreground">{t("transactions.totalExpense")}: </span>
+            <span className="font-medium text-expense">{formatCurrency(weekExpense, defaultCurrency)}</span>
+          </div>
+        </div>
+        {/* Week days */}
+        <div className="grid grid-cols-7 gap-1">
+          {weekDays.map((day, index) => {
+            const dateKey = format(day, "yyyy-MM-dd")
+            const dayTxns = transactionsByDay[dateKey] || []
+            const income = dayTxns.filter((tx) => tx.type === "INCOME").reduce((s, tx) => s + tx.amount, 0)
+            const expense = dayTxns.filter((tx) => tx.type === "EXPENSE").reduce((s, tx) => s + tx.amount, 0)
+            const isSelected = isSameDay(day, selectedDate)
+
+            return (
+              <button
+                key={dateKey}
+                onClick={() => {
+                  setSelectedDate(day)
+                  setCalendarViewMode("day")
+                }}
+                className={cn(
+                  "flex flex-col items-center rounded-lg border p-2 transition-colors",
+                  isSelected && "border-primary ring-1 ring-primary",
+                  !isSelected && "hover:border-primary/50"
+                )}
+              >
+                <span className="text-xs text-muted-foreground">{weekDayLabels[index]}</span>
+                <span className={cn("text-lg font-medium", isToday(day) && "rounded-full bg-primary px-2 text-primary-foreground")}>
+                  {format(day, "d")}
+                </span>
+                {dayTxns.length > 0 && (
+                  <div className="mt-1 text-center text-[10px]">
+                    {income > 0 && <div className="text-income">+{formatCurrency(income, defaultCurrency)}</div>}
+                    {expense > 0 && <div className="text-expense">-{formatCurrency(expense, defaultCurrency)}</div>}
+                  </div>
+                )}
+                {dayTxns.length === 0 && <div className="mt-1 text-[10px] text-muted-foreground">-</div>}
+              </button>
+            )
+          })}
+        </div>
+        {/* Selected day transactions */}
+        {transactionsByDay[format(selectedDate, "yyyy-MM-dd")]?.length > 0 && (
+          <div className="space-y-2 border-t pt-4">
+            <h4 className="text-sm font-medium">{formatFullDate(format(selectedDate, "yyyy-MM-dd"), lang)}</h4>
+            {transactionsByDay[format(selectedDate, "yyyy-MM-dd")].map((tx) => renderTransactionItem(tx))}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  // Render Day View
+  const renderDayView = () => {
+    const dateKey = format(selectedDate, "yyyy-MM-dd")
+    const dayTxns = transactionsByDay[dateKey] || []
+    const income = dayTxns.filter((tx) => tx.type === "INCOME").reduce((s, tx) => s + tx.amount, 0)
+    const expense = dayTxns.filter((tx) => tx.type === "EXPENSE").reduce((s, tx) => s + tx.amount, 0)
+
+    return (
+      <div className="space-y-4">
+        {/* Day summary */}
+        <div className="flex justify-center gap-6 text-sm">
+          <div>
+            <span className="text-muted-foreground">{t("transactions.totalIncome")}: </span>
+            <span className="font-medium text-income">{formatCurrency(income, defaultCurrency)}</span>
+          </div>
+          <div>
+            <span className="text-muted-foreground">{t("transactions.totalExpense")}: </span>
+            <span className="font-medium text-expense">{formatCurrency(expense, defaultCurrency)}</span>
+          </div>
+          <div>
+            <span className="text-muted-foreground">{t("transactions.balance")}: </span>
+            <span className={cn("font-medium", income - expense >= 0 ? "text-income" : "text-expense")}>
+              {income - expense >= 0 ? "+" : ""}{formatCurrency(income - expense, defaultCurrency)}
+            </span>
+          </div>
+        </div>
+        {/* Transactions list */}
+        {dayTxns.length > 0 ? (
+          <div className="space-y-2">
+            {dayTxns.map((tx) => renderTransactionItem(tx))}
+          </div>
+        ) : (
+          <div className="flex h-32 items-center justify-center text-muted-foreground">
+            {t("transactions.noTransactions")}
+          </div>
+        )}
+        {/* Add transaction button */}
+        <div className="flex justify-center">
+          <Button variant="outline" onClick={() => setIsModalOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            {t("transactions.addTransaction")}
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  // Render Calendar View
+  const renderCalendarView = () => (
+    <Card>
+      <CardHeader className="p-4">
+        {/* Calendar view mode tabs */}
+        <div className="mb-4 flex justify-center gap-1 rounded-lg bg-muted p-1">
+          {(["month", "week", "day"] as CalendarViewMode[]).map((mode) => (
+            <button
+              key={mode}
+              onClick={() => setCalendarViewMode(mode)}
+              className={cn(
+                "rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+                calendarViewMode === mode ? "bg-background shadow" : "hover:bg-background/50"
+              )}
+            >
+              {t(`transactions.calendarViews.${mode}`)}
+            </button>
+          ))}
+        </div>
+        {/* Navigation */}
+        <div className="flex items-center justify-between">
+          <Button variant="ghost" size="icon" onClick={handleCalendarPrev}>
+            <ChevronLeft className="h-5 w-5" />
+          </Button>
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-base md:text-lg">{getCalendarTitle()}</CardTitle>
+            <Button variant="outline" size="sm" className="text-xs" onClick={handleCalendarToday}>
+              {t("transactions.today")}
+            </Button>
+          </div>
+          <Button variant="ghost" size="icon" onClick={handleCalendarNext}>
+            <ChevronRight className="h-5 w-5" />
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent className="p-2 md:p-4">
+        {calendarViewMode === "month" && renderMonthView()}
+        {calendarViewMode === "week" && renderWeekView()}
+        {calendarViewMode === "day" && renderDayView()}
+      </CardContent>
+    </Card>
+  )
 
   // Render Category View
   const renderCategoryView = () => {

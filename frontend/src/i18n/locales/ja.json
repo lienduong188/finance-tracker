@@ -130,6 +130,12 @@
       "category": "カテゴリー",
       "account": "口座"
     },
+    "calendarViews": {
+      "month": "月",
+      "week": "週",
+      "day": "日"
+    },
+    "today": "今日",
     "totalIncome": "総収入",
     "totalExpense": "総支出",
     "balance": "残高"

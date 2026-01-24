@@ -130,6 +130,12 @@
       "category": "Danh mục",
       "account": "Tài khoản"
     },
+    "calendarViews": {
+      "month": "Tháng",
+      "week": "Tuần",
+      "day": "Ngày"
+    },
+    "today": "Hôm nay",
     "totalIncome": "Tổng thu",
     "totalExpense": "Tổng chi",
     "balance": "Số dư"

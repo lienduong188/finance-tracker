@@ -130,6 +130,12 @@
       "category": "Category",
       "account": "Account"
     },
+    "calendarViews": {
+      "month": "Month",
+      "week": "Week",
+      "day": "Day"
+    },
+    "today": "Today",
     "totalIncome": "Total Income",
     "totalExpense": "Total Expense",
     "balance": "Balance"
