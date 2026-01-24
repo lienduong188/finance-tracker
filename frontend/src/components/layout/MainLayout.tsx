@@ -21,7 +21,7 @@ export function MainLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen w-full overflow-x-hidden bg-background">
       {/* Mobile/Tablet header with hamburger */}
       <header className="fixed left-0 right-0 top-0 z-20 flex h-14 items-center border-b bg-card px-4 lg:hidden">
         <button
