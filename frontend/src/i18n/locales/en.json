@@ -122,7 +122,16 @@
       "TRANSFER": "Transfer"
     },
     "noTransactions": "No transactions yet",
-    "createFirst": "Add your first transaction to track your spending"
+    "createFirst": "Add your first transaction to track your spending",
+    "views": {
+      "list": "List",
+      "calendar": "Calendar",
+      "category": "Category",
+      "account": "Account"
+    },
+    "totalIncome": "Total Income",
+    "totalExpense": "Total Expense",
+    "balance": "Balance"
   },
   "budgets": {
     "title": "Budgets",

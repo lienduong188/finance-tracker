@@ -122,7 +122,16 @@
       "TRANSFER": "Chuyển khoản"
     },
     "noTransactions": "Chưa có giao dịch nào",
-    "createFirst": "Thêm giao dịch đầu tiên để theo dõi chi tiêu"
+    "createFirst": "Thêm giao dịch đầu tiên để theo dõi chi tiêu",
+    "views": {
+      "list": "Danh sách",
+      "calendar": "Lịch",
+      "category": "Danh mục",
+      "account": "Tài khoản"
+    },
+    "totalIncome": "Tổng thu",
+    "totalExpense": "Tổng chi",
+    "balance": "Số dư"
   },
   "budgets": {
     "title": "Ngân sách",

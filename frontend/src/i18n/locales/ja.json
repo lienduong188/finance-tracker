@@ -122,7 +122,16 @@
       "TRANSFER": "振替"
     },
     "noTransactions": "取引がありません",
-    "createFirst": "最初の取引を追加して支出を追跡しましょう"
+    "createFirst": "最初の取引を追加して支出を追跡しましょう",
+    "views": {
+      "list": "リスト",
+      "calendar": "カレンダー",
+      "category": "カテゴリー",
+      "account": "口座"
+    },
+    "totalIncome": "総収入",
+    "totalExpense": "総支出",
+    "balance": "残高"
   },
   "budgets": {
     "title": "予算",
