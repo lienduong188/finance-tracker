@@ -11,6 +11,13 @@ import { transactionsApi, accountsApi, categoriesApi } from "@/api"
 import { cn } from "@/lib/utils"
 import type { Transaction, TransactionRequest, TransactionType } from "@/types"
 
+// Format number with thousand separators
+const formatNumberWithSeparator = (value: number | string, locale: string): string => {
+  const num = typeof value === "string" ? parseFloat(value.replace(/[^\d.-]/g, "")) : value
+  if (isNaN(num) || num === 0) return ""
+  return new Intl.NumberFormat(locale === "vi" ? "vi-VN" : locale === "ja" ? "ja-JP" : "en-US").format(num)
+}
+
 const baseTransactionSchema = z.object({
   accountId: z.string().min(1),
   categoryId: z.string().optional(),
@@ -34,10 +41,11 @@ export function TransactionFormModal({
   onClose,
   transaction,
 }: TransactionFormModalProps) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const queryClient = useQueryClient()
   const isEditing = !!transaction
   const [selectedType, setSelectedType] = useState<TransactionType>("EXPENSE")
+  const [amountDisplay, setAmountDisplay] = useState("")
 
   const transactionSchema = z.object({
     accountId: z.string().min(1, t("validation.required")),
@@ -78,6 +86,14 @@ export function TransactionFormModal({
     enabled: selectedType !== "TRANSFER",
   })
 
+  // Handle amount input change with formatting
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value.replace(/[^\d]/g, "")
+    const numValue = parseInt(rawValue) || 0
+    setValue("amount", numValue)
+    setAmountDisplay(rawValue ? formatNumberWithSeparator(numValue, i18n.language) : "")
+  }
+
   useEffect(() => {
     if (transaction) {
       reset({
@@ -90,6 +106,7 @@ export function TransactionFormModal({
         toAccountId: transaction.toAccountId || "",
       })
       setSelectedType(transaction.type)
+      setAmountDisplay(formatNumberWithSeparator(transaction.amount, i18n.language))
     } else {
       reset({
         accountId: "",
@@ -101,8 +118,9 @@ export function TransactionFormModal({
         toAccountId: "",
       })
       setSelectedType("EXPENSE")
+      setAmountDisplay("")
     }
-  }, [transaction, reset])
+  }, [transaction, reset, i18n.language])
 
   useEffect(() => {
     setSelectedType(watchType)
@@ -196,10 +214,12 @@ export function TransactionFormModal({
             </Label>
             <Input
               id="amount"
-              type="number"
+              type="text"
+              inputMode="numeric"
               placeholder="0"
+              value={amountDisplay}
+              onChange={handleAmountChange}
               error={errors.amount?.message}
-              {...register("amount", { valueAsNumber: true })}
             />
           </div>
 
@@ -240,7 +260,7 @@ export function TransactionFormModal({
                 <option value="">{t("common.all")}</option>
                 {categories?.map((category) => (
                   <option key={category.id} value={category.id}>
-                    {category.icon} {category.name}
+                    {category.icon} {t(`categories.${category.name}`, category.name)}
                   </option>
                 ))}
               </Select>

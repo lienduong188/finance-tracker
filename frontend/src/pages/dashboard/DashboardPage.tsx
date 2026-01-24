@@ -240,7 +240,9 @@ export function DashboardPage() {
                         className="h-3 w-3 shrink-0 rounded-full"
                         style={{ backgroundColor: cat.color || "#888" }}
                       />
-                      <span className="flex-1 truncate text-xs md:text-sm">{cat.categoryName}</span>
+                      <span className="flex-1 truncate text-xs md:text-sm">
+                        {t(`categories.${cat.categoryName}`, cat.categoryName)}
+                      </span>
                       <span className="text-xs font-medium md:text-sm">
                         {cat.percentage.toFixed(1)}%
                       </span>
@@ -300,7 +302,7 @@ export function DashboardPage() {
                     </div>
                     <div>
                       <p className="text-sm font-medium">
-                        {tx.description || tx.categoryName || t(`transactions.types.${tx.type}`)}
+                        {tx.description || (tx.categoryName ? t(`categories.${tx.categoryName}`, tx.categoryName) : t(`transactions.types.${tx.type}`))}
                       </p>
                       <p className="flex items-center gap-1 text-xs text-muted-foreground">
                         <Calendar className="h-3 w-3" />

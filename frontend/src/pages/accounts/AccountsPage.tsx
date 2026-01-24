@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next"
 import { Plus, Wallet, Building2, Smartphone, CreditCard, Pencil, Trash2 } from "lucide-react"
 import { Button, Card, CardContent, CardHeader, CardTitle } from "@/components/ui"
 import { accountsApi } from "@/api"
+import { useAuth } from "@/context/AuthContext"
 import { formatCurrency } from "@/lib/utils"
 import type { Account, AccountType } from "@/types"
 import { AccountFormModal } from "./AccountFormModal"
@@ -17,9 +18,12 @@ const accountTypeIcons: Record<AccountType, typeof Wallet> = {
 
 export function AccountsPage() {
   const { t } = useTranslation()
+  const { user } = useAuth()
   const queryClient = useQueryClient()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingAccount, setEditingAccount] = useState<Account | null>(null)
+
+  const defaultCurrency = user?.defaultCurrency || "VND"
 
   const { data: accounts, isLoading } = useQuery({
     queryKey: ["accounts"],
@@ -33,7 +37,15 @@ export function AccountsPage() {
     },
   })
 
-  const totalBalance = accounts?.reduce((sum, acc) => sum + acc.currentBalance, 0) || 0
+  // Group balances by currency
+  const balancesByCurrency = accounts?.reduce((acc, account) => {
+    const currency = account.currency
+    acc[currency] = (acc[currency] || 0) + account.currentBalance
+    return acc
+  }, {} as Record<string, number>) || {}
+
+  // Get primary balance (user's default currency)
+  const primaryBalance = balancesByCurrency[defaultCurrency] || 0
 
   const handleEdit = (account: Account) => {
     setEditingAccount(account)
@@ -78,7 +90,17 @@ export function AccountsPage() {
       <Card className="bg-primary text-primary-foreground">
         <CardContent className="p-4 md:p-6">
           <p className="text-sm opacity-90">{t("dashboard.totalBalance")}</p>
-          <p className="text-2xl font-bold md:text-3xl">{formatCurrency(totalBalance)}</p>
+          <p className="text-2xl font-bold md:text-3xl">
+            {formatCurrency(primaryBalance, defaultCurrency)}
+          </p>
+          {/* Show other currencies if any */}
+          {Object.entries(balancesByCurrency)
+            .filter(([currency]) => currency !== defaultCurrency)
+            .map(([currency, balance]) => (
+              <p key={currency} className="text-lg opacity-90">
+                {formatCurrency(balance, currency)}
+              </p>
+            ))}
           <p className="mt-2 text-xs opacity-75 md:text-sm">
             {accounts?.length || 0} {t("accounts.title").toLowerCase()}
           </p>

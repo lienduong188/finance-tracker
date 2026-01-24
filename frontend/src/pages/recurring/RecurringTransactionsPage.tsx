@@ -179,7 +179,7 @@ export function RecurringTransactionsPage() {
                   </div>
                   <div className="min-w-0">
                     <CardTitle className="truncate text-sm md:text-base">
-                      {recurring.description || recurring.categoryName || t(`transactions.types.${recurring.type}`)}
+                      {recurring.description || (recurring.categoryName ? t(`categories.${recurring.categoryName}`, recurring.categoryName) : t(`transactions.types.${recurring.type}`))}
                     </CardTitle>
                     <p className="truncate text-xs text-muted-foreground">
                       {recurring.accountName}

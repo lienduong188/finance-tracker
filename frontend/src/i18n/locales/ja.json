@@ -199,6 +199,21 @@
     "VND": "VND - ベトナムドン",
     "JPY": "JPY - 日本円"
   },
+  "categories": {
+    "Lương": "給料",
+    "Thưởng": "ボーナス",
+    "Đầu tư": "投資",
+    "Thu nhập khác": "その他収入",
+    "Ăn uống": "食費",
+    "Di chuyển": "交通費",
+    "Mua sắm": "買い物",
+    "Giải trí": "娯楽",
+    "Hóa đơn & Tiện ích": "光熱費",
+    "Sức khỏe": "医療費",
+    "Giáo dục": "教育費",
+    "Gia đình": "家族",
+    "Chi tiêu khác": "その他支出"
+  },
   "settings": {
     "title": "設定",
     "language": "言語",

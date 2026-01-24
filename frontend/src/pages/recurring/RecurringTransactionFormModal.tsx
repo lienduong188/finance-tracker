@@ -260,7 +260,7 @@ export function RecurringTransactionFormModal({
                 <option value="">{t("common.all")}</option>
                 {categories?.map((category) => (
                   <option key={category.id} value={category.id}>
-                    {category.icon} {category.name}
+                    {category.icon} {t(`categories.${category.name}`, category.name)}
                   </option>
                 ))}
               </Select>

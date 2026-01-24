@@ -135,7 +135,7 @@ export function BudgetsPage() {
                 <div className="min-w-0">
                   <CardTitle className="truncate text-sm md:text-base">{budget.name}</CardTitle>
                   <p className="truncate text-xs text-muted-foreground">
-                    {budget.categoryName || t("common.all")} •{" "}
+                    {budget.categoryName ? t(`categories.${budget.categoryName}`, budget.categoryName) : t("common.all")} •{" "}
                     {t(`budgets.periods.${budget.period}`)}
                   </p>
                 </div>

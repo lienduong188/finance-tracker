@@ -146,12 +146,12 @@ export function BudgetFormModal({ isOpen, onClose, budget }: BudgetFormModalProp
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="categoryId">Danh mục (để trống = tất cả chi tiêu)</Label>
+            <Label htmlFor="categoryId">{t("transactions.category")}</Label>
             <Select id="categoryId" {...register("categoryId")}>
-              <option value="">Tất cả chi tiêu</option>
+              <option value="">{t("common.all")}</option>
               {categories?.map((category) => (
                 <option key={category.id} value={category.id}>
-                  {category.icon} {category.name}
+                  {category.icon} {t(`categories.${category.name}`, category.name)}
                 </option>
               ))}
             </Select>

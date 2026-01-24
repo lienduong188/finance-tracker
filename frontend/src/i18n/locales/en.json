@@ -199,6 +199,21 @@
     "VND": "VND - Vietnamese Dong",
     "JPY": "JPY - Japanese Yen"
   },
+  "categories": {
+    "Lương": "Salary",
+    "Thưởng": "Bonus",
+    "Đầu tư": "Investment",
+    "Thu nhập khác": "Other Income",
+    "Ăn uống": "Food & Dining",
+    "Di chuyển": "Transportation",
+    "Mua sắm": "Shopping",
+    "Giải trí": "Entertainment",
+    "Hóa đơn & Tiện ích": "Bills & Utilities",
+    "Sức khỏe": "Health",
+    "Giáo dục": "Education",
+    "Gia đình": "Family",
+    "Chi tiêu khác": "Other Expenses"
+  },
   "settings": {
     "title": "Settings",
     "language": "Language",

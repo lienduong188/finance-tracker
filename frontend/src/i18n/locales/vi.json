@@ -199,6 +199,21 @@
     "VND": "VND - Việt Nam Đồng",
     "JPY": "JPY - Yên Nhật"
   },
+  "categories": {
+    "Lương": "Lương",
+    "Thưởng": "Thưởng",
+    "Đầu tư": "Đầu tư",
+    "Thu nhập khác": "Thu nhập khác",
+    "Ăn uống": "Ăn uống",
+    "Di chuyển": "Di chuyển",
+    "Mua sắm": "Mua sắm",
+    "Giải trí": "Giải trí",
+    "Hóa đơn & Tiện ích": "Hóa đơn & Tiện ích",
+    "Sức khỏe": "Sức khỏe",
+    "Giáo dục": "Giáo dục",
+    "Gia đình": "Gia đình",
+    "Chi tiêu khác": "Chi tiêu khác"
+  },
   "settings": {
     "title": "Cài đặt",
     "language": "Ngôn ngữ",
