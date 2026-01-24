@@ -1,4 +1,4 @@
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next"
 import { X } from "lucide-react"
 import { Button, Input, Label, Select, EmojiPicker } from "@/components/ui"
 import { accountsApi } from "@/api"
+import { useAuth } from "@/context/AuthContext"
 import type { Account, AccountRequest } from "@/types"
 
 interface AccountFormModalProps {
@@ -15,10 +16,28 @@ interface AccountFormModalProps {
   account: Account | null
 }
 
+// Format number with thousand separators
+const formatNumberWithSeparator = (value: number | string, locale: string): string => {
+  const num = typeof value === "string" ? parseFloat(value.replace(/[^\d.-]/g, "")) : value
+  if (isNaN(num)) return ""
+  // Use locale-specific formatting
+  return new Intl.NumberFormat(locale === "vi" ? "vi-VN" : locale === "ja" ? "ja-JP" : "en-US").format(num)
+}
+
+// Parse formatted string back to number
+const parseFormattedNumber = (value: string): number => {
+  const cleaned = value.replace(/[^\d.-]/g, "")
+  return parseFloat(cleaned) || 0
+}
+
 export function AccountFormModal({ isOpen, onClose, account }: AccountFormModalProps) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const { user } = useAuth()
   const queryClient = useQueryClient()
   const isEditing = !!account
+  const [balanceDisplay, setBalanceDisplay] = useState("")
+
+  const defaultCurrency = user?.defaultCurrency || "VND"
 
   const accountSchema = z.object({
     name: z.string().min(1, t("validation.required")),
@@ -42,12 +61,20 @@ export function AccountFormModal({ isOpen, onClose, account }: AccountFormModalP
     resolver: zodResolver(accountSchema),
     defaultValues: {
       type: "CASH",
-      currency: "VND",
+      currency: defaultCurrency,
       initialBalance: 0,
     },
   })
 
   const iconValue = watch("icon")
+
+  // Handle balance input change with formatting
+  const handleBalanceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value.replace(/[^\d]/g, "")
+    const numValue = parseInt(rawValue) || 0
+    setValue("initialBalance", numValue)
+    setBalanceDisplay(rawValue ? formatNumberWithSeparator(numValue, i18n.language) : "")
+  }
 
   useEffect(() => {
     if (account) {
@@ -59,17 +86,19 @@ export function AccountFormModal({ isOpen, onClose, account }: AccountFormModalP
         icon: account.icon || "",
         color: account.color || "",
       })
+      setBalanceDisplay(formatNumberWithSeparator(account.initialBalance, i18n.language))
     } else {
       reset({
         name: "",
         type: "CASH",
-        currency: "VND",
+        currency: defaultCurrency,
         initialBalance: 0,
         icon: "",
         color: "",
       })
+      setBalanceDisplay("")
     }
-  }, [account, reset])
+  }, [account, reset, defaultCurrency, i18n.language])
 
   const createMutation = useMutation({
     mutationFn: (data: AccountRequest) => accountsApi.create(data),
@@ -125,7 +154,7 @@ export function AccountFormModal({ isOpen, onClose, account }: AccountFormModalP
             <Label htmlFor="name" required>{t("accounts.accountName")}</Label>
             <Input
               id="name"
-              placeholder="VD: Vietcombank, Cash, MoMo"
+              placeholder={t("accounts.accountNamePlaceholder")}
               error={errors.name?.message}
               {...register("name")}
             />
@@ -155,10 +184,12 @@ export function AccountFormModal({ isOpen, onClose, account }: AccountFormModalP
             <Label htmlFor="initialBalance" required>{t("accounts.initialBalance")}</Label>
             <Input
               id="initialBalance"
-              type="number"
-              placeholder="0"
+              type="text"
+              inputMode="numeric"
+              placeholder={t("accounts.initialBalancePlaceholder")}
+              value={balanceDisplay}
+              onChange={handleBalanceChange}
               error={errors.initialBalance?.message}
-              {...register("initialBalance", { valueAsNumber: true })}
             />
           </div>
 
