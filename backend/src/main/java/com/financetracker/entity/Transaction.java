@@ -49,4 +49,8 @@ public class Transaction extends BaseEntity {
 
     @Column(name = "exchange_rate", precision = 19, scale = 6)
     private BigDecimal exchangeRate;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "recurring_transaction_id")
+    private RecurringTransaction recurringTransaction;
 }

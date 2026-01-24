@@ -26,6 +26,7 @@ public class TransactionService {
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
     private final BudgetService budgetService;
+    private final RecurringTransactionRepository recurringTransactionRepository;
 
     public Page<TransactionResponse> getTransactions(UUID userId, Pageable pageable) {
         return transactionRepository.findByUserId(userId, pageable)
@@ -164,6 +165,60 @@ public class TransactionService {
         }
 
         transactionRepository.delete(transaction);
+    }
+
+    @Transactional
+    public TransactionResponse createTransactionFromRecurring(UUID userId, TransactionRequest request, UUID recurringTransactionId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> ApiException.notFound("User"));
+
+        Account account = accountRepository.findByIdAndUserId(request.getAccountId(), userId)
+                .orElseThrow(() -> ApiException.notFound("Account"));
+
+        Category category = null;
+        if (request.getCategoryId() != null) {
+            category = categoryRepository.findByIdAndUserIdOrSystem(request.getCategoryId(), userId)
+                    .orElseThrow(() -> ApiException.notFound("Category"));
+        }
+
+        Account toAccount = null;
+        if (request.getType() == TransactionType.TRANSFER && request.getToAccountId() != null) {
+            toAccount = accountRepository.findByIdAndUserId(request.getToAccountId(), userId)
+                    .orElseThrow(() -> ApiException.notFound("To account"));
+        }
+
+        RecurringTransaction recurring = recurringTransactionRepository.findById(recurringTransactionId)
+                .orElse(null);
+
+        Transaction transaction = Transaction.builder()
+                .user(user)
+                .account(account)
+                .category(category)
+                .type(request.getType())
+                .amount(request.getAmount())
+                .currency(request.getCurrency() != null ? request.getCurrency() : account.getCurrency())
+                .description(request.getDescription())
+                .transactionDate(request.getTransactionDate())
+                .toAccount(toAccount)
+                .exchangeRate(request.getExchangeRate())
+                .recurringTransaction(recurring)
+                .build();
+
+        transaction = transactionRepository.save(transaction);
+
+        updateAccountBalance(account, request.getType(), request.getAmount(), true);
+        if (toAccount != null) {
+            BigDecimal transferAmount = request.getExchangeRate() != null
+                    ? request.getAmount().multiply(request.getExchangeRate())
+                    : request.getAmount();
+            updateAccountBalance(toAccount, TransactionType.INCOME, transferAmount, true);
+        }
+
+        if (category != null && request.getType() == TransactionType.EXPENSE) {
+            budgetService.updateBudgetSpentAmount(userId, category.getId(), request.getTransactionDate());
+        }
+
+        return toResponse(transaction);
     }
 
     private void updateAccountBalance(Account account, TransactionType type, BigDecimal amount, boolean isAdd) {
