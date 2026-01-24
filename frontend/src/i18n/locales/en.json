@@ -136,6 +136,9 @@
       "day": "Day"
     },
     "today": "Today",
+    "fromDate": "From Date",
+    "toDate": "To Date",
+    "clearFilters": "Clear Filters",
     "totalIncome": "Total Income",
     "totalExpense": "Total Expense",
     "balance": "Balance"

@@ -19,6 +19,8 @@ export const transactionsApi = {
     if (filters.accountId) params.append("accountId", filters.accountId)
     if (filters.categoryId) params.append("categoryId", filters.categoryId)
     if (filters.type) params.append("type", filters.type)
+    if (filters.startDate) params.append("startDate", filters.startDate)
+    if (filters.endDate) params.append("endDate", filters.endDate)
 
     const response = await apiClient.get<PageResponse<Transaction>>(`/transactions?${params}`)
     return response.data

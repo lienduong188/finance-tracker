@@ -136,6 +136,9 @@
       "day": "Ngày"
     },
     "today": "Hôm nay",
+    "fromDate": "Từ ngày",
+    "toDate": "Đến ngày",
+    "clearFilters": "Xóa bộ lọc",
     "totalIncome": "Tổng thu",
     "totalExpense": "Tổng chi",
     "balance": "Số dư"

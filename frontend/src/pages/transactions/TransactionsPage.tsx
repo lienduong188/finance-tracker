@@ -40,7 +40,7 @@ import {
   isToday,
 } from "date-fns"
 import { vi, enUS, ja } from "date-fns/locale"
-import { Button, Card, CardContent, CardHeader, CardTitle, Select } from "@/components/ui"
+import { Button, Card, CardContent, CardHeader, CardTitle, Select, Input, Label } from "@/components/ui"
 import { transactionsApi, accountsApi } from "@/api"
 import { formatCurrency, formatFullDate, cn } from "@/lib/utils"
 import { useAuth } from "@/context/AuthContext"
@@ -97,6 +97,8 @@ export function TransactionsPage() {
   const [filters, setFilters] = useState({
     accountId: "",
     type: "",
+    startDate: "",
+    endDate: "",
     page: 0,
     size: 100, // Load more for calendar/category views
   })
@@ -766,23 +768,51 @@ export function TransactionsPage() {
       {/* Filters (for list view) */}
       {viewMode === "list" && (
         <Card>
-          <CardContent className="flex flex-col gap-3 p-3 sm:flex-row sm:flex-wrap sm:gap-4 sm:p-4">
+          <CardContent className="flex flex-col gap-3 p-3 sm:flex-row sm:flex-wrap sm:items-end sm:gap-4 sm:p-4">
             <div className="w-full sm:w-40 md:w-48">
+              <Label className="mb-1 text-xs">{t("transactions.account")}</Label>
               <Select value={filters.accountId} onChange={(e) => setFilters({ ...filters, accountId: e.target.value })}>
-                <option value="">{t("common.all")} {t("accounts.title").toLowerCase()}</option>
+                <option value="">{t("common.all")}</option>
                 {accounts?.map((account) => (
                   <option key={account.id} value={account.id}>{account.name}</option>
                 ))}
               </Select>
             </div>
             <div className="w-full sm:w-40 md:w-48">
+              <Label className="mb-1 text-xs">{t("transactions.type")}</Label>
               <Select value={filters.type} onChange={(e) => setFilters({ ...filters, type: e.target.value })}>
-                <option value="">{t("common.all")} {t("transactions.type").toLowerCase()}</option>
+                <option value="">{t("common.all")}</option>
                 <option value="INCOME">{t("transactions.types.INCOME")}</option>
                 <option value="EXPENSE">{t("transactions.types.EXPENSE")}</option>
                 <option value="TRANSFER">{t("transactions.types.TRANSFER")}</option>
               </Select>
             </div>
+            <div className="w-full sm:w-36">
+              <Label className="mb-1 text-xs">{t("transactions.fromDate")}</Label>
+              <Input
+                type="date"
+                value={filters.startDate}
+                onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
+              />
+            </div>
+            <div className="w-full sm:w-36">
+              <Label className="mb-1 text-xs">{t("transactions.toDate")}</Label>
+              <Input
+                type="date"
+                value={filters.endDate}
+                onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
+              />
+            </div>
+            {(filters.startDate || filters.endDate || filters.accountId || filters.type) && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-xs"
+                onClick={() => setFilters({ ...filters, accountId: "", type: "", startDate: "", endDate: "" })}
+              >
+                {t("transactions.clearFilters")}
+              </Button>
+            )}
           </CardContent>
         </Card>
       )}

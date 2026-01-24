@@ -136,6 +136,9 @@
       "day": "日"
     },
     "today": "今日",
+    "fromDate": "開始日",
+    "toDate": "終了日",
+    "clearFilters": "フィルターをクリア",
     "totalIncome": "総収入",
     "totalExpense": "総支出",
     "balance": "残高"
