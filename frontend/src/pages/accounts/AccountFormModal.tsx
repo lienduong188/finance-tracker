@@ -71,6 +71,7 @@ export function AccountFormModal({ isOpen, onClose, account }: AccountFormModalP
   }
 
   useEffect(() => {
+    if (!isOpen) return
     if (account) {
       reset({
         name: account.name,
@@ -92,7 +93,7 @@ export function AccountFormModal({ isOpen, onClose, account }: AccountFormModalP
       })
       setBalanceDisplay("")
     }
-  }, [account, reset, defaultCurrency, i18n.language])
+  }, [isOpen, account, reset, defaultCurrency, i18n.language])
 
   const createMutation = useMutation({
     mutationFn: (data: AccountRequest) => accountsApi.create(data),

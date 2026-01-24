@@ -79,12 +79,17 @@ export function TransactionFormModal({
     queryFn: accountsApi.getAll,
   })
 
-  const { data: categories } = useQuery({
+  const { data: categoriesRaw } = useQuery({
     queryKey: ["categories", selectedType === "TRANSFER" ? "EXPENSE" : selectedType],
     queryFn: () =>
       categoriesApi.getByType(selectedType === "TRANSFER" ? "EXPENSE" : selectedType),
     enabled: selectedType !== "TRANSFER",
   })
+
+  // Filter out duplicate categories by name
+  const categories = categoriesRaw?.filter(
+    (category, index, self) => self.findIndex((c) => c.name === category.name) === index
+  )
 
   // Handle amount input change with formatting
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -95,6 +100,7 @@ export function TransactionFormModal({
   }
 
   useEffect(() => {
+    if (!isOpen) return
     if (transaction) {
       reset({
         accountId: transaction.accountId,
@@ -120,7 +126,7 @@ export function TransactionFormModal({
       setSelectedType("EXPENSE")
       setAmountDisplay("")
     }
-  }, [transaction, reset, i18n.language])
+  }, [isOpen, transaction, reset, i18n.language])
 
   useEffect(() => {
     setSelectedType(watchType)
@@ -239,17 +245,14 @@ export function TransactionFormModal({
 
           {watchType === "TRANSFER" && (
             <div className="space-y-2">
-              <Label htmlFor="toAccountId" required>
+              <Label htmlFor="toAccountId">
                 {t("transactions.toAccount")}
               </Label>
-              <Select id="toAccountId" {...register("toAccountId")}>
-                <option value="">{t("validation.required")}</option>
-                {accounts?.map((account) => (
-                  <option key={account.id} value={account.id}>
-                    {account.name}
-                  </option>
-                ))}
-              </Select>
+              <Input
+                id="toAccountId"
+                placeholder={t("transactions.toAccountPlaceholder")}
+                {...register("toAccountId")}
+              />
             </div>
           )}
 

@@ -397,8 +397,8 @@ export function TransactionsPage() {
                 </div>
               </CardContent>
             </Card>
-            {/* Category list with transactions */}
-            <div className="space-y-3">
+            {/* Category list with transactions - 2 columns grid */}
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {groupedByCategory.map(([key, cat]) => (
                 <Card key={key}>
                   <CardHeader className="flex flex-row items-center justify-between p-3 pb-0">
@@ -436,9 +436,9 @@ export function TransactionsPage() {
     )
   }
 
-  // Render Account View
+  // Render Account View - 2 columns grid
   const renderAccountView = () => (
-    <div className="space-y-4">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
       {groupedByAccount.map(([key, acc]) => (
         <Card key={key}>
           <CardHeader className="p-4 pb-2">
