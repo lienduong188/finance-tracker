@@ -148,7 +148,7 @@ export function TransactionsPage() {
         categoryMap[key] = {
           name: tx.categoryName || t(`transactions.types.${tx.type}`),
           icon: tx.categoryIcon || "",
-          color: tx.categoryColor || (tx.type === "INCOME" ? "#22c55e" : "#ef4444"),
+          color: tx.type === "INCOME" ? "#22c55e" : "#ef4444",
           total: 0,
           transactions: [],
         }

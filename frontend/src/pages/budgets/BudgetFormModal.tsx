@@ -1,6 +1,7 @@
 import { useEffect } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
+import { useTranslation } from "react-i18next"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { X } from "lucide-react"
@@ -29,6 +30,7 @@ interface BudgetFormModalProps {
 }
 
 export function BudgetFormModal({ isOpen, onClose, budget }: BudgetFormModalProps) {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const isEditing = !!budget
 
