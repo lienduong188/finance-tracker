@@ -5,6 +5,7 @@ import {
   Wallet,
   ArrowLeftRight,
   PiggyBank,
+  Repeat,
   Settings,
   LogOut,
   Shield,
@@ -19,6 +20,7 @@ const navItems = [
   { to: "/accounts", icon: Wallet, labelKey: "nav.accounts" },
   { to: "/transactions", icon: ArrowLeftRight, labelKey: "nav.transactions" },
   { to: "/budgets", icon: PiggyBank, labelKey: "nav.budgets" },
+  { to: "/recurring", icon: Repeat, labelKey: "nav.recurring" },
 ]
 
 interface SidebarProps {
@@ -31,18 +33,18 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
   const { t } = useTranslation()
 
   const handleNavClick = () => {
-    // Close sidebar on mobile after navigation
-    if (onClose && window.innerWidth < 768) {
+    // Close sidebar on mobile/tablet after navigation
+    if (onClose && window.innerWidth < 1024) {
       onClose()
     }
   }
 
   return (
     <>
-      {/* Overlay for mobile */}
+      {/* Overlay for mobile/tablet */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-30 bg-black/50 md:hidden"
+          className="fixed inset-0 z-30 bg-black/50 lg:hidden"
           onClick={onClose}
         />
       )}
@@ -51,10 +53,10 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
       <aside
         className={cn(
           "fixed left-0 top-0 z-40 h-screen w-64 border-r bg-card transition-transform duration-300 ease-in-out",
-          // Mobile: slide in/out
+          // Mobile/Tablet: slide in/out
           isOpen ? "translate-x-0" : "-translate-x-full",
-          // Desktop: always visible
-          "md:translate-x-0"
+          // Desktop (lg+): always visible
+          "lg:translate-x-0"
         )}
       >
         <div className="flex h-full flex-col">
@@ -63,7 +65,7 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
             <h1 className="text-xl font-bold text-primary">Finance Tracker</h1>
             <button
               onClick={onClose}
-              className="rounded-lg p-1 hover:bg-accent md:hidden"
+              className="rounded-lg p-1 hover:bg-accent lg:hidden"
             >
               <X className="h-5 w-5" />
             </button>

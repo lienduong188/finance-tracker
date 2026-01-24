@@ -22,22 +22,23 @@ export function MainLayout() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Mobile header with hamburger */}
-      <header className="fixed left-0 right-0 top-0 z-20 flex h-14 items-center border-b bg-card px-4 md:hidden">
+      {/* Mobile/Tablet header with hamburger */}
+      <header className="fixed left-0 right-0 top-0 z-20 flex h-14 items-center border-b bg-card px-4 lg:hidden">
         <button
           onClick={() => setSidebarOpen(true)}
           className="rounded-lg p-2 hover:bg-accent"
+          aria-label="Open menu"
         >
-          <Menu className="h-5 w-5" />
+          <Menu className="h-6 w-6" />
         </button>
         <h1 className="ml-3 text-lg font-bold text-primary">Finance Tracker</h1>
       </header>
 
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      {/* Main content - responsive padding and margin */}
-      <main className="min-h-screen pt-14 md:ml-64 md:pt-0">
-        <div className="p-4 md:p-6">
+      {/* Main content - full width on mobile/tablet, offset on desktop */}
+      <main className="min-h-screen pt-14 lg:ml-64 lg:pt-0">
+        <div className="p-4 sm:p-6">
           <Outlet />
         </div>
       </main>
