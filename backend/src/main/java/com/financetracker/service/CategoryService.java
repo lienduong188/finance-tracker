@@ -24,17 +24,43 @@ public class CategoryService {
     private final UserRepository userRepository;
 
     public List<CategoryResponse> getAllCategories(UUID userId) {
-        return categoryRepository.findByUserIdOrSystemCategories(userId)
+        return deduplicateCategories(categoryRepository.findByUserIdOrSystemCategories(userId))
                 .stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }
 
     public List<CategoryResponse> getCategoriesByType(UUID userId, CategoryType type) {
-        return categoryRepository.findByUserIdOrSystemAndType(userId, type)
+        return deduplicateCategories(categoryRepository.findByUserIdOrSystemAndType(userId, type))
                 .stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Remove duplicate categories, keeping system categories over user categories with same name
+     */
+    private List<Category> deduplicateCategories(List<Category> categories) {
+        java.util.Map<String, Category> uniqueCategories = new java.util.LinkedHashMap<>();
+
+        // First pass: add all system categories
+        for (Category cat : categories) {
+            if (cat.getIsSystem()) {
+                uniqueCategories.put(cat.getName() + "_" + cat.getType(), cat);
+            }
+        }
+
+        // Second pass: add user categories only if no system category with same name exists
+        for (Category cat : categories) {
+            if (!cat.getIsSystem()) {
+                String key = cat.getName() + "_" + cat.getType();
+                if (!uniqueCategories.containsKey(key)) {
+                    uniqueCategories.put(key, cat);
+                }
+            }
+        }
+
+        return new java.util.ArrayList<>(uniqueCategories.values());
     }
 
     @Transactional
