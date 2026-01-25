@@ -415,7 +415,9 @@ export function SettingsPage() {
                       {category.icon || "📁"}
                     </span>
                     <div>
-                      <p className="font-medium">{category.name}</p>
+                      <p className="font-medium">
+                        {category.isSystem ? t(`categories.${category.name}`, category.name) : category.name}
+                      </p>
                       <p className="text-xs text-muted-foreground">
                         {category.isSystem ? t("settings.systemCategory") : t("settings.customCategory")}
                       </p>
