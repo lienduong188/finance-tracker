@@ -4,3 +4,4 @@ export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
 export { Label } from "./label"
 export { Select } from "./select"
 export { EmojiPicker } from "./emoji-picker"
+export { ConfirmDialog } from "./ConfirmDialog"

@@ -2,7 +2,7 @@ import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
 import { Plus, Wallet, Building2, Smartphone, CreditCard, Pencil, Trash2 } from "lucide-react"
-import { Button, Card, CardContent, CardHeader, CardTitle } from "@/components/ui"
+import { Button, Card, CardContent, CardHeader, CardTitle, ConfirmDialog } from "@/components/ui"
 import { accountsApi } from "@/api"
 import { useAuth } from "@/context/AuthContext"
 import { formatCurrency } from "@/lib/utils"
@@ -22,6 +22,10 @@ export function AccountsPage() {
   const queryClient = useQueryClient()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingAccount, setEditingAccount] = useState<Account | null>(null)
+  const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; accountId: string | null }>({
+    isOpen: false,
+    accountId: null,
+  })
 
   const defaultCurrency = user?.defaultCurrency || "VND"
 
@@ -56,10 +60,14 @@ export function AccountsPage() {
     setIsModalOpen(true)
   }
 
-  const handleDelete = async (id: string) => {
-    const message = t("accounts.deleteConfirm", "Tài khoản sẽ bị ẩn nhưng các giao dịch vẫn được giữ lại. Bạn có chắc chắn?")
-    if (confirm(message)) {
-      await deleteMutation.mutateAsync(id)
+  const handleDeleteClick = (id: string) => {
+    setDeleteConfirm({ isOpen: true, accountId: id })
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (deleteConfirm.accountId) {
+      await deleteMutation.mutateAsync(deleteConfirm.accountId)
+      setDeleteConfirm({ isOpen: false, accountId: null })
     }
   }
 
@@ -152,7 +160,7 @@ export function AccountsPage() {
                     variant="ghost"
                     size="icon"
                     className="h-8 w-8 text-destructive hover:text-destructive"
-                    onClick={() => handleDelete(account.id)}
+                    onClick={() => handleDeleteClick(account.id)}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -188,6 +196,19 @@ export function AccountsPage() {
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         account={editingAccount}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={deleteConfirm.isOpen}
+        onClose={() => setDeleteConfirm({ isOpen: false, accountId: null })}
+        onConfirm={handleDeleteConfirm}
+        title={t("accounts.deleteAccount", "Xóa tài khoản")}
+        message={t("accounts.deleteConfirm", "Tài khoản sẽ bị ẩn nhưng các giao dịch vẫn được giữ lại. Bạn có chắc chắn?")}
+        confirmText={t("common.delete", "Xóa")}
+        cancelText={t("common.cancel", "Hủy")}
+        variant="danger"
+        isLoading={deleteMutation.isPending}
       />
     </div>
   )

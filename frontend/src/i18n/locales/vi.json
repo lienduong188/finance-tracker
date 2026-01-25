@@ -103,6 +103,7 @@
     },
     "noAccounts": "Chưa có tài khoản nào",
     "createFirst": "Tạo tài khoản đầu tiên để bắt đầu quản lý tài chính",
+    "deleteAccount": "Xóa tài khoản",
     "deleteConfirm": "Tài khoản sẽ bị ẩn nhưng các giao dịch vẫn được giữ lại. Bạn có chắc chắn?"
   },
   "transactions": {
