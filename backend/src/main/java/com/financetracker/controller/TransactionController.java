@@ -16,8 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import com.financetracker.entity.TransactionType;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -35,7 +33,7 @@ public class TransactionController {
     public ResponseEntity<Page<TransactionResponse>> getTransactions(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(required = false) UUID accountId,
-            @RequestParam(required = false) TransactionType type,
+            @RequestParam(required = false) String type,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @PageableDefault(size = 20, sort = "transactionDate") Pageable pageable) {

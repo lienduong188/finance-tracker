@@ -65,15 +65,22 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate);
 
-    @Query("SELECT t FROM Transaction t WHERE t.user.id = :userId " +
-           "AND (:accountId IS NULL OR t.account.id = :accountId) " +
+    @Query(value = "SELECT * FROM transactions t WHERE t.user_id = :userId " +
+           "AND (:accountId IS NULL OR t.account_id = CAST(:accountId AS uuid)) " +
            "AND (:type IS NULL OR t.type = :type) " +
-           "AND (:startDate IS NULL OR t.transactionDate >= :startDate) " +
-           "AND (:endDate IS NULL OR t.transactionDate <= :endDate)")
+           "AND (CAST(:startDate AS date) IS NULL OR t.transaction_date >= :startDate) " +
+           "AND (CAST(:endDate AS date) IS NULL OR t.transaction_date <= :endDate) " +
+           "ORDER BY t.transaction_date DESC",
+           countQuery = "SELECT COUNT(*) FROM transactions t WHERE t.user_id = :userId " +
+           "AND (:accountId IS NULL OR t.account_id = CAST(:accountId AS uuid)) " +
+           "AND (:type IS NULL OR t.type = :type) " +
+           "AND (CAST(:startDate AS date) IS NULL OR t.transaction_date >= :startDate) " +
+           "AND (CAST(:endDate AS date) IS NULL OR t.transaction_date <= :endDate)",
+           nativeQuery = true)
     Page<Transaction> findByUserIdWithFilters(
             @Param("userId") UUID userId,
             @Param("accountId") UUID accountId,
-            @Param("type") TransactionType type,
+            @Param("type") String type,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate,
             Pageable pageable);
