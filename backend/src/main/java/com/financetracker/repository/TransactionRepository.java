@@ -64,4 +64,17 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
             @Param("categoryId") UUID categoryId,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate);
+
+    @Query("SELECT t FROM Transaction t WHERE t.user.id = :userId " +
+           "AND (:accountId IS NULL OR t.account.id = :accountId) " +
+           "AND (:type IS NULL OR t.type = :type) " +
+           "AND (:startDate IS NULL OR t.transactionDate >= :startDate) " +
+           "AND (:endDate IS NULL OR t.transactionDate <= :endDate)")
+    Page<Transaction> findByUserIdWithFilters(
+            @Param("userId") UUID userId,
+            @Param("accountId") UUID accountId,
+            @Param("type") TransactionType type,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
+            Pageable pageable);
 }

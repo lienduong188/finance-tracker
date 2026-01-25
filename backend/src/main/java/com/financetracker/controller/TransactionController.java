@@ -16,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import com.financetracker.entity.TransactionType;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -29,11 +31,16 @@ public class TransactionController {
     private final TransactionService transactionService;
 
     @GetMapping
-    @Operation(summary = "Get all transactions with pagination")
+    @Operation(summary = "Get all transactions with pagination and filters")
     public ResponseEntity<Page<TransactionResponse>> getTransactions(
             @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam(required = false) UUID accountId,
+            @RequestParam(required = false) TransactionType type,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @PageableDefault(size = 20, sort = "transactionDate") Pageable pageable) {
-        return ResponseEntity.ok(transactionService.getTransactions(userDetails.getId(), pageable));
+        return ResponseEntity.ok(transactionService.getTransactionsWithFilters(
+                userDetails.getId(), accountId, type, startDate, endDate, pageable));
     }
 
     @GetMapping("/range")

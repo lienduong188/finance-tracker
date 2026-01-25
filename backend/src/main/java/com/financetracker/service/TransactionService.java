@@ -33,6 +33,12 @@ public class TransactionService {
                 .map(this::toResponse);
     }
 
+    public Page<TransactionResponse> getTransactionsWithFilters(UUID userId, UUID accountId,
+            TransactionType type, LocalDate startDate, LocalDate endDate, Pageable pageable) {
+        return transactionRepository.findByUserIdWithFilters(userId, accountId, type, startDate, endDate, pageable)
+                .map(this::toResponse);
+    }
+
     public List<TransactionResponse> getTransactionsByDateRange(UUID userId, LocalDate startDate, LocalDate endDate) {
         return transactionRepository.findByUserIdAndDateRange(userId, startDate, endDate)
                 .stream()
