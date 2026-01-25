@@ -37,6 +37,9 @@ public class DataSeeder implements CommandLineRunner {
         // Seed admin user first
         seedAdminUser();
 
+        // Clean up duplicate custom categories that have same name as system categories
+        cleanupDuplicateCategories();
+
         // Seed recurring transactions for existing demo users if not already seeded
         seedRecurringForExistingUsers();
 
@@ -98,76 +101,36 @@ public class DataSeeder implements CommandLineRunner {
                 .build();
         eWallet = accountRepository.save(eWallet);
 
-        // Create categories
-        Category salaryCategory = Category.builder()
-                .user(demoUser)
-                .name("Lương")
-                .type(CategoryType.INCOME)
-                .icon("💰")
-                .color("#22c55e")
-                .isSystem(false)
-                .build();
-        salaryCategory = categoryRepository.save(salaryCategory);
+        // Use system categories instead of creating duplicates
+        var systemCategories = categoryRepository.findByIsSystemTrue();
 
-        Category bonusCategory = Category.builder()
-                .user(demoUser)
-                .name("Thưởng")
-                .type(CategoryType.INCOME)
-                .icon("🎁")
-                .color("#10b981")
-                .isSystem(false)
-                .build();
-        bonusCategory = categoryRepository.save(bonusCategory);
+        Category salaryCategory = systemCategories.stream()
+                .filter(c -> c.getName().equals("Lương") && c.getType() == CategoryType.INCOME)
+                .findFirst().orElse(null);
 
-        Category foodCategory = Category.builder()
-                .user(demoUser)
-                .name("Ăn uống")
-                .type(CategoryType.EXPENSE)
-                .icon("🍜")
-                .color("#f97316")
-                .isSystem(false)
-                .build();
-        foodCategory = categoryRepository.save(foodCategory);
+        Category bonusCategory = systemCategories.stream()
+                .filter(c -> c.getName().equals("Thưởng") && c.getType() == CategoryType.INCOME)
+                .findFirst().orElse(null);
 
-        Category transportCategory = Category.builder()
-                .user(demoUser)
-                .name("Di chuyển")
-                .type(CategoryType.EXPENSE)
-                .icon("🚗")
-                .color("#eab308")
-                .isSystem(false)
-                .build();
-        transportCategory = categoryRepository.save(transportCategory);
+        Category foodCategory = systemCategories.stream()
+                .filter(c -> c.getName().equals("Ăn uống") && c.getType() == CategoryType.EXPENSE)
+                .findFirst().orElse(null);
 
-        Category shoppingCategory = Category.builder()
-                .user(demoUser)
-                .name("Mua sắm")
-                .type(CategoryType.EXPENSE)
-                .icon("🛒")
-                .color("#ec4899")
-                .isSystem(false)
-                .build();
-        shoppingCategory = categoryRepository.save(shoppingCategory);
+        Category transportCategory = systemCategories.stream()
+                .filter(c -> c.getName().equals("Di chuyển") && c.getType() == CategoryType.EXPENSE)
+                .findFirst().orElse(null);
 
-        Category entertainmentCategory = Category.builder()
-                .user(demoUser)
-                .name("Giải trí")
-                .type(CategoryType.EXPENSE)
-                .icon("🎮")
-                .color("#8b5cf6")
-                .isSystem(false)
-                .build();
-        entertainmentCategory = categoryRepository.save(entertainmentCategory);
+        Category shoppingCategory = systemCategories.stream()
+                .filter(c -> c.getName().equals("Mua sắm") && c.getType() == CategoryType.EXPENSE)
+                .findFirst().orElse(null);
 
-        Category billsCategory = Category.builder()
-                .user(demoUser)
-                .name("Hóa đơn")
-                .type(CategoryType.EXPENSE)
-                .icon("📄")
-                .color("#ef4444")
-                .isSystem(false)
-                .build();
-        billsCategory = categoryRepository.save(billsCategory);
+        Category entertainmentCategory = systemCategories.stream()
+                .filter(c -> c.getName().equals("Giải trí") && c.getType() == CategoryType.EXPENSE)
+                .findFirst().orElse(null);
+
+        Category billsCategory = systemCategories.stream()
+                .filter(c -> c.getName().equals("Hóa đơn & Tiện ích") && c.getType() == CategoryType.EXPENSE)
+                .findFirst().orElse(null);
 
         // Create transactions for the last 30 days
         LocalDate today = LocalDate.now();
@@ -749,6 +712,76 @@ public class DataSeeder implements CommandLineRunner {
         log.info("Japanese demo credentials: demo.jp@example.com / demo123");
     }
 
+    private void cleanupDuplicateCategories() {
+        var systemCategories = categoryRepository.findByIsSystemTrue();
+        if (systemCategories.isEmpty()) {
+            return;
+        }
+
+        // Get system category names for quick lookup
+        var systemCategoryNames = systemCategories.stream()
+                .collect(java.util.stream.Collectors.toMap(
+                        c -> c.getName() + "_" + c.getType(),
+                        c -> c,
+                        (c1, c2) -> c1
+                ));
+
+        // Check Vietnamese demo user
+        userRepository.findByEmail("demo@example.com").ifPresent(demoUser -> {
+            cleanupUserDuplicateCategories(demoUser, systemCategoryNames);
+        });
+
+        // Check Japanese demo user (Japanese categories are not duplicates of system)
+    }
+
+    private void cleanupUserDuplicateCategories(User user, java.util.Map<String, Category> systemCategoryNames) {
+        var userCategories = categoryRepository.findByUserId(user.getId());
+
+        for (Category userCategory : userCategories) {
+            if (userCategory.getIsSystem()) {
+                continue;
+            }
+
+            String key = userCategory.getName() + "_" + userCategory.getType();
+            Category systemCategory = systemCategoryNames.get(key);
+
+            if (systemCategory != null) {
+                log.info("Found duplicate category '{}' for user {}, migrating to system category", userCategory.getName(), user.getEmail());
+
+                // Update all transactions using this category to use system category
+                var transactions = transactionRepository.findByUserId(user.getId());
+                for (var tx : transactions) {
+                    if (tx.getCategory() != null && tx.getCategory().getId().equals(userCategory.getId())) {
+                        tx.setCategory(systemCategory);
+                        transactionRepository.save(tx);
+                    }
+                }
+
+                // Update all budgets using this category
+                var budgets = budgetRepository.findByUserId(user.getId());
+                for (var budget : budgets) {
+                    if (budget.getCategory() != null && budget.getCategory().getId().equals(userCategory.getId())) {
+                        budget.setCategory(systemCategory);
+                        budgetRepository.save(budget);
+                    }
+                }
+
+                // Update all recurring transactions using this category
+                var recurringTxs = recurringTransactionRepository.findByUserId(user.getId());
+                for (var rtx : recurringTxs) {
+                    if (rtx.getCategory() != null && rtx.getCategory().getId().equals(userCategory.getId())) {
+                        rtx.setCategory(systemCategory);
+                        recurringTransactionRepository.save(rtx);
+                    }
+                }
+
+                // Delete the duplicate custom category
+                categoryRepository.delete(userCategory);
+                log.info("Deleted duplicate custom category '{}'", userCategory.getName());
+            }
+        }
+    }
+
     private void seedRecurringForExistingUsers() {
         LocalDate today = LocalDate.now();
 
@@ -770,10 +803,12 @@ public class DataSeeder implements CommandLineRunner {
                 Account cashAccount = accounts.stream().filter(a -> a.getType() == AccountType.CASH).findFirst().orElse(accounts.get(0));
                 Account eWallet = accounts.stream().filter(a -> a.getType() == AccountType.E_WALLET).findFirst().orElse(accounts.get(0));
 
-                Category salaryCategory = categories.stream().filter(c -> c.getType() == CategoryType.INCOME).findFirst().orElse(null);
-                Category billsCategory = categories.stream().filter(c -> c.getName().contains("Hóa đơn") || c.getName().contains("Bills")).findFirst().orElse(null);
-                Category foodCategory = categories.stream().filter(c -> c.getName().contains("Ăn uống") || c.getName().contains("Food")).findFirst().orElse(null);
-                Category transportCategory = categories.stream().filter(c -> c.getName().contains("Di chuyển") || c.getName().contains("Transport")).findFirst().orElse(null);
+                // Get system categories for Vietnamese user
+                var systemCategories = categoryRepository.findByIsSystemTrue();
+                Category salaryCategory = systemCategories.stream().filter(c -> c.getName().equals("Lương") && c.getType() == CategoryType.INCOME).findFirst().orElse(null);
+                Category billsCategory = systemCategories.stream().filter(c -> c.getName().equals("Hóa đơn & Tiện ích") && c.getType() == CategoryType.EXPENSE).findFirst().orElse(null);
+                Category foodCategory = systemCategories.stream().filter(c -> c.getName().equals("Ăn uống") && c.getType() == CategoryType.EXPENSE).findFirst().orElse(null);
+                Category transportCategory = systemCategories.stream().filter(c -> c.getName().equals("Di chuyển") && c.getType() == CategoryType.EXPENSE).findFirst().orElse(null);
 
                 if (salaryCategory != null) {
                     recurringTransactionRepository.save(RecurringTransaction.builder()

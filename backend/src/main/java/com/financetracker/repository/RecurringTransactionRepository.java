@@ -17,6 +17,8 @@ import java.util.UUID;
 @Repository
 public interface RecurringTransactionRepository extends JpaRepository<RecurringTransaction, UUID> {
 
+    List<RecurringTransaction> findByUserId(UUID userId);
+
     Page<RecurringTransaction> findByUserId(UUID userId, Pageable pageable);
 
     Page<RecurringTransaction> findByUserIdAndStatus(UUID userId, RecurringStatus status, Pageable pageable);
