@@ -36,6 +36,10 @@ public class DataSeeder implements CommandLineRunner {
     public void run(String... args) {
         // Seed admin user first
         seedAdminUser();
+
+        // Seed recurring transactions for existing demo users if not already seeded
+        seedRecurringForExistingUsers();
+
         // Check if demo user already exists
         if (userRepository.findByEmail("demo@example.com").isPresent()) {
             log.info("Demo data already exists, skipping seeding");
@@ -743,6 +747,167 @@ public class DataSeeder implements CommandLineRunner {
 
         log.info("Japanese demo user seeding completed!");
         log.info("Japanese demo credentials: demo.jp@example.com / demo123");
+    }
+
+    private void seedRecurringForExistingUsers() {
+        LocalDate today = LocalDate.now();
+
+        // Check Vietnamese demo user
+        userRepository.findByEmail("demo@example.com").ifPresent(demoUser -> {
+            if (recurringTransactionRepository.findByUserIdOrderByNextExecutionDateAsc(demoUser.getId()).isEmpty()) {
+                log.info("Seeding recurring transactions for existing Vietnamese demo user...");
+
+                // Get existing accounts and categories
+                var accounts = accountRepository.findByUserIdOrderByNameAsc(demoUser.getId());
+                var categories = categoryRepository.findByUserIdOrderByNameAsc(demoUser.getId());
+
+                if (accounts.isEmpty() || categories.isEmpty()) {
+                    log.warn("No accounts or categories found for demo user, skipping recurring seeding");
+                    return;
+                }
+
+                Account bankAccount = accounts.stream().filter(a -> a.getType() == AccountType.BANK).findFirst().orElse(accounts.get(0));
+                Account cashAccount = accounts.stream().filter(a -> a.getType() == AccountType.CASH).findFirst().orElse(accounts.get(0));
+                Account eWallet = accounts.stream().filter(a -> a.getType() == AccountType.E_WALLET).findFirst().orElse(accounts.get(0));
+
+                Category salaryCategory = categories.stream().filter(c -> c.getType() == CategoryType.INCOME).findFirst().orElse(null);
+                Category billsCategory = categories.stream().filter(c -> c.getName().contains("Hóa đơn") || c.getName().contains("Bills")).findFirst().orElse(null);
+                Category foodCategory = categories.stream().filter(c -> c.getName().contains("Ăn uống") || c.getName().contains("Food")).findFirst().orElse(null);
+                Category transportCategory = categories.stream().filter(c -> c.getName().contains("Di chuyển") || c.getName().contains("Transport")).findFirst().orElse(null);
+
+                if (salaryCategory != null) {
+                    recurringTransactionRepository.save(RecurringTransaction.builder()
+                            .user(demoUser).account(bankAccount).category(salaryCategory)
+                            .type(TransactionType.INCOME).amount(BigDecimal.valueOf(15000000)).currency("VND")
+                            .description("Lương hàng tháng").frequency(RecurrenceFrequency.MONTHLY).intervalValue(1).dayOfMonth(1)
+                            .startDate(today.withDayOfMonth(1)).nextExecutionDate(today.withDayOfMonth(1).plusMonths(1))
+                            .status(RecurringStatus.ACTIVE).build());
+                }
+
+                if (billsCategory != null) {
+                    recurringTransactionRepository.save(RecurringTransaction.builder()
+                            .user(demoUser).account(bankAccount).category(billsCategory)
+                            .type(TransactionType.EXPENSE).amount(BigDecimal.valueOf(500000)).currency("VND")
+                            .description("Tiền điện hàng tháng").frequency(RecurrenceFrequency.MONTHLY).intervalValue(1).dayOfMonth(5)
+                            .startDate(today.withDayOfMonth(5)).nextExecutionDate(today.getDayOfMonth() >= 5 ? today.withDayOfMonth(5).plusMonths(1) : today.withDayOfMonth(5))
+                            .status(RecurringStatus.ACTIVE).build());
+
+                    recurringTransactionRepository.save(RecurringTransaction.builder()
+                            .user(demoUser).account(bankAccount).category(billsCategory)
+                            .type(TransactionType.EXPENSE).amount(BigDecimal.valueOf(300000)).currency("VND")
+                            .description("Tiền internet FPT").frequency(RecurrenceFrequency.MONTHLY).intervalValue(1).dayOfMonth(10)
+                            .startDate(today.withDayOfMonth(10)).nextExecutionDate(today.getDayOfMonth() >= 10 ? today.withDayOfMonth(10).plusMonths(1) : today.withDayOfMonth(10))
+                            .status(RecurringStatus.ACTIVE).build());
+                }
+
+                if (foodCategory != null) {
+                    recurringTransactionRepository.save(RecurringTransaction.builder()
+                            .user(demoUser).account(cashAccount).category(foodCategory)
+                            .type(TransactionType.EXPENSE).amount(BigDecimal.valueOf(500000)).currency("VND")
+                            .description("Đi chợ cuối tuần").frequency(RecurrenceFrequency.WEEKLY).intervalValue(1).dayOfWeek(7)
+                            .startDate(today).nextExecutionDate(today.plusDays((13 - today.getDayOfWeek().getValue()) % 7))
+                            .status(RecurringStatus.ACTIVE).build());
+                }
+
+                if (transportCategory != null) {
+                    recurringTransactionRepository.save(RecurringTransaction.builder()
+                            .user(demoUser).account(eWallet).category(transportCategory)
+                            .type(TransactionType.EXPENSE).amount(BigDecimal.valueOf(50000)).currency("VND")
+                            .description("Grab đi làm").frequency(RecurrenceFrequency.DAILY).intervalValue(1)
+                            .startDate(today).nextExecutionDate(today.plusDays(1))
+                            .status(RecurringStatus.PAUSED).build());
+                }
+
+                log.info("Recurring transactions seeded for Vietnamese demo user");
+            }
+        });
+
+        // Check Japanese demo user
+        userRepository.findByEmail("demo.jp@example.com").ifPresent(jpUser -> {
+            if (recurringTransactionRepository.findByUserIdOrderByNextExecutionDateAsc(jpUser.getId()).isEmpty()) {
+                log.info("Seeding recurring transactions for existing Japanese demo user...");
+
+                var accounts = accountRepository.findByUserIdOrderByNameAsc(jpUser.getId());
+                var categories = categoryRepository.findByUserIdOrderByNameAsc(jpUser.getId());
+
+                if (accounts.isEmpty() || categories.isEmpty()) {
+                    log.warn("No accounts or categories found for JP demo user, skipping recurring seeding");
+                    return;
+                }
+
+                Account jpBank = accounts.stream().filter(a -> a.getType() == AccountType.BANK).findFirst().orElse(accounts.get(0));
+                Account paypay = accounts.stream().filter(a -> a.getName().contains("PayPay")).findFirst().orElse(accounts.get(0));
+                Account rakutenCard = accounts.stream().filter(a -> a.getType() == AccountType.CREDIT_CARD).findFirst().orElse(accounts.get(0));
+
+                Category jpSalary = categories.stream().filter(c -> c.getType() == CategoryType.INCOME).findFirst().orElse(null);
+                Category jpBills = categories.stream().filter(c -> c.getName().contains("光熱費")).findFirst().orElse(null);
+                Category jpFood = categories.stream().filter(c -> c.getName().contains("食費")).findFirst().orElse(null);
+
+                // Create subscription category if not exists
+                Category jpSubscription = categories.stream().filter(c -> c.getName().contains("サブスク")).findFirst().orElse(null);
+                if (jpSubscription == null) {
+                    jpSubscription = categoryRepository.save(Category.builder()
+                            .user(jpUser).name("サブスク").type(CategoryType.EXPENSE).icon("📺").color("#e11d48").isSystem(false).build());
+                }
+
+                // Create rent category if not exists
+                Category jpRent = categories.stream().filter(c -> c.getName().contains("家賃")).findFirst().orElse(null);
+                if (jpRent == null) {
+                    jpRent = categoryRepository.save(Category.builder()
+                            .user(jpUser).name("家賃").type(CategoryType.EXPENSE).icon("🏠").color("#64748b").isSystem(false).build());
+                }
+
+                if (jpSalary != null) {
+                    recurringTransactionRepository.save(RecurringTransaction.builder()
+                            .user(jpUser).account(jpBank).category(jpSalary)
+                            .type(TransactionType.INCOME).amount(BigDecimal.valueOf(280000)).currency("JPY")
+                            .description("給料").frequency(RecurrenceFrequency.MONTHLY).intervalValue(1).dayOfMonth(25)
+                            .startDate(today.withDayOfMonth(25)).nextExecutionDate(today.getDayOfMonth() >= 25 ? today.withDayOfMonth(25).plusMonths(1) : today.withDayOfMonth(25))
+                            .status(RecurringStatus.ACTIVE).build());
+                }
+
+                recurringTransactionRepository.save(RecurringTransaction.builder()
+                        .user(jpUser).account(jpBank).category(jpRent)
+                        .type(TransactionType.EXPENSE).amount(BigDecimal.valueOf(70000)).currency("JPY")
+                        .description("家賃").frequency(RecurrenceFrequency.MONTHLY).intervalValue(1).dayOfMonth(27)
+                        .startDate(today.withDayOfMonth(27)).nextExecutionDate(today.getDayOfMonth() >= 27 ? today.withDayOfMonth(27).plusMonths(1) : today.withDayOfMonth(27))
+                        .status(RecurringStatus.ACTIVE).build());
+
+                if (jpBills != null) {
+                    recurringTransactionRepository.save(RecurringTransaction.builder()
+                            .user(jpUser).account(jpBank).category(jpBills)
+                            .type(TransactionType.EXPENSE).amount(BigDecimal.valueOf(8000)).currency("JPY")
+                            .description("電気代").frequency(RecurrenceFrequency.MONTHLY).intervalValue(1).dayOfMonth(20)
+                            .startDate(today.withDayOfMonth(20)).nextExecutionDate(today.getDayOfMonth() >= 20 ? today.withDayOfMonth(20).plusMonths(1) : today.withDayOfMonth(20))
+                            .status(RecurringStatus.ACTIVE).build());
+                }
+
+                if (jpFood != null) {
+                    recurringTransactionRepository.save(RecurringTransaction.builder()
+                            .user(jpUser).account(paypay).category(jpFood)
+                            .type(TransactionType.EXPENSE).amount(BigDecimal.valueOf(5000)).currency("JPY")
+                            .description("スーパー買い物").frequency(RecurrenceFrequency.WEEKLY).intervalValue(1).dayOfWeek(7)
+                            .startDate(today).nextExecutionDate(today.plusDays((13 - today.getDayOfWeek().getValue()) % 7))
+                            .status(RecurringStatus.ACTIVE).build());
+                }
+
+                recurringTransactionRepository.save(RecurringTransaction.builder()
+                        .user(jpUser).account(rakutenCard).category(jpSubscription)
+                        .type(TransactionType.EXPENSE).amount(BigDecimal.valueOf(1490)).currency("JPY")
+                        .description("Netflix").frequency(RecurrenceFrequency.MONTHLY).intervalValue(1).dayOfMonth(1)
+                        .startDate(today.withDayOfMonth(1)).nextExecutionDate(today.withDayOfMonth(1).plusMonths(1))
+                        .status(RecurringStatus.ACTIVE).build());
+
+                recurringTransactionRepository.save(RecurringTransaction.builder()
+                        .user(jpUser).account(rakutenCard).category(jpSubscription)
+                        .type(TransactionType.EXPENSE).amount(BigDecimal.valueOf(980)).currency("JPY")
+                        .description("Spotify Premium").frequency(RecurrenceFrequency.MONTHLY).intervalValue(1).dayOfMonth(1)
+                        .startDate(today.withDayOfMonth(1)).nextExecutionDate(today.withDayOfMonth(1).plusMonths(1))
+                        .status(RecurringStatus.ACTIVE).build());
+
+                log.info("Recurring transactions seeded for Japanese demo user");
+            }
+        });
     }
 
     private void seedAdminUser() {
