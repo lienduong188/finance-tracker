@@ -59,6 +59,10 @@ export interface Account {
   color: string | null
   isActive: boolean
   createdAt: string
+  // Credit card specific fields
+  creditLimit: number | null
+  billingDay: number | null
+  paymentDueDay: number | null
 }
 
 export interface AccountRequest {
@@ -68,6 +72,10 @@ export interface AccountRequest {
   initialBalance: number
   icon?: string
   color?: string
+  // Credit card specific fields
+  creditLimit?: number
+  billingDay?: number
+  paymentDueDay?: number
 }
 
 // Category types

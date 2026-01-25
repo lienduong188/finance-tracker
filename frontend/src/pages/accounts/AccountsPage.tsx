@@ -174,6 +174,20 @@ export function AccountsPage() {
                 <p className="text-xs text-muted-foreground">
                   {t("accounts.initialBalance")}: {formatCurrency(account.initialBalance, account.currency)}
                 </p>
+                {/* Credit card specific info */}
+                {account.type === "CREDIT_CARD" && account.creditLimit && (
+                  <div className="mt-2 space-y-1 border-t pt-2 text-xs text-muted-foreground">
+                    <p>
+                      {t("accounts.creditLimit")}: {formatCurrency(account.creditLimit, account.currency)}
+                    </p>
+                    {account.billingDay && (
+                      <p>{t("accounts.billingDay")}: {account.billingDay}</p>
+                    )}
+                    {account.paymentDueDay && (
+                      <p>{t("accounts.paymentDueDay")}: {account.paymentDueDay}</p>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
           )

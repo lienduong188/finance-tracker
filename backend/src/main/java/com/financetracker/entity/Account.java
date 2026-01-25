@@ -49,6 +49,16 @@ public class Account extends BaseEntity {
     @Builder.Default
     private Boolean isActive = true;
 
+    // Credit card specific fields
+    @Column(name = "credit_limit", precision = 19, scale = 4)
+    private BigDecimal creditLimit;
+
+    @Column(name = "billing_day")
+    private Integer billingDay;
+
+    @Column(name = "payment_due_day")
+    private Integer paymentDueDay;
+
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
     @Builder.Default
     private List<Transaction> transactions = new ArrayList<>();

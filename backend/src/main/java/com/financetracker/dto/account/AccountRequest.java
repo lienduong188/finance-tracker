@@ -31,4 +31,11 @@ public class AccountRequest {
     private String icon;
 
     private String color;
+
+    // Credit card specific fields
+    private BigDecimal creditLimit;
+
+    private Integer billingDay;
+
+    private Integer paymentDueDay;
 }

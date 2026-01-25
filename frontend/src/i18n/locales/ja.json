@@ -104,7 +104,11 @@
     "noAccounts": "口座がありません",
     "createFirst": "最初の口座を作成して資産管理を始めましょう",
     "deleteAccount": "口座を削除",
-    "deleteConfirm": "口座は非表示になりますが、取引履歴は保持されます。よろしいですか？"
+    "deleteConfirm": "口座は非表示になりますが、取引履歴は保持されます。よろしいですか？",
+    "creditLimit": "利用限度額",
+    "creditLimitPlaceholder": "例：500,000",
+    "billingDay": "締め日",
+    "paymentDueDay": "支払い日"
   },
   "transactions": {
     "title": "取引",

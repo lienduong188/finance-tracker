@@ -104,7 +104,11 @@
     "noAccounts": "Chưa có tài khoản nào",
     "createFirst": "Tạo tài khoản đầu tiên để bắt đầu quản lý tài chính",
     "deleteAccount": "Xóa tài khoản",
-    "deleteConfirm": "Tài khoản sẽ bị ẩn nhưng các giao dịch vẫn được giữ lại. Bạn có chắc chắn?"
+    "deleteConfirm": "Tài khoản sẽ bị ẩn nhưng các giao dịch vẫn được giữ lại. Bạn có chắc chắn?",
+    "creditLimit": "Hạn mức tín dụng",
+    "creditLimitPlaceholder": "VD: 50,000,000",
+    "billingDay": "Ngày chốt sao kê",
+    "paymentDueDay": "Ngày đến hạn thanh toán"
   },
   "transactions": {
     "title": "Giao dịch",

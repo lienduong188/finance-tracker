@@ -27,4 +27,9 @@ public class AccountResponse {
     private Boolean isActive;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
+
+    // Credit card specific fields
+    private BigDecimal creditLimit;
+    private Integer billingDay;
+    private Integer paymentDueDay;
 }

@@ -30,6 +30,7 @@ export function AccountFormModal({ isOpen, onClose, account }: AccountFormModalP
   const queryClient = useQueryClient()
   const isEditing = !!account
   const [balanceDisplay, setBalanceDisplay] = useState("")
+  const [creditLimitDisplay, setCreditLimitDisplay] = useState("")
 
   const defaultCurrency = user?.defaultCurrency || "VND"
 
@@ -40,6 +41,10 @@ export function AccountFormModal({ isOpen, onClose, account }: AccountFormModalP
     initialBalance: z.number().min(0, t("validation.balanceMin")),
     icon: z.string().optional(),
     color: z.string().optional(),
+    // Credit card specific fields
+    creditLimit: z.number().min(0).optional(),
+    billingDay: z.number().min(1).max(31).optional(),
+    paymentDueDay: z.number().min(1).max(31).optional(),
   })
 
   type AccountForm = z.infer<typeof accountSchema>
@@ -57,10 +62,14 @@ export function AccountFormModal({ isOpen, onClose, account }: AccountFormModalP
       type: "CASH",
       currency: defaultCurrency,
       initialBalance: 0,
+      creditLimit: undefined,
+      billingDay: undefined,
+      paymentDueDay: undefined,
     },
   })
 
   const iconValue = watch("icon")
+  const typeValue = watch("type")
 
   // Handle balance input change with formatting
   const handleBalanceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -68,6 +77,14 @@ export function AccountFormModal({ isOpen, onClose, account }: AccountFormModalP
     const numValue = parseInt(rawValue) || 0
     setValue("initialBalance", numValue)
     setBalanceDisplay(rawValue ? formatNumberWithSeparator(numValue, i18n.language) : "")
+  }
+
+  // Handle credit limit input change with formatting
+  const handleCreditLimitChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value.replace(/[^\d]/g, "")
+    const numValue = parseInt(rawValue) || 0
+    setValue("creditLimit", numValue || undefined)
+    setCreditLimitDisplay(rawValue ? formatNumberWithSeparator(numValue, i18n.language) : "")
   }
 
   useEffect(() => {
@@ -80,8 +97,12 @@ export function AccountFormModal({ isOpen, onClose, account }: AccountFormModalP
         initialBalance: account.initialBalance,
         icon: account.icon || "",
         color: account.color || "",
+        creditLimit: account.creditLimit || undefined,
+        billingDay: account.billingDay || undefined,
+        paymentDueDay: account.paymentDueDay || undefined,
       })
       setBalanceDisplay(formatNumberWithSeparator(account.initialBalance, i18n.language))
+      setCreditLimitDisplay(account.creditLimit ? formatNumberWithSeparator(account.creditLimit, i18n.language) : "")
     } else {
       reset({
         name: "",
@@ -90,8 +111,12 @@ export function AccountFormModal({ isOpen, onClose, account }: AccountFormModalP
         initialBalance: 0,
         icon: "",
         color: "",
+        creditLimit: undefined,
+        billingDay: undefined,
+        paymentDueDay: undefined,
       })
       setBalanceDisplay("")
+      setCreditLimitDisplay("")
     }
   }, [isOpen, account, reset, defaultCurrency, i18n.language])
 
@@ -119,6 +144,10 @@ export function AccountFormModal({ isOpen, onClose, account }: AccountFormModalP
       initialBalance: data.initialBalance,
       icon: data.icon || undefined,
       color: data.color || undefined,
+      // Include credit card fields only for credit card type
+      creditLimit: data.type === "CREDIT_CARD" ? data.creditLimit : undefined,
+      billingDay: data.type === "CREDIT_CARD" ? data.billingDay : undefined,
+      paymentDueDay: data.type === "CREDIT_CARD" ? data.paymentDueDay : undefined,
     }
 
     if (isEditing) {
@@ -187,6 +216,52 @@ export function AccountFormModal({ isOpen, onClose, account }: AccountFormModalP
               error={errors.initialBalance?.message}
             />
           </div>
+
+          {/* Credit card specific fields */}
+          {typeValue === "CREDIT_CARD" && (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="creditLimit">{t("accounts.creditLimit")}</Label>
+                <Input
+                  id="creditLimit"
+                  type="text"
+                  inputMode="numeric"
+                  placeholder={t("accounts.creditLimitPlaceholder")}
+                  value={creditLimitDisplay}
+                  onChange={handleCreditLimitChange}
+                  error={errors.creditLimit?.message}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="billingDay">{t("accounts.billingDay")}</Label>
+                  <Input
+                    id="billingDay"
+                    type="number"
+                    min={1}
+                    max={31}
+                    placeholder="1-31"
+                    {...register("billingDay", { valueAsNumber: true })}
+                    error={errors.billingDay?.message}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="paymentDueDay">{t("accounts.paymentDueDay")}</Label>
+                  <Input
+                    id="paymentDueDay"
+                    type="number"
+                    min={1}
+                    max={31}
+                    placeholder="1-31"
+                    {...register("paymentDueDay", { valueAsNumber: true })}
+                    error={errors.paymentDueDay?.message}
+                  />
+                </div>
+              </div>
+            </>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">

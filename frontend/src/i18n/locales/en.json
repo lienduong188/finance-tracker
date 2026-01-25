@@ -104,7 +104,11 @@
     "noAccounts": "No accounts yet",
     "createFirst": "Create your first account to start managing your finances",
     "deleteAccount": "Delete Account",
-    "deleteConfirm": "The account will be hidden but transactions will be kept. Are you sure?"
+    "deleteConfirm": "The account will be hidden but transactions will be kept. Are you sure?",
+    "creditLimit": "Credit Limit",
+    "creditLimitPlaceholder": "e.g. 5,000",
+    "billingDay": "Billing Day",
+    "paymentDueDay": "Payment Due Day"
   },
   "transactions": {
     "title": "Transactions",

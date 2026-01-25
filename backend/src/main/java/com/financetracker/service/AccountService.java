@@ -50,6 +50,9 @@ public class AccountService {
                 .icon(request.getIcon())
                 .color(request.getColor())
                 .isActive(true)
+                .creditLimit(request.getCreditLimit())
+                .billingDay(request.getBillingDay())
+                .paymentDueDay(request.getPaymentDueDay())
                 .build();
 
         account = accountRepository.save(account);
@@ -73,6 +76,11 @@ public class AccountService {
             account.setInitialBalance(request.getInitialBalance());
             account.setCurrentBalance(account.getCurrentBalance().add(difference));
         }
+
+        // Update credit card specific fields
+        account.setCreditLimit(request.getCreditLimit());
+        account.setBillingDay(request.getBillingDay());
+        account.setPaymentDueDay(request.getPaymentDueDay());
 
         account = accountRepository.save(account);
         return toResponse(account);
@@ -99,6 +107,9 @@ public class AccountService {
                 .isActive(account.getIsActive())
                 .createdAt(account.getCreatedAt())
                 .updatedAt(account.getUpdatedAt())
+                .creditLimit(account.getCreditLimit())
+                .billingDay(account.getBillingDay())
+                .paymentDueDay(account.getPaymentDueDay())
                 .build();
     }
 }
