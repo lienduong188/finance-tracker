@@ -138,6 +138,17 @@ export function RegisterPage() {
           </CardContent>
 
           <CardFooter className="flex flex-col gap-3 p-4 pt-0 md:gap-4 md:p-6 md:pt-0">
+            <p className="text-center text-xs text-muted-foreground">
+              {t("legal.agreeToTerms")}{" "}
+              <Link to="/terms" className="text-primary hover:underline">
+                {t("legal.termsTitle")}
+              </Link>{" "}
+              {t("legal.and")}{" "}
+              <Link to="/privacy" className="text-primary hover:underline">
+                {t("legal.privacyTitle")}
+              </Link>
+            </p>
+
             <Button type="submit" className="w-full" isLoading={isLoading}>
               {t("auth.register")}
             </Button>

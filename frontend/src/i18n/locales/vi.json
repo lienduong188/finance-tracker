@@ -277,5 +277,90 @@
     "categoryDeleted": "Đã xóa danh mục",
     "confirmDeleteCategory": "Bạn có chắc muốn xóa danh mục này?",
     "cannotDeleteSystem": "Không thể xóa danh mục hệ thống"
+  },
+  "legal": {
+    "termsTitle": "Điều khoản sử dụng",
+    "privacyTitle": "Chính sách bảo mật",
+    "lastUpdated": "Cập nhật lần cuối",
+    "backToRegister": "Quay lại đăng ký",
+    "agreeToTerms": "Bằng việc đăng ký, bạn đồng ý với",
+    "and": "và",
+    "terms": {
+      "acceptance": {
+        "title": "1. Chấp nhận điều khoản",
+        "content": "Bằng việc truy cập và sử dụng Finance Tracker, bạn đồng ý tuân thủ các điều khoản và điều kiện được nêu trong tài liệu này. Nếu bạn không đồng ý với bất kỳ phần nào của các điều khoản này, vui lòng không sử dụng dịch vụ của chúng tôi."
+      },
+      "service": {
+        "title": "2. Mô tả dịch vụ",
+        "content": "Finance Tracker là ứng dụng quản lý tài chính cá nhân, cho phép người dùng theo dõi thu nhập, chi tiêu, quản lý ngân sách và tài khoản. Dịch vụ được cung cấp 'nguyên trạng' và chúng tôi không đảm bảo tính khả dụng liên tục."
+      },
+      "account": {
+        "title": "3. Tài khoản người dùng",
+        "content": "Bạn có trách nhiệm bảo mật thông tin đăng nhập của mình. Bạn đồng ý thông báo ngay cho chúng tôi về bất kỳ việc sử dụng trái phép tài khoản của bạn. Chúng tôi không chịu trách nhiệm cho bất kỳ tổn thất nào do việc sử dụng trái phép tài khoản của bạn."
+      },
+      "usage": {
+        "title": "4. Quy tắc sử dụng",
+        "content": "Bạn đồng ý không sử dụng dịch vụ cho các mục đích bất hợp pháp hoặc bị cấm. Bạn không được cố gắng truy cập trái phép vào hệ thống, can thiệp vào hoạt động của dịch vụ, hoặc sử dụng dịch vụ để phân phối nội dung độc hại."
+      },
+      "data": {
+        "title": "5. Dữ liệu người dùng",
+        "content": "Bạn sở hữu tất cả dữ liệu bạn nhập vào hệ thống. Chúng tôi cam kết bảo vệ dữ liệu của bạn theo Chính sách bảo mật. Bạn có thể xuất hoặc xóa dữ liệu của mình bất cứ lúc nào."
+      },
+      "liability": {
+        "title": "6. Giới hạn trách nhiệm",
+        "content": "Finance Tracker không chịu trách nhiệm cho bất kỳ quyết định tài chính nào bạn đưa ra dựa trên thông tin từ ứng dụng. Chúng tôi không phải là cố vấn tài chính và không cung cấp lời khuyên đầu tư."
+      },
+      "changes": {
+        "title": "7. Thay đổi điều khoản",
+        "content": "Chúng tôi có quyền sửa đổi các điều khoản này bất cứ lúc nào. Việc tiếp tục sử dụng dịch vụ sau khi thay đổi được đăng tải đồng nghĩa với việc bạn chấp nhận các điều khoản mới."
+      },
+      "contact": {
+        "title": "8. Liên hệ",
+        "content": "Nếu bạn có câu hỏi về Điều khoản sử dụng, vui lòng liên hệ chúng tôi qua email: support@financetracker.app"
+      }
+    },
+    "privacy": {
+      "intro": {
+        "title": "1. Giới thiệu",
+        "content": "Chúng tôi tôn trọng quyền riêng tư của bạn. Chính sách này mô tả cách chúng tôi thu thập, sử dụng và bảo vệ thông tin cá nhân của bạn khi sử dụng Finance Tracker."
+      },
+      "collect": {
+        "title": "2. Thông tin chúng tôi thu thập",
+        "content": "Chúng tôi thu thập các loại thông tin sau:",
+        "item1": "Thông tin tài khoản: email, họ tên, mật khẩu (được mã hóa)",
+        "item2": "Dữ liệu tài chính: thông tin về tài khoản, giao dịch, ngân sách mà bạn tự nhập",
+        "item3": "Thông tin kỹ thuật: địa chỉ IP, loại trình duyệt, thời gian truy cập"
+      },
+      "use": {
+        "title": "3. Cách chúng tôi sử dụng thông tin",
+        "content": "Thông tin của bạn được sử dụng để:",
+        "item1": "Cung cấp và duy trì dịch vụ quản lý tài chính",
+        "item2": "Xác thực và bảo mật tài khoản của bạn",
+        "item3": "Cải thiện và phát triển các tính năng mới"
+      },
+      "security": {
+        "title": "4. Bảo mật dữ liệu",
+        "content": "Chúng tôi sử dụng các biện pháp bảo mật tiêu chuẩn ngành bao gồm mã hóa SSL/TLS, mã hóa mật khẩu, và kiểm soát truy cập nghiêm ngặt để bảo vệ dữ liệu của bạn."
+      },
+      "sharing": {
+        "title": "5. Chia sẻ thông tin",
+        "content": "Chúng tôi KHÔNG bán, trao đổi hoặc chia sẻ thông tin cá nhân của bạn với bên thứ ba, trừ khi được yêu cầu bởi pháp luật hoặc để bảo vệ quyền lợi hợp pháp của chúng tôi."
+      },
+      "cookies": {
+        "title": "6. Cookies",
+        "content": "Chúng tôi sử dụng cookies để lưu trữ token xác thực và tùy chọn ngôn ngữ. Bạn có thể tắt cookies trong trình duyệt nhưng điều này có thể ảnh hưởng đến chức năng của ứng dụng."
+      },
+      "rights": {
+        "title": "7. Quyền của bạn",
+        "content": "Bạn có các quyền sau đối với dữ liệu của mình:",
+        "item1": "Quyền truy cập và xem dữ liệu cá nhân",
+        "item2": "Quyền chỉnh sửa thông tin không chính xác",
+        "item3": "Quyền xóa tài khoản và toàn bộ dữ liệu"
+      },
+      "contact": {
+        "title": "8. Liên hệ về quyền riêng tư",
+        "content": "Nếu bạn có câu hỏi về Chính sách bảo mật hoặc muốn thực hiện các quyền của mình, vui lòng liên hệ: privacy@financetracker.app"
+      }
+    }
   }
 }
