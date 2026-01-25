@@ -253,6 +253,23 @@
     "profileUpdated": "Profile updated successfully",
     "passwordChanged": "Password changed successfully",
     "passwordChangeFailed": "Failed to change password",
-    "currentPasswordWrong": "Current password is incorrect"
+    "currentPasswordWrong": "Current password is incorrect",
+    "categoriesSection": "Spending Categories",
+    "categoriesDescription": "Manage your income and expense categories",
+    "addCategory": "Add Category",
+    "editCategory": "Edit Category",
+    "categoryName": "Category Name",
+    "categoryType": "Type",
+    "categoryIcon": "Icon (emoji)",
+    "categoryColor": "Color",
+    "incomeCategories": "Income Categories",
+    "expenseCategories": "Expense Categories",
+    "systemCategory": "System category",
+    "customCategory": "Custom category",
+    "categoryCreated": "Category created",
+    "categoryUpdated": "Category updated",
+    "categoryDeleted": "Category deleted",
+    "confirmDeleteCategory": "Are you sure you want to delete this category?",
+    "cannotDeleteSystem": "Cannot delete system category"
   }
 }

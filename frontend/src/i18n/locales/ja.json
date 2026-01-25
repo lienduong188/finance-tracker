@@ -253,6 +253,23 @@
     "profileUpdated": "プロフィールが更新されました",
     "passwordChanged": "パスワードが変更されました",
     "passwordChangeFailed": "パスワードの変更に失敗しました",
-    "currentPasswordWrong": "現在のパスワードが正しくありません"
+    "currentPasswordWrong": "現在のパスワードが正しくありません",
+    "categoriesSection": "支出カテゴリー",
+    "categoriesDescription": "収入・支出カテゴリーを管理",
+    "addCategory": "カテゴリーを追加",
+    "editCategory": "カテゴリーを編集",
+    "categoryName": "カテゴリー名",
+    "categoryType": "種類",
+    "categoryIcon": "アイコン（絵文字）",
+    "categoryColor": "色",
+    "incomeCategories": "収入カテゴリー",
+    "expenseCategories": "支出カテゴリー",
+    "systemCategory": "システムカテゴリー",
+    "customCategory": "カスタムカテゴリー",
+    "categoryCreated": "カテゴリーが作成されました",
+    "categoryUpdated": "カテゴリーが更新されました",
+    "categoryDeleted": "カテゴリーが削除されました",
+    "confirmDeleteCategory": "このカテゴリーを削除してもよろしいですか？",
+    "cannotDeleteSystem": "システムカテゴリーは削除できません"
   }
 }

@@ -253,6 +253,23 @@
     "profileUpdated": "Hồ sơ đã được cập nhật",
     "passwordChanged": "Mật khẩu đã được thay đổi",
     "passwordChangeFailed": "Đổi mật khẩu thất bại",
-    "currentPasswordWrong": "Mật khẩu hiện tại không đúng"
+    "currentPasswordWrong": "Mật khẩu hiện tại không đúng",
+    "categoriesSection": "Danh mục chi tiêu",
+    "categoriesDescription": "Quản lý danh mục thu chi của bạn",
+    "addCategory": "Thêm danh mục",
+    "editCategory": "Sửa danh mục",
+    "categoryName": "Tên danh mục",
+    "categoryType": "Loại",
+    "categoryIcon": "Icon (emoji)",
+    "categoryColor": "Màu sắc",
+    "incomeCategories": "Danh mục thu nhập",
+    "expenseCategories": "Danh mục chi tiêu",
+    "systemCategory": "Danh mục hệ thống",
+    "customCategory": "Danh mục tùy chỉnh",
+    "categoryCreated": "Đã tạo danh mục",
+    "categoryUpdated": "Đã cập nhật danh mục",
+    "categoryDeleted": "Đã xóa danh mục",
+    "confirmDeleteCategory": "Bạn có chắc muốn xóa danh mục này?",
+    "cannotDeleteSystem": "Không thể xóa danh mục hệ thống"
   }
 }
