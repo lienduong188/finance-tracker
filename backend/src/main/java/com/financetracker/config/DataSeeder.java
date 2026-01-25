@@ -754,12 +754,12 @@ public class DataSeeder implements CommandLineRunner {
 
         // Check Vietnamese demo user
         userRepository.findByEmail("demo@example.com").ifPresent(demoUser -> {
-            if (recurringTransactionRepository.findByUserIdOrderByNextExecutionDateAsc(demoUser.getId()).isEmpty()) {
+            if (recurringTransactionRepository.findByUserIdAndStatusOrderByNextExecutionDateAsc(demoUser.getId(), RecurringStatus.ACTIVE).isEmpty()) {
                 log.info("Seeding recurring transactions for existing Vietnamese demo user...");
 
                 // Get existing accounts and categories
-                var accounts = accountRepository.findByUserIdOrderByNameAsc(demoUser.getId());
-                var categories = categoryRepository.findByUserIdOrderByNameAsc(demoUser.getId());
+                var accounts = accountRepository.findByUserId(demoUser.getId());
+                var categories = categoryRepository.findByUserId(demoUser.getId());
 
                 if (accounts.isEmpty() || categories.isEmpty()) {
                     log.warn("No accounts or categories found for demo user, skipping recurring seeding");
@@ -824,11 +824,11 @@ public class DataSeeder implements CommandLineRunner {
 
         // Check Japanese demo user
         userRepository.findByEmail("demo.jp@example.com").ifPresent(jpUser -> {
-            if (recurringTransactionRepository.findByUserIdOrderByNextExecutionDateAsc(jpUser.getId()).isEmpty()) {
+            if (recurringTransactionRepository.findByUserIdAndStatusOrderByNextExecutionDateAsc(jpUser.getId(), RecurringStatus.ACTIVE).isEmpty()) {
                 log.info("Seeding recurring transactions for existing Japanese demo user...");
 
-                var accounts = accountRepository.findByUserIdOrderByNameAsc(jpUser.getId());
-                var categories = categoryRepository.findByUserIdOrderByNameAsc(jpUser.getId());
+                var accounts = accountRepository.findByUserId(jpUser.getId());
+                var categories = categoryRepository.findByUserId(jpUser.getId());
 
                 if (accounts.isEmpty() || categories.isEmpty()) {
                     log.warn("No accounts or categories found for JP demo user, skipping recurring seeding");
