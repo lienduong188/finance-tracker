@@ -66,6 +66,14 @@ public class AccountService {
         account.setIcon(request.getIcon());
         account.setColor(request.getColor());
 
+        // Allow updating initialBalance - recalculate currentBalance
+        if (request.getInitialBalance() != null &&
+            !request.getInitialBalance().equals(account.getInitialBalance())) {
+            java.math.BigDecimal difference = request.getInitialBalance().subtract(account.getInitialBalance());
+            account.setInitialBalance(request.getInitialBalance());
+            account.setCurrentBalance(account.getCurrentBalance().add(difference));
+        }
+
         account = accountRepository.save(account);
         return toResponse(account);
     }
