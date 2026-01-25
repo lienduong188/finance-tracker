@@ -34,6 +34,10 @@ export function AccountsPage() {
     mutationFn: accountsApi.delete,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["accounts"] })
+      queryClient.invalidateQueries({ queryKey: ["dashboard-summary"] })
+    },
+    onError: (error: Error) => {
+      alert(t("common.error") + ": " + error.message)
     },
   })
 
@@ -53,7 +57,8 @@ export function AccountsPage() {
   }
 
   const handleDelete = async (id: string) => {
-    if (confirm(t("common.confirm") + "?")) {
+    const message = t("accounts.deleteConfirm", "Tài khoản sẽ bị ẩn nhưng các giao dịch vẫn được giữ lại. Bạn có chắc chắn?")
+    if (confirm(message)) {
       await deleteMutation.mutateAsync(id)
     }
   }

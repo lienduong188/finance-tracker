@@ -102,7 +102,8 @@
       "CREDIT_CARD": "Credit Card"
     },
     "noAccounts": "No accounts yet",
-    "createFirst": "Create your first account to start managing your finances"
+    "createFirst": "Create your first account to start managing your finances",
+    "deleteConfirm": "The account will be hidden but transactions will be kept. Are you sure?"
   },
   "transactions": {
     "title": "Transactions",
