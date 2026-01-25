@@ -386,20 +386,20 @@ export function TransactionsPage() {
 
   // Render Month View
   const renderMonthView = () => (
-    <>
+    <div className="overflow-hidden rounded-lg border border-border">
       {/* Week headers */}
-      <div className="mb-2 grid grid-cols-7 text-center text-xs font-medium">
+      <div className="grid grid-cols-7 border-b border-border bg-muted/30 text-center text-xs font-medium">
         {weekDayLabels.map((d, index) => (
           <div key={d} className={cn(
-            "py-2",
-            index === 0 && "text-red-500", // Sunday
-            index === 6 && "text-blue-500", // Saturday
+            "border-r border-border py-2 last:border-r-0",
+            index === 0 && "text-red-500 font-semibold", // Sunday
+            index === 6 && "text-blue-500 font-semibold", // Saturday
             index !== 0 && index !== 6 && "text-muted-foreground"
           )}>{d}</div>
         ))}
       </div>
       {/* Days grid */}
-      <div className="grid grid-cols-7 gap-1">
+      <div className="grid grid-cols-7">
         {calendarDays.map((day) => {
           const dateKey = format(day, "yyyy-MM-dd")
           const dayTxns = transactionsByDay[dateKey] || []
@@ -417,11 +417,11 @@ export function TransactionsPage() {
                 setCalendarViewMode("day")
               }}
               className={cn(
-                "relative flex min-h-[60px] flex-col items-center rounded-lg border p-1 text-xs transition-colors md:min-h-[80px] md:p-2",
-                isCurrentMonth ? "bg-background" : "bg-muted/30",
+                "relative flex min-h-[60px] flex-col items-center border-b border-r border-border p-1 text-xs transition-colors md:min-h-[80px] md:p-2",
+                isCurrentMonth ? "bg-background" : "bg-muted/50",
                 !isCurrentMonth && dayOfWeek !== 0 && dayOfWeek !== 6 && "text-muted-foreground",
-                isSelected && "border-primary ring-1 ring-primary",
-                !isSelected && "hover:border-primary/50"
+                isSelected && "bg-primary/10 ring-2 ring-inset ring-primary",
+                !isSelected && "hover:bg-accent/50"
               )}
             >
               <span className={cn(
@@ -442,7 +442,7 @@ export function TransactionsPage() {
           )
         })}
       </div>
-    </>
+    </div>
   )
 
   // Render Week View
@@ -470,7 +470,7 @@ export function TransactionsPage() {
           </div>
         </div>
         {/* Week days */}
-        <div className="grid grid-cols-7 gap-1">
+        <div className="grid grid-cols-7 overflow-hidden rounded-lg border border-border">
           {weekDays.map((day, index) => {
             const dateKey = format(day, "yyyy-MM-dd")
             const dayTxns = transactionsByDay[dateKey] || []
@@ -487,9 +487,9 @@ export function TransactionsPage() {
                   setCalendarViewMode("day")
                 }}
                 className={cn(
-                  "flex flex-col items-center rounded-lg border p-2 transition-colors",
-                  isSelected && "border-primary ring-1 ring-primary",
-                  !isSelected && "hover:border-primary/50"
+                  "flex flex-col items-center border-r border-border p-2 transition-colors last:border-r-0",
+                  isSelected && "bg-primary/10 ring-2 ring-inset ring-primary",
+                  !isSelected && "hover:bg-accent/50"
                 )}
               >
                 <span className={cn(
