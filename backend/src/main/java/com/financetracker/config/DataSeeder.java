@@ -22,6 +22,7 @@ public class DataSeeder implements CommandLineRunner {
     private final CategoryRepository categoryRepository;
     private final TransactionRepository transactionRepository;
     private final BudgetRepository budgetRepository;
+    private final RecurringTransactionRepository recurringTransactionRepository;
     private final PasswordEncoder passwordEncoder;
 
     @org.springframework.beans.factory.annotation.Value("${admin.email:admin@financetracker.com}")
@@ -252,6 +253,96 @@ public class DataSeeder implements CommandLineRunner {
                 .isActive(true)
                 .build();
         budgetRepository.save(entertainmentBudget);
+
+        // Create recurring transactions for Vietnamese user
+        // Monthly salary
+        RecurringTransaction salaryCron = RecurringTransaction.builder()
+                .user(demoUser)
+                .account(bankAccount)
+                .category(salaryCategory)
+                .type(TransactionType.INCOME)
+                .amount(BigDecimal.valueOf(15000000))
+                .currency("VND")
+                .description("Lương hàng tháng")
+                .frequency(RecurrenceFrequency.MONTHLY)
+                .intervalValue(1)
+                .dayOfMonth(1)
+                .startDate(today.withDayOfMonth(1))
+                .nextExecutionDate(today.withDayOfMonth(1).plusMonths(1))
+                .status(RecurringStatus.ACTIVE)
+                .build();
+        recurringTransactionRepository.save(salaryCron);
+
+        // Monthly electricity bill
+        RecurringTransaction electricBill = RecurringTransaction.builder()
+                .user(demoUser)
+                .account(bankAccount)
+                .category(billsCategory)
+                .type(TransactionType.EXPENSE)
+                .amount(BigDecimal.valueOf(500000))
+                .currency("VND")
+                .description("Tiền điện hàng tháng")
+                .frequency(RecurrenceFrequency.MONTHLY)
+                .intervalValue(1)
+                .dayOfMonth(5)
+                .startDate(today.withDayOfMonth(5))
+                .nextExecutionDate(today.getDayOfMonth() >= 5 ? today.withDayOfMonth(5).plusMonths(1) : today.withDayOfMonth(5))
+                .status(RecurringStatus.ACTIVE)
+                .build();
+        recurringTransactionRepository.save(electricBill);
+
+        // Monthly internet bill
+        RecurringTransaction internetBill = RecurringTransaction.builder()
+                .user(demoUser)
+                .account(bankAccount)
+                .category(billsCategory)
+                .type(TransactionType.EXPENSE)
+                .amount(BigDecimal.valueOf(300000))
+                .currency("VND")
+                .description("Tiền internet FPT")
+                .frequency(RecurrenceFrequency.MONTHLY)
+                .intervalValue(1)
+                .dayOfMonth(10)
+                .startDate(today.withDayOfMonth(10))
+                .nextExecutionDate(today.getDayOfMonth() >= 10 ? today.withDayOfMonth(10).plusMonths(1) : today.withDayOfMonth(10))
+                .status(RecurringStatus.ACTIVE)
+                .build();
+        recurringTransactionRepository.save(internetBill);
+
+        // Weekly grocery shopping
+        RecurringTransaction groceryCron = RecurringTransaction.builder()
+                .user(demoUser)
+                .account(cashAccount)
+                .category(foodCategory)
+                .type(TransactionType.EXPENSE)
+                .amount(BigDecimal.valueOf(500000))
+                .currency("VND")
+                .description("Đi chợ cuối tuần")
+                .frequency(RecurrenceFrequency.WEEKLY)
+                .intervalValue(1)
+                .dayOfWeek(7) // Saturday
+                .startDate(today)
+                .nextExecutionDate(today.plusDays((13 - today.getDayOfWeek().getValue()) % 7))
+                .status(RecurringStatus.ACTIVE)
+                .build();
+        recurringTransactionRepository.save(groceryCron);
+
+        // Daily transport (paused example)
+        RecurringTransaction dailyTransport = RecurringTransaction.builder()
+                .user(demoUser)
+                .account(eWallet)
+                .category(transportCategory)
+                .type(TransactionType.EXPENSE)
+                .amount(BigDecimal.valueOf(50000))
+                .currency("VND")
+                .description("Grab đi làm")
+                .frequency(RecurrenceFrequency.DAILY)
+                .intervalValue(1)
+                .startDate(today)
+                .nextExecutionDate(today.plusDays(1))
+                .status(RecurringStatus.PAUSED)
+                .build();
+        recurringTransactionRepository.save(dailyTransport);
 
         log.info("Demo data seeding completed!");
         log.info("Demo account credentials: demo@example.com / demo123");
@@ -492,6 +583,163 @@ public class DataSeeder implements CommandLineRunner {
                 .isActive(true)
                 .build();
         budgetRepository.save(jpEntBudget);
+
+        // Create recurring transactions for Japanese user
+        // Monthly salary (25th)
+        RecurringTransaction jpSalaryCron = RecurringTransaction.builder()
+                .user(jpUser)
+                .account(jpBank)
+                .category(jpSalary)
+                .type(TransactionType.INCOME)
+                .amount(BigDecimal.valueOf(280000))
+                .currency("JPY")
+                .description("給料")
+                .frequency(RecurrenceFrequency.MONTHLY)
+                .intervalValue(1)
+                .dayOfMonth(25)
+                .startDate(today.withDayOfMonth(25))
+                .nextExecutionDate(today.getDayOfMonth() >= 25 ? today.withDayOfMonth(25).plusMonths(1) : today.withDayOfMonth(25))
+                .status(RecurringStatus.ACTIVE)
+                .build();
+        recurringTransactionRepository.save(jpSalaryCron);
+
+        // Monthly rent
+        Category jpRent = Category.builder()
+                .user(jpUser)
+                .name("家賃")
+                .type(CategoryType.EXPENSE)
+                .icon("🏠")
+                .color("#64748b")
+                .isSystem(false)
+                .build();
+        jpRent = categoryRepository.save(jpRent);
+
+        RecurringTransaction rentCron = RecurringTransaction.builder()
+                .user(jpUser)
+                .account(jpBank)
+                .category(jpRent)
+                .type(TransactionType.EXPENSE)
+                .amount(BigDecimal.valueOf(70000))
+                .currency("JPY")
+                .description("家賃")
+                .frequency(RecurrenceFrequency.MONTHLY)
+                .intervalValue(1)
+                .dayOfMonth(27)
+                .startDate(today.withDayOfMonth(27))
+                .nextExecutionDate(today.getDayOfMonth() >= 27 ? today.withDayOfMonth(27).plusMonths(1) : today.withDayOfMonth(27))
+                .status(RecurringStatus.ACTIVE)
+                .build();
+        recurringTransactionRepository.save(rentCron);
+
+        // Monthly phone bill
+        Category jpPhone = Category.builder()
+                .user(jpUser)
+                .name("携帯代")
+                .type(CategoryType.EXPENSE)
+                .icon("📱")
+                .color("#06b6d4")
+                .isSystem(false)
+                .build();
+        jpPhone = categoryRepository.save(jpPhone);
+
+        RecurringTransaction phoneBill = RecurringTransaction.builder()
+                .user(jpUser)
+                .account(jpBank)
+                .category(jpPhone)
+                .type(TransactionType.EXPENSE)
+                .amount(BigDecimal.valueOf(3000))
+                .currency("JPY")
+                .description("携帯料金 (楽天モバイル)")
+                .frequency(RecurrenceFrequency.MONTHLY)
+                .intervalValue(1)
+                .dayOfMonth(15)
+                .startDate(today.withDayOfMonth(15))
+                .nextExecutionDate(today.getDayOfMonth() >= 15 ? today.withDayOfMonth(15).plusMonths(1) : today.withDayOfMonth(15))
+                .status(RecurringStatus.ACTIVE)
+                .build();
+        recurringTransactionRepository.save(phoneBill);
+
+        // Monthly electricity
+        RecurringTransaction jpElectric = RecurringTransaction.builder()
+                .user(jpUser)
+                .account(jpBank)
+                .category(jpBills)
+                .type(TransactionType.EXPENSE)
+                .amount(BigDecimal.valueOf(8000))
+                .currency("JPY")
+                .description("電気代")
+                .frequency(RecurrenceFrequency.MONTHLY)
+                .intervalValue(1)
+                .dayOfMonth(20)
+                .startDate(today.withDayOfMonth(20))
+                .nextExecutionDate(today.getDayOfMonth() >= 20 ? today.withDayOfMonth(20).plusMonths(1) : today.withDayOfMonth(20))
+                .status(RecurringStatus.ACTIVE)
+                .build();
+        recurringTransactionRepository.save(jpElectric);
+
+        // Weekly grocery
+        RecurringTransaction jpGrocery = RecurringTransaction.builder()
+                .user(jpUser)
+                .account(paypay)
+                .category(jpFood)
+                .type(TransactionType.EXPENSE)
+                .amount(BigDecimal.valueOf(5000))
+                .currency("JPY")
+                .description("スーパー買い物")
+                .frequency(RecurrenceFrequency.WEEKLY)
+                .intervalValue(1)
+                .dayOfWeek(7) // Saturday
+                .startDate(today)
+                .nextExecutionDate(today.plusDays((13 - today.getDayOfWeek().getValue()) % 7))
+                .status(RecurringStatus.ACTIVE)
+                .build();
+        recurringTransactionRepository.save(jpGrocery);
+
+        // Netflix subscription
+        Category jpSubscription = Category.builder()
+                .user(jpUser)
+                .name("サブスク")
+                .type(CategoryType.EXPENSE)
+                .icon("📺")
+                .color("#e11d48")
+                .isSystem(false)
+                .build();
+        jpSubscription = categoryRepository.save(jpSubscription);
+
+        RecurringTransaction netflixCron = RecurringTransaction.builder()
+                .user(jpUser)
+                .account(rakutenCard)
+                .category(jpSubscription)
+                .type(TransactionType.EXPENSE)
+                .amount(BigDecimal.valueOf(1490))
+                .currency("JPY")
+                .description("Netflix")
+                .frequency(RecurrenceFrequency.MONTHLY)
+                .intervalValue(1)
+                .dayOfMonth(1)
+                .startDate(today.withDayOfMonth(1))
+                .nextExecutionDate(today.withDayOfMonth(1).plusMonths(1))
+                .status(RecurringStatus.ACTIVE)
+                .build();
+        recurringTransactionRepository.save(netflixCron);
+
+        // Spotify subscription
+        RecurringTransaction spotifyCron = RecurringTransaction.builder()
+                .user(jpUser)
+                .account(rakutenCard)
+                .category(jpSubscription)
+                .type(TransactionType.EXPENSE)
+                .amount(BigDecimal.valueOf(980))
+                .currency("JPY")
+                .description("Spotify Premium")
+                .frequency(RecurrenceFrequency.MONTHLY)
+                .intervalValue(1)
+                .dayOfMonth(1)
+                .startDate(today.withDayOfMonth(1))
+                .nextExecutionDate(today.withDayOfMonth(1).plusMonths(1))
+                .status(RecurringStatus.ACTIVE)
+                .build();
+        recurringTransactionRepository.save(spotifyCron);
 
         log.info("Japanese demo user seeding completed!");
         log.info("Japanese demo credentials: demo.jp@example.com / demo123");
