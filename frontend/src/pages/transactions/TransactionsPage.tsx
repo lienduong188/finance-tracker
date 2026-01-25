@@ -388,9 +388,14 @@ export function TransactionsPage() {
   const renderMonthView = () => (
     <>
       {/* Week headers */}
-      <div className="mb-2 grid grid-cols-7 text-center text-xs font-medium text-muted-foreground">
-        {weekDayLabels.map((d) => (
-          <div key={d} className="py-2">{d}</div>
+      <div className="mb-2 grid grid-cols-7 text-center text-xs font-medium">
+        {weekDayLabels.map((d, index) => (
+          <div key={d} className={cn(
+            "py-2",
+            index === 0 && "text-red-500", // Sunday
+            index === 6 && "text-blue-500", // Saturday
+            index !== 0 && index !== 6 && "text-muted-foreground"
+          )}>{d}</div>
         ))}
       </div>
       {/* Days grid */}
@@ -402,6 +407,7 @@ export function TransactionsPage() {
           const expense = dayTxns.filter((tx) => tx.type === "EXPENSE").reduce((s, tx) => s + tx.amount, 0)
           const isSelected = isSameDay(day, selectedDate)
           const isCurrentMonth = isSameMonth(day, calendarMonth)
+          const dayOfWeek = day.getDay() // 0 = Sunday, 6 = Saturday
 
           return (
             <button
@@ -412,12 +418,18 @@ export function TransactionsPage() {
               }}
               className={cn(
                 "relative flex min-h-[60px] flex-col items-center rounded-lg border p-1 text-xs transition-colors md:min-h-[80px] md:p-2",
-                isCurrentMonth ? "bg-background" : "bg-muted/30 text-muted-foreground",
+                isCurrentMonth ? "bg-background" : "bg-muted/30",
+                !isCurrentMonth && dayOfWeek !== 0 && dayOfWeek !== 6 && "text-muted-foreground",
                 isSelected && "border-primary ring-1 ring-primary",
                 !isSelected && "hover:border-primary/50"
               )}
             >
-              <span className={cn("font-medium", isToday(day) && "rounded-full bg-primary px-1.5 text-primary-foreground")}>
+              <span className={cn(
+                "font-medium",
+                isToday(day) && "rounded-full bg-primary px-1.5 text-primary-foreground",
+                !isToday(day) && dayOfWeek === 0 && "text-red-500", // Sunday
+                !isToday(day) && dayOfWeek === 6 && "text-blue-500" // Saturday
+              )}>
                 {format(day, "d")}
               </span>
               {dayTxns.length > 0 && (
@@ -465,6 +477,7 @@ export function TransactionsPage() {
             const income = dayTxns.filter((tx) => tx.type === "INCOME").reduce((s, tx) => s + tx.amount, 0)
             const expense = dayTxns.filter((tx) => tx.type === "EXPENSE").reduce((s, tx) => s + tx.amount, 0)
             const isSelected = isSameDay(day, selectedDate)
+            const dayOfWeek = day.getDay() // 0 = Sunday, 6 = Saturday
 
             return (
               <button
@@ -479,8 +492,18 @@ export function TransactionsPage() {
                   !isSelected && "hover:border-primary/50"
                 )}
               >
-                <span className="text-xs text-muted-foreground">{weekDayLabels[index]}</span>
-                <span className={cn("text-lg font-medium", isToday(day) && "rounded-full bg-primary px-2 text-primary-foreground")}>
+                <span className={cn(
+                  "text-xs",
+                  dayOfWeek === 0 && "text-red-500", // Sunday
+                  dayOfWeek === 6 && "text-blue-500", // Saturday
+                  dayOfWeek !== 0 && dayOfWeek !== 6 && "text-muted-foreground"
+                )}>{weekDayLabels[index]}</span>
+                <span className={cn(
+                  "text-lg font-medium",
+                  isToday(day) && "rounded-full bg-primary px-2 text-primary-foreground",
+                  !isToday(day) && dayOfWeek === 0 && "text-red-500", // Sunday
+                  !isToday(day) && dayOfWeek === 6 && "text-blue-500" // Saturday
+                )}>
                   {format(day, "d")}
                 </span>
                 {dayTxns.length > 0 && (
