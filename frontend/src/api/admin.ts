@@ -1,6 +1,7 @@
 import apiClient from "./client"
 import type {
   AdminUser,
+  AdminStats,
   Category,
   PageResponse,
   UpdateUserRoleRequest,
@@ -8,6 +9,12 @@ import type {
 } from "@/types"
 
 export const adminApi = {
+  // Stats
+  getStats: async (): Promise<AdminStats> => {
+    const response = await apiClient.get<AdminStats>("/admin/stats")
+    return response.data
+  },
+
   // Users
   getUsers: async (
     page = 0,

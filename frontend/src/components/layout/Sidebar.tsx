@@ -95,7 +95,7 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
             {/* Admin Panel Link */}
             {isAdmin && (
               <NavLink
-                to="/admin/users"
+                to="/admin"
                 onClick={handleNavClick}
                 className={({ isActive }) =>
                   cn(

@@ -256,6 +256,21 @@ export interface AdminCategoryRequest {
   parentId?: string
 }
 
+export interface AdminStats {
+  totalUsers: number
+  activeUsers: number
+  disabledUsers: number
+  adminUsers: number
+  totalAccounts: number
+  totalTransactions: number
+  totalBudgets: number
+  totalCategories: number
+  usersLast7Days: number
+  usersLast30Days: number
+  transactionsLast7Days: number
+  transactionsLast30Days: number
+}
+
 // Recurring Transaction types
 export type RecurrenceFrequency = "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY"
 export type RecurringStatus = "ACTIVE" | "PAUSED" | "COMPLETED" | "CANCELLED"

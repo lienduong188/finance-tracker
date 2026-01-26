@@ -10,7 +10,7 @@ import { TransactionsPage } from "./pages/transactions"
 import { BudgetsPage } from "./pages/budgets"
 import { RecurringTransactionsPage } from "./pages/recurring"
 import { SettingsPage } from "./pages/settings"
-import { AdminUsersPage, AdminCategoriesPage } from "./pages/admin"
+import { AdminDashboardPage, AdminUsersPage, AdminCategoriesPage } from "./pages/admin"
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -48,6 +48,7 @@ function App() {
 
             {/* Admin routes */}
             <Route element={<AdminLayout />}>
+              <Route path="/admin" element={<AdminDashboardPage />} />
               <Route path="/admin/users" element={<AdminUsersPage />} />
               <Route path="/admin/categories" element={<AdminCategoriesPage />} />
             </Route>
