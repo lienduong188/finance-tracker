@@ -50,37 +50,47 @@ export function AdminCategoriesPage() {
     )
   }
 
-  const CategoryCard = ({ category }: { category: Category }) => (
-    <div
-      className="flex items-center justify-between rounded-lg border p-3 hover:bg-accent/50"
-      style={{ borderLeftColor: category.color || undefined, borderLeftWidth: 4 }}
-    >
-      <div className="flex items-center gap-3">
-        <span className="text-2xl">{category.icon || "📁"}</span>
-        <div>
-          <p className="font-medium">{category.name}</p>
-          {category.children?.length > 0 && (
-            <p className="text-xs text-muted-foreground">
-              {category.children.length} subcategories
-            </p>
-          )}
+  const CategoryCard = ({ category }: { category: Category }) => {
+    const hasTranslations = category.nameVi || category.nameEn || category.nameJa
+    return (
+      <div
+        className="flex items-center justify-between rounded-lg border p-3 hover:bg-accent/50"
+        style={{ borderLeftColor: category.color || undefined, borderLeftWidth: 4 }}
+      >
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">{category.icon || "📁"}</span>
+          <div>
+            <p className="font-medium">{category.name}</p>
+            {hasTranslations && (
+              <p className="text-xs text-muted-foreground">
+                {category.nameVi && <span className="mr-2">VI: {category.nameVi}</span>}
+                {category.nameEn && <span className="mr-2">EN: {category.nameEn}</span>}
+                {category.nameJa && <span>JA: {category.nameJa}</span>}
+              </p>
+            )}
+            {category.children?.length > 0 && (
+              <p className="text-xs text-muted-foreground">
+                {category.children.length} subcategories
+              </p>
+            )}
+          </div>
+        </div>
+        <div className="flex gap-1">
+          <Button variant="ghost" size="sm" onClick={() => handleEdit(category)}>
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleDelete(category)}
+            className="text-destructive hover:text-destructive"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
         </div>
       </div>
-      <div className="flex gap-1">
-        <Button variant="ghost" size="sm" onClick={() => handleEdit(category)}>
-          <Pencil className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => handleDelete(category)}
-          className="text-destructive hover:text-destructive"
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
-      </div>
-    </div>
-  )
+    )
+  }
 
   return (
     <div className="space-y-6">

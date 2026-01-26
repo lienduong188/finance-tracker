@@ -39,6 +39,9 @@ public class AdminCategoryService {
         Category category = Category.builder()
                 .user(null) // System categories have no user
                 .name(request.getName())
+                .nameVi(request.getNameVi())
+                .nameEn(request.getNameEn())
+                .nameJa(request.getNameJa())
                 .type(request.getType())
                 .icon(request.getIcon())
                 .color(request.getColor())
@@ -60,6 +63,9 @@ public class AdminCategoryService {
         }
 
         category.setName(request.getName());
+        category.setNameVi(request.getNameVi());
+        category.setNameEn(request.getNameEn());
+        category.setNameJa(request.getNameJa());
         category.setType(request.getType());
         category.setIcon(request.getIcon());
         category.setColor(request.getColor());
@@ -84,6 +90,9 @@ public class AdminCategoryService {
         return CategoryResponse.builder()
                 .id(category.getId())
                 .name(category.getName())
+                .nameVi(category.getNameVi())
+                .nameEn(category.getNameEn())
+                .nameJa(category.getNameJa())
                 .type(category.getType())
                 .icon(category.getIcon())
                 .color(category.getColor())

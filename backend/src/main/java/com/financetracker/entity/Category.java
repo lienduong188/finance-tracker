@@ -22,6 +22,16 @@ public class Category extends BaseEntity {
     @Column(nullable = false)
     private String name;
 
+    // Multi-language names for system categories
+    @Column(name = "name_vi")
+    private String nameVi;
+
+    @Column(name = "name_en")
+    private String nameEn;
+
+    @Column(name = "name_ja")
+    private String nameJa;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
     private CategoryType type;

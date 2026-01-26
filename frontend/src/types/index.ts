@@ -84,6 +84,9 @@ export type CategoryType = "INCOME" | "EXPENSE"
 export interface Category {
   id: string
   name: string
+  nameVi: string | null
+  nameEn: string | null
+  nameJa: string | null
   type: CategoryType
   icon: string | null
   color: string | null
@@ -251,6 +254,9 @@ export interface UpdateUserRoleRequest {
 
 export interface AdminCategoryRequest {
   name: string
+  nameVi?: string
+  nameEn?: string
+  nameJa?: string
   type: CategoryType
   icon?: string
   color?: string

@@ -17,6 +17,9 @@ public class CategoryResponse {
 
     private UUID id;
     private String name;
+    private String nameVi;
+    private String nameEn;
+    private String nameJa;
     private CategoryType type;
     private String icon;
     private String color;

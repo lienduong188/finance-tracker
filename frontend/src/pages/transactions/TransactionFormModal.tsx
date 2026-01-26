@@ -8,7 +8,7 @@ import { X } from "lucide-react"
 import { format } from "date-fns"
 import { Button, Input, Label, Select } from "@/components/ui"
 import { transactionsApi, accountsApi, categoriesApi } from "@/api"
-import { cn } from "@/lib/utils"
+import { cn, getCategoryName } from "@/lib/utils"
 import type { Transaction, TransactionRequest, TransactionType } from "@/types"
 
 // Format number with thousand separators
@@ -263,7 +263,7 @@ export function TransactionFormModal({
                 <option value="">{t("common.all")}</option>
                 {categories?.map((category) => (
                   <option key={category.id} value={category.id}>
-                    {category.icon} {t(`categories.${category.name}`, category.name)}
+                    {category.icon} {getCategoryName(category, i18n.language)}
                   </option>
                 ))}
               </Select>

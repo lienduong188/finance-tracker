@@ -10,6 +10,9 @@ import type { Category } from "@/types"
 
 const categorySchema = z.object({
   name: z.string().min(1, "Tên category là bắt buộc"),
+  nameVi: z.string().optional(),
+  nameEn: z.string().optional(),
+  nameJa: z.string().optional(),
   type: z.enum(["INCOME", "EXPENSE"]),
   icon: z.string().optional(),
   color: z.string().optional(),
@@ -40,6 +43,9 @@ export function AdminCategoryFormModal({
     resolver: zodResolver(categorySchema),
     defaultValues: {
       name: "",
+      nameVi: "",
+      nameEn: "",
+      nameJa: "",
       type: "EXPENSE",
       icon: "",
       color: "#3b82f6",
@@ -50,6 +56,9 @@ export function AdminCategoryFormModal({
     if (category) {
       reset({
         name: category.name,
+        nameVi: category.nameVi || "",
+        nameEn: category.nameEn || "",
+        nameJa: category.nameJa || "",
         type: category.type,
         icon: category.icon || "",
         color: category.color || "#3b82f6",
@@ -57,6 +66,9 @@ export function AdminCategoryFormModal({
     } else {
       reset({
         name: "",
+        nameVi: "",
+        nameEn: "",
+        nameJa: "",
         type: "EXPENSE",
         icon: "",
         color: "#3b82f6",
@@ -92,8 +104,8 @@ export function AdminCategoryFormModal({
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="w-full max-w-md rounded-lg bg-card p-6 shadow-lg">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-lg bg-card p-6 shadow-lg">
         {/* Header */}
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold">
@@ -110,7 +122,7 @@ export function AdminCategoryFormModal({
         {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
-            <Label htmlFor="name">Tên category</Label>
+            <Label htmlFor="name">Tên mặc định</Label>
             <Input
               id="name"
               {...register("name")}
@@ -119,6 +131,44 @@ export function AdminCategoryFormModal({
             {errors.name && (
               <p className="mt-1 text-sm text-destructive">{errors.name.message}</p>
             )}
+          </div>
+
+          {/* Multi-language names */}
+          <div className="rounded-lg border border-border p-3 space-y-3">
+            <p className="text-sm font-medium text-muted-foreground">Tên đa ngôn ngữ (tùy chọn)</p>
+
+            <div>
+              <Label htmlFor="nameVi" className="flex items-center gap-2">
+                <span>Tiếng Việt</span>
+              </Label>
+              <Input
+                id="nameVi"
+                {...register("nameVi")}
+                placeholder="Ví dụ: Ăn uống"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="nameEn" className="flex items-center gap-2">
+                <span>English</span>
+              </Label>
+              <Input
+                id="nameEn"
+                {...register("nameEn")}
+                placeholder="e.g. Food & Dining"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="nameJa" className="flex items-center gap-2">
+                <span>Japanese</span>
+              </Label>
+              <Input
+                id="nameJa"
+                {...register("nameJa")}
+                placeholder="例: 食費"
+              />
+            </div>
           </div>
 
           <div>

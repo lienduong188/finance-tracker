@@ -112,3 +112,25 @@ export function formatRelativeTime(date: string | Date, lang: string = "vi"): st
   }
   return formatShortDate(date, lang)
 }
+
+// Get localized category name based on current language
+export function getCategoryName(
+  category: {
+    name: string
+    nameVi?: string | null
+    nameEn?: string | null
+    nameJa?: string | null
+  },
+  lang: string = "vi"
+): string {
+  switch (lang) {
+    case "vi":
+      return category.nameVi || category.name
+    case "en":
+      return category.nameEn || category.name
+    case "ja":
+      return category.nameJa || category.name
+    default:
+      return category.name
+  }
+}
