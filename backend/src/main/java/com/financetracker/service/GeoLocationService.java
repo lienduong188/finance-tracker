@@ -86,8 +86,9 @@ public class GeoLocationService {
 
     private String formatLocation(IpApiResponse response) {
         StringBuilder sb = new StringBuilder();
-        if (response.getCity() != null && !response.getCity().isEmpty()) {
-            sb.append(response.getCity());
+        // Use regionName (prefecture/state) instead of city
+        if (response.getRegionName() != null && !response.getRegionName().isEmpty()) {
+            sb.append(response.getRegionName());
         }
         if (response.getCountry() != null && !response.getCountry().isEmpty()) {
             if (sb.length() > 0) sb.append(", ");
