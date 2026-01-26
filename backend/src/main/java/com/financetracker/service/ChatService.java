@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
@@ -229,8 +230,15 @@ public class ChatService {
                 }
             }
             return getErrorMessage(language, false);
+        } catch (HttpClientErrorException.TooManyRequests e) {
+            log.warn("Gemini API rate limit exceeded (429)");
+            return getMaintenanceMessage(language);
         } catch (Exception e) {
             log.error("Error calling Gemini API", e);
+            // Check if it's a rate limit error in the message
+            if (e.getMessage() != null && e.getMessage().contains("429")) {
+                return getMaintenanceMessage(language);
+            }
             return getErrorMessage(language, true);
         }
     }
@@ -296,6 +304,14 @@ public class ChatService {
             case "en" -> "I understand. I will answer based on your financial data.";
             case "ja" -> "了解しました。あなたの財務データに基づいて回答します。";
             default -> "Toi da hieu. Toi se tra loi dua tren du lieu tai chinh cua ban.";
+        };
+    }
+
+    private String getMaintenanceMessage(String language) {
+        return switch (language) {
+            case "en" -> "🔧 AI Assistant is currently under maintenance. We'll be back soon! Thank you for your patience.";
+            case "ja" -> "🔧 AIアシスタントは現在メンテナンス中です。まもなく復旧いたします。ご理解のほどよろしくお願いいたします。";
+            default -> "🔧 Trợ lý AI đang được bảo trì. Chúng tôi sẽ sớm hoạt động trở lại! Cảm ơn bạn đã kiên nhẫn.";
         };
     }
 
