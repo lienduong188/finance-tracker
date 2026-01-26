@@ -65,17 +65,17 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate);
 
-    @Query(value = "SELECT * FROM transactions t WHERE t.user_id = :userId " +
-           "AND (:accountId IS NULL OR t.account_id = CAST(:accountId AS uuid)) " +
-           "AND (:type IS NULL OR t.type = :type) " +
-           "AND (CAST(:startDate AS date) IS NULL OR t.transaction_date >= :startDate) " +
-           "AND (CAST(:endDate AS date) IS NULL OR t.transaction_date <= :endDate) " +
+    @Query(value = "SELECT * FROM transactions t WHERE t.user_id = CAST(:userId AS uuid) " +
+           "AND (CAST(:accountId AS text) IS NULL OR t.account_id = CAST(:accountId AS uuid)) " +
+           "AND (CAST(:type AS text) IS NULL OR t.type = CAST(:type AS text)) " +
+           "AND (CAST(:startDate AS date) IS NULL OR t.transaction_date >= CAST(:startDate AS date)) " +
+           "AND (CAST(:endDate AS date) IS NULL OR t.transaction_date <= CAST(:endDate AS date)) " +
            "ORDER BY t.transaction_date DESC",
-           countQuery = "SELECT COUNT(*) FROM transactions t WHERE t.user_id = :userId " +
-           "AND (:accountId IS NULL OR t.account_id = CAST(:accountId AS uuid)) " +
-           "AND (:type IS NULL OR t.type = :type) " +
-           "AND (CAST(:startDate AS date) IS NULL OR t.transaction_date >= :startDate) " +
-           "AND (CAST(:endDate AS date) IS NULL OR t.transaction_date <= :endDate)",
+           countQuery = "SELECT COUNT(*) FROM transactions t WHERE t.user_id = CAST(:userId AS uuid) " +
+           "AND (CAST(:accountId AS text) IS NULL OR t.account_id = CAST(:accountId AS uuid)) " +
+           "AND (CAST(:type AS text) IS NULL OR t.type = CAST(:type AS text)) " +
+           "AND (CAST(:startDate AS date) IS NULL OR t.transaction_date >= CAST(:startDate AS date)) " +
+           "AND (CAST(:endDate AS date) IS NULL OR t.transaction_date <= CAST(:endDate AS date))",
            nativeQuery = true)
     Page<Transaction> findByUserIdWithFilters(
             @Param("userId") UUID userId,
