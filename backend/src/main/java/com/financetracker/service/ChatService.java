@@ -31,18 +31,21 @@ public class ChatService {
     private final BudgetRepository budgetRepository;
     private final RestTemplate restTemplate;
 
-    @Value("${gemini.api-key:}")
-    private String geminiApiKey;
+    @Value("${groq.api-key:}")
+    private String groqApiKey;
 
-    @Value("${gemini.api-url:https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent}")
-    private String geminiApiUrl;
+    @Value("${groq.api-url:https://api.groq.com/openai/v1/chat/completions}")
+    private String groqApiUrl;
+
+    @Value("${groq.model:llama-3.3-70b-versatile}")
+    private String groqModel;
 
     private static final int MAX_CONTEXT_MESSAGES = 10;
 
     @Transactional
     public ChatResponse sendMessage(UUID userId, ChatRequest request) {
-        if (geminiApiKey == null || geminiApiKey.isBlank()) {
-            throw ApiException.badRequest("Gemini API key is not configured");
+        if (groqApiKey == null || groqApiKey.isBlank()) {
+            throw ApiException.badRequest("Groq API key is not configured");
         }
 
         User user = userRepository.findById(userId)
@@ -64,9 +67,9 @@ public class ChatService {
                 userId, PageRequest.of(0, MAX_CONTEXT_MESSAGES));
         Collections.reverse(recentMessages);
 
-        // 4. Call Gemini API
+        // 4. Call Groq API
         String language = request.getLanguage() != null ? request.getLanguage() : "vi";
-        String aiResponse = callGeminiApi(financialContext, recentMessages, request.getMessage(), language);
+        String aiResponse = callGroqApi(financialContext, recentMessages, request.getMessage(), language);
 
         // 5. Save assistant response
         ChatMessage assistantMessage = ChatMessage.builder()
@@ -168,74 +171,57 @@ public class ChatService {
     }
 
     @SuppressWarnings("unchecked")
-    private String callGeminiApi(String financialContext, List<ChatMessage> history, String userMessage, String language) {
+    private String callGroqApi(String financialContext, List<ChatMessage> history, String userMessage, String language) {
         String systemPrompt = buildSystemPrompt(language) + financialContext;
-        String ackMessage = getAckMessage(language);
 
-        // Build conversation for Gemini
-        List<Map<String, Object>> contents = new ArrayList<>();
+        // Build messages array for OpenAI-compatible API
+        List<Map<String, String>> messages = new ArrayList<>();
 
-        // Add system context as first user message
-        Map<String, Object> systemContent = new HashMap<>();
-        systemContent.put("role", "user");
-        systemContent.put("parts", List.of(Map.of("text", systemPrompt)));
-        contents.add(systemContent);
-
-        // Add acknowledgment
-        Map<String, Object> ackContent = new HashMap<>();
-        ackContent.put("role", "model");
-        ackContent.put("parts", List.of(Map.of("text", ackMessage)));
-        contents.add(ackContent);
+        // Add system message
+        messages.add(Map.of("role", "system", "content", systemPrompt));
 
         // Add conversation history (skip the just-saved user message since we add it separately)
         for (int i = 0; i < history.size() - 1; i++) {
             ChatMessage msg = history.get(i);
-            Map<String, Object> content = new HashMap<>();
-            content.put("role", msg.getRole() == ChatRole.USER ? "user" : "model");
-            content.put("parts", List.of(Map.of("text", msg.getContent())));
-            contents.add(content);
+            messages.add(Map.of(
+                    "role", msg.getRole() == ChatRole.USER ? "user" : "assistant",
+                    "content", msg.getContent()
+            ));
         }
 
         // Add current user message
-        Map<String, Object> currentMsg = new HashMap<>();
-        currentMsg.put("role", "user");
-        currentMsg.put("parts", List.of(Map.of("text", userMessage)));
-        contents.add(currentMsg);
+        messages.add(Map.of("role", "user", "content", userMessage));
 
         // Build request body
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("contents", contents);
-        requestBody.put("generationConfig", Map.of(
-                "temperature", 0.7,
-                "maxOutputTokens", 1024
-        ));
+        requestBody.put("model", groqModel);
+        requestBody.put("messages", messages);
+        requestBody.put("temperature", 0.7);
+        requestBody.put("max_tokens", 1024);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-
-        String url = geminiApiUrl + "?key=" + geminiApiKey;
+        headers.setBearerAuth(groqApiKey);
 
         try {
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
-            ResponseEntity<Map> response = restTemplate.postForEntity(url, entity, Map.class);
+            ResponseEntity<Map> response = restTemplate.postForEntity(groqApiUrl, entity, Map.class);
 
             if (response.getBody() != null) {
-                List<Map<String, Object>> candidates = (List<Map<String, Object>>) response.getBody().get("candidates");
-                if (candidates != null && !candidates.isEmpty()) {
-                    Map<String, Object> content = (Map<String, Object>) candidates.get(0).get("content");
-                    List<Map<String, Object>> parts = (List<Map<String, Object>>) content.get("parts");
-                    if (parts != null && !parts.isEmpty()) {
-                        return (String) parts.get(0).get("text");
+                List<Map<String, Object>> choices = (List<Map<String, Object>>) response.getBody().get("choices");
+                if (choices != null && !choices.isEmpty()) {
+                    Map<String, Object> message = (Map<String, Object>) choices.get(0).get("message");
+                    if (message != null) {
+                        return (String) message.get("content");
                     }
                 }
             }
             return getErrorMessage(language, false);
         } catch (HttpClientErrorException.TooManyRequests e) {
-            log.warn("Gemini API rate limit exceeded (429)");
+            log.warn("Groq API rate limit exceeded (429)");
             return getMaintenanceMessage(language);
         } catch (Exception e) {
-            log.error("Error calling Gemini API", e);
-            // Check if it's a rate limit error in the message
+            log.error("Error calling Groq API", e);
             if (e.getMessage() != null && e.getMessage().contains("429")) {
                 return getMaintenanceMessage(language);
             }
@@ -296,14 +282,6 @@ public class ChatService {
 
                 DU LIEU TAI CHINH HIEN TAI:
                 """;
-        };
-    }
-
-    private String getAckMessage(String language) {
-        return switch (language) {
-            case "en" -> "I understand. I will answer based on your financial data.";
-            case "ja" -> "了解しました。あなたの財務データに基づいて回答します。";
-            default -> "Toi da hieu. Toi se tra loi dua tren du lieu tai chinh cua ban.";
         };
     }
 
