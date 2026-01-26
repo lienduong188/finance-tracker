@@ -6,10 +6,10 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { X } from "lucide-react"
 import { format } from "date-fns"
-import { Button, Input, Label, Select } from "@/components/ui"
+import { Button, Input, Label } from "@/components/ui"
 import { debtsApi } from "@/api"
 import { cn } from "@/lib/utils"
-import type { Debt, DebtRequest, DebtType } from "@/types"
+import type { Debt, DebtRequest } from "@/types"
 
 const debtSchema = z.object({
   type: z.enum(["LEND", "BORROW"]),
@@ -45,7 +45,6 @@ export function DebtFormModal({ isOpen, onClose, debt }: DebtFormModalProps) {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const isEditing = !!debt
-  const [selectedType, setSelectedType] = useState<DebtType>("LEND")
   const [amountDisplay, setAmountDisplay] = useState("")
 
   const {
@@ -77,7 +76,6 @@ export function DebtFormModal({ isOpen, onClose, debt }: DebtFormModalProps) {
         dueDate: debt.dueDate || "",
         note: debt.note || "",
       })
-      setSelectedType(debt.type)
       setAmountDisplay(formatNumber(debt.amount))
     } else {
       reset({
@@ -89,14 +87,9 @@ export function DebtFormModal({ isOpen, onClose, debt }: DebtFormModalProps) {
         dueDate: "",
         note: "",
       })
-      setSelectedType("LEND")
       setAmountDisplay("")
     }
   }, [debt, reset])
-
-  useEffect(() => {
-    setSelectedType(watchType)
-  }, [watchType])
 
   const createMutation = useMutation({
     mutationFn: (data: DebtRequest) => debtsApi.create(data),
