@@ -128,17 +128,17 @@ public class ChatService {
 
         // Accounts
         context.append("--- TAI KHOAN ---\n");
-        context.append(String.format("Tong so du: %s %s\n", totalBalance, currency));
+        context.append(String.format("Tong so du: %s %s\n", formatAmount(totalBalance), currency));
         for (Account acc : accounts) {
             context.append(String.format("- %s (%s): %s %s\n",
-                    acc.getName(), acc.getType(), acc.getCurrentBalance(), acc.getCurrency()));
+                    acc.getName(), acc.getType(), formatAmount(acc.getCurrentBalance()), acc.getCurrency()));
         }
 
         // Monthly summary
         context.append("\n--- THONG KE THANG NAY ---\n");
-        context.append(String.format("Thu nhap: %s %s\n", monthlyIncome, currency));
-        context.append(String.format("Chi tieu: %s %s\n", monthlyExpense, currency));
-        context.append(String.format("Tiet kiem: %s %s\n", monthlyIncome.subtract(monthlyExpense), currency));
+        context.append(String.format("Thu nhap: %s %s\n", formatAmount(monthlyIncome), currency));
+        context.append(String.format("Chi tieu: %s %s\n", formatAmount(monthlyExpense), currency));
+        context.append(String.format("Tiet kiem: %s %s\n", formatAmount(monthlyIncome.subtract(monthlyExpense)), currency));
 
         // Top categories
         if (!categorySpending.isEmpty()) {
@@ -149,7 +149,7 @@ public class ChatService {
                 String catName = (String) row[1];
                 BigDecimal amount = (BigDecimal) row[2];
                 context.append(String.format("%d. %s: %s %s\n", ++count,
-                        catName != null ? catName : "Khong phan loai", amount, currency));
+                        catName != null ? catName : "Khong phan loai", formatAmount(amount), currency));
             }
         }
 
@@ -163,7 +163,7 @@ public class ChatService {
             context.append("\n--- NGAN SACH VUOT HAN MUC ---\n");
             for (Budget b : overBudget) {
                 context.append(String.format("- %s: Chi %s/%s %s\n",
-                        b.getName(), b.getSpentAmount(), b.getAmount(), b.getCurrency()));
+                        b.getName(), formatAmount(b.getSpentAmount()), formatAmount(b.getAmount()), b.getCurrency()));
             }
         }
 
@@ -277,6 +277,11 @@ public class ChatService {
             case "ja" -> "申し訳ありませんが、現在リクエストを処理できません。後でもう一度お試しください。";
             default -> "Xin loi, toi khong the xu ly yeu cau cua ban luc nay. Vui long thu lai sau.";
         };
+    }
+
+    private String formatAmount(BigDecimal amount) {
+        if (amount == null) return "0";
+        return amount.setScale(0, java.math.RoundingMode.HALF_UP).toPlainString();
     }
 
     private ChatResponse toResponse(ChatMessage message) {
