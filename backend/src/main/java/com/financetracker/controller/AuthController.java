@@ -69,6 +69,7 @@ public class AuthController {
                 .email(userDetails.getEmail())
                 .fullName(userDetails.getFullName())
                 .defaultCurrency(userDetails.getDefaultCurrency())
+                .role(userDetails.getRole().name())
                 .build());
     }
 }
