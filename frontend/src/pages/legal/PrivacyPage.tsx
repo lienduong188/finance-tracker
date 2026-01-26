@@ -1,10 +1,12 @@
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
+import { ArrowLeft } from "lucide-react"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui"
 import { LanguageSwitch } from "@/components/LanguageSwitch"
 
 export function PrivacyPage() {
   const { t } = useTranslation()
+  const navigate = useNavigate()
 
   return (
     <div className="min-h-screen bg-muted px-4 py-8">
@@ -78,9 +80,13 @@ export function PrivacyPage() {
               <Link to="/terms" className="text-primary hover:underline">
                 {t("legal.termsTitle")}
               </Link>
-              <Link to="/register" className="text-primary hover:underline">
-                {t("legal.backToRegister")}
-              </Link>
+              <button
+                onClick={() => navigate(-1)}
+                className="flex items-center gap-1 text-primary hover:underline"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                {t("legal.goBack")}
+              </button>
             </div>
           </CardContent>
         </Card>

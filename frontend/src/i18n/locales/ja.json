@@ -282,7 +282,7 @@
     "termsTitle": "利用規約",
     "privacyTitle": "プライバシーポリシー",
     "lastUpdated": "最終更新日",
-    "backToRegister": "登録に戻る",
+    "goBack": "戻る",
     "agreeToTerms": "登録することで、以下に同意したことになります",
     "and": "と",
     "terms": {
