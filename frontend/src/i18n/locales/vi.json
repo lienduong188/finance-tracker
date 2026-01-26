@@ -224,6 +224,17 @@
     "VND": "VND - Việt Nam Đồng",
     "JPY": "JPY - Yên Nhật"
   },
+  "chat": {
+    "title": "Trợ lý AI",
+    "subtitle": "Hỏi về tài chính của bạn",
+    "clearHistory": "Xóa lịch sử",
+    "welcome": "Xin chào! Tôi có thể giúp bạn:",
+    "hint1": "Tổng kết chi tiêu tháng",
+    "hint2": "Số dư các tài khoản",
+    "hint3": "Top danh mục chi tiêu",
+    "placeholder": "Nhập câu hỏi của bạn...",
+    "thinking": "Đang suy nghĩ..."
+  },
   "categories": {
     "Lương": "Lương",
     "Thưởng": "Thưởng",

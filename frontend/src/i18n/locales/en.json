@@ -224,6 +224,17 @@
     "VND": "VND - Vietnamese Dong",
     "JPY": "JPY - Japanese Yen"
   },
+  "chat": {
+    "title": "AI Assistant",
+    "subtitle": "Ask about your finances",
+    "clearHistory": "Clear history",
+    "welcome": "Hi! I can help you with:",
+    "hint1": "Monthly expenses summary",
+    "hint2": "Account balances",
+    "hint3": "Top spending categories",
+    "placeholder": "Type your question...",
+    "thinking": "Thinking..."
+  },
   "categories": {
     "Lương": "Salary",
     "Thưởng": "Bonus",

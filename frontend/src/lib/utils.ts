@@ -89,3 +89,26 @@ export function formatFullDate(date: string | Date, lang: string = "vi"): string
 export function formatPercent(value: number, decimals: number = 1): string {
   return `${value.toFixed(decimals)}%`
 }
+
+export function formatRelativeTime(date: string | Date, lang: string = "vi"): string {
+  const now = new Date()
+  const d = new Date(date)
+  const diffMs = now.getTime() - d.getTime()
+  const diffMins = Math.floor(diffMs / 60000)
+  const diffHours = Math.floor(diffMs / 3600000)
+  const diffDays = Math.floor(diffMs / 86400000)
+
+  if (diffMins < 1) {
+    return lang === "vi" ? "Vừa xong" : "Just now"
+  }
+  if (diffMins < 60) {
+    return lang === "vi" ? `${diffMins} phút trước` : `${diffMins}m ago`
+  }
+  if (diffHours < 24) {
+    return lang === "vi" ? `${diffHours} giờ trước` : `${diffHours}h ago`
+  }
+  if (diffDays < 7) {
+    return lang === "vi" ? `${diffDays} ngày trước` : `${diffDays}d ago`
+  }
+  return formatShortDate(date, lang)
+}

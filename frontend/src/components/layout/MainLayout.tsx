@@ -3,6 +3,7 @@ import { Outlet, Navigate } from "react-router-dom"
 import { Menu } from "lucide-react"
 import { useAuth } from "@/context/AuthContext"
 import { Sidebar } from "./Sidebar"
+import { ChatWidget } from "@/components/chat/ChatWidget"
 
 export function MainLayout() {
   const { isAuthenticated, isLoading } = useAuth()
@@ -42,6 +43,9 @@ export function MainLayout() {
           <Outlet />
         </div>
       </main>
+
+      {/* AI Chat Widget */}
+      <ChatWidget />
     </div>
   )
 }

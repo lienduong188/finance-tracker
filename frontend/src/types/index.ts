@@ -322,3 +322,29 @@ export interface UpcomingTransaction {
   categoryIcon: string | null
   scheduledDate: string
 }
+
+// Chat types
+export type ChatRole = "USER" | "ASSISTANT"
+
+export interface ChatMessage {
+  id: string
+  role: ChatRole
+  content: string
+  createdAt: string
+}
+
+export interface ChatRequest {
+  message: string
+}
+
+export interface ChatResponse {
+  id: string
+  role: string
+  content: string
+  createdAt: string
+}
+
+export interface ChatHistoryResponse {
+  messages: ChatResponse[]
+  totalCount: number
+}
