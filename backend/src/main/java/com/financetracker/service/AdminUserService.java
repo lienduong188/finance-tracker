@@ -114,6 +114,7 @@ public class AdminUserService {
                 .updatedAt(user.getUpdatedAt())
                 .lastLoginAt(user.getLastLoginAt())
                 .lastLoginIp(user.getLastLoginIp())
+                .lastLoginLocation(user.getLastLoginLocation())
                 .lastUserAgent(user.getLastUserAgent())
                 .accountsCount(accountsCount)
                 .transactionsCount(transactionsCount)

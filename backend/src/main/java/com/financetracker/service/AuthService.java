@@ -29,6 +29,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final GeoLocationService geoLocationService;
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
@@ -71,9 +72,15 @@ public class AuthService {
                 .orElseThrow(() -> ApiException.notFound("User"));
 
         // Update login tracking info
+        String clientIp = getClientIp(httpRequest);
         user.setLastLoginAt(OffsetDateTime.now());
-        user.setLastLoginIp(getClientIp(httpRequest));
+        user.setLastLoginIp(clientIp);
         user.setLastUserAgent(httpRequest.getHeader("User-Agent"));
+
+        // Get location from IP (sync call - fast enough for login)
+        String location = geoLocationService.getLocation(clientIp);
+        user.setLastLoginLocation(location);
+
         userRepository.save(user);
 
         CustomUserDetails userDetails = new CustomUserDetails(user);

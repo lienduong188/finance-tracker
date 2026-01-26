@@ -239,6 +239,7 @@ export interface AdminUser {
   updatedAt: string
   lastLoginAt: string | null
   lastLoginIp: string | null
+  lastLoginLocation: string | null
   lastUserAgent: string | null
   accountsCount: number
   transactionsCount: number

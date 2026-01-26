@@ -27,6 +27,7 @@ public class AdminUserResponse {
     // Login tracking
     private OffsetDateTime lastLoginAt;
     private String lastLoginIp;
+    private String lastLoginLocation;
     private String lastUserAgent;
 
     // Statistics

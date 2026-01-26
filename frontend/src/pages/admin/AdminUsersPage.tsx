@@ -10,7 +10,7 @@ import {
   ChevronRight,
   UserCheck,
   UserX,
-  Globe,
+  MapPin,
   Monitor,
   Clock,
 } from "lucide-react"
@@ -207,10 +207,12 @@ export function AdminUsersPage() {
                           <Clock className="h-3 w-3" />
                           <span>{new Date(user.lastLoginAt).toLocaleString("vi-VN")}</span>
                         </div>
-                        {user.lastLoginIp && (
-                          <div className="flex items-center gap-1 text-muted-foreground">
-                            <Globe className="h-3 w-3" />
-                            <span className="font-mono text-xs">{user.lastLoginIp}</span>
+                        {(user.lastLoginLocation || user.lastLoginIp) && (
+                          <div className="flex items-center gap-1 text-muted-foreground" title={user.lastLoginIp || undefined}>
+                            <MapPin className="h-3 w-3" />
+                            <span className="text-xs">
+                              {user.lastLoginLocation || user.lastLoginIp}
+                            </span>
                           </div>
                         )}
                         {user.lastUserAgent && (

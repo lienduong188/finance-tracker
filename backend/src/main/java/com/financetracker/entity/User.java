@@ -47,6 +47,9 @@ public class User extends BaseEntity {
     @Column(name = "last_user_agent", length = 500)
     private String lastUserAgent;
 
+    @Column(name = "last_login_location", length = 200)
+    private String lastLoginLocation;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Account> accounts = new ArrayList<>();
