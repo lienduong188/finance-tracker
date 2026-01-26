@@ -8,6 +8,7 @@ import { ChatWidget } from "@/components/chat/ChatWidget"
 export function MainLayout() {
   const { isAuthenticated, isLoading } = useAuth()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [chatOpen, setChatOpen] = useState(false)
 
   if (isLoading) {
     return (
@@ -35,7 +36,7 @@ export function MainLayout() {
         <h1 className="ml-3 text-lg font-bold text-primary">Finance Tracker</h1>
       </header>
 
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} onOpenChat={() => setChatOpen(true)} />
 
       {/* Main content - full width on mobile/tablet, offset on desktop */}
       <main className="min-h-screen pt-14 lg:ml-64 lg:pt-0">
@@ -45,7 +46,7 @@ export function MainLayout() {
       </main>
 
       {/* AI Chat Widget */}
-      <ChatWidget />
+      <ChatWidget isOpen={chatOpen} onOpenChange={setChatOpen} />
     </div>
   )
 }

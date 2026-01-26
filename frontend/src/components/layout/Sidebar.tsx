@@ -10,6 +10,7 @@ import {
   LogOut,
   Shield,
   X,
+  MessageCircle,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/context/AuthContext"
@@ -26,9 +27,10 @@ const navItems = [
 interface SidebarProps {
   isOpen?: boolean
   onClose?: () => void
+  onOpenChat?: () => void
 }
 
-export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
+export function Sidebar({ isOpen = true, onClose, onOpenChat }: SidebarProps) {
   const { user, isAdmin, logout } = useAuth()
   const { t } = useTranslation()
 
@@ -91,6 +93,18 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                 {t(item.labelKey)}
               </NavLink>
             ))}
+
+            {/* AI Assistant - only show on mobile/tablet */}
+            <button
+              onClick={() => {
+                onOpenChat?.()
+                onClose?.()
+              }}
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground lg:hidden"
+            >
+              <MessageCircle className="h-5 w-5" />
+              {t("chat.title", "AI Assistant")}
+            </button>
 
             {/* Admin Panel Link */}
             {isAdmin && (

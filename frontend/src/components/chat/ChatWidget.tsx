@@ -7,12 +7,27 @@ import { chatApi } from "@/api"
 import { cn, formatRelativeTime } from "@/lib/utils"
 import type { ChatResponse } from "@/types"
 
-export function ChatWidget() {
+interface ChatWidgetProps {
+  isOpen?: boolean
+  onOpenChange?: (open: boolean) => void
+}
+
+export function ChatWidget({ isOpen: controlledIsOpen, onOpenChange }: ChatWidgetProps) {
   const { t, i18n } = useTranslation()
   const queryClient = useQueryClient()
-  const [isOpen, setIsOpen] = useState(false)
+  const [internalIsOpen, setInternalIsOpen] = useState(false)
   const [message, setMessage] = useState("")
   const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  // Use controlled state if provided, otherwise use internal state
+  const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : internalIsOpen
+  const setIsOpen = (value: boolean) => {
+    if (onOpenChange) {
+      onOpenChange(value)
+    } else {
+      setInternalIsOpen(value)
+    }
+  }
 
   // Fetch chat history
   const { data: history, isLoading: historyLoading } = useQuery({
@@ -63,12 +78,12 @@ export function ChatWidget() {
 
   return (
     <>
-      {/* Floating Button */}
+      {/* Floating Button - hidden on mobile/tablet, only show on desktop */}
       <button
         onClick={() => setIsOpen(true)}
         className={cn(
-          "fixed bottom-4 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-all hover:scale-105 hover:shadow-xl",
-          isOpen && "hidden"
+          "fixed bottom-4 right-4 z-50 hidden h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-all hover:scale-105 hover:shadow-xl lg:flex",
+          isOpen && "lg:hidden"
         )}
         aria-label="Open chat"
       >
