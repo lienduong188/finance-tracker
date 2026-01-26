@@ -20,7 +20,15 @@ export const authApi = {
   },
 
   me: async (): Promise<User> => {
-    const response = await apiClient.get<User>("/auth/me")
-    return response.data
+    const response = await apiClient.get<AuthResponse>("/auth/me")
+    const data = response.data
+    return {
+      id: data.userId,
+      email: data.email,
+      fullName: data.fullName,
+      defaultCurrency: data.defaultCurrency || "VND",
+      role: data.role || "USER",
+      createdAt: new Date().toISOString(),
+    }
   },
 }
