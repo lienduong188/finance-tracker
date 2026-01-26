@@ -5,6 +5,7 @@ import com.financetracker.entity.TransactionType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -16,7 +17,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface TransactionRepository extends JpaRepository<Transaction, UUID> {
+public interface TransactionRepository extends JpaRepository<Transaction, UUID>, JpaSpecificationExecutor<Transaction> {
 
     List<Transaction> findByUserId(UUID userId);
 
@@ -65,23 +66,4 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate);
 
-    @Query(value = "SELECT * FROM transactions t WHERE t.user_id = CAST(:userId AS uuid) " +
-           "AND (CAST(:accountId AS text) IS NULL OR t.account_id = CAST(:accountId AS uuid)) " +
-           "AND (CAST(:type AS text) IS NULL OR t.type = CAST(:type AS text)) " +
-           "AND (CAST(:startDate AS date) IS NULL OR t.transaction_date >= CAST(:startDate AS date)) " +
-           "AND (CAST(:endDate AS date) IS NULL OR t.transaction_date <= CAST(:endDate AS date)) " +
-           "ORDER BY t.transaction_date DESC",
-           countQuery = "SELECT COUNT(*) FROM transactions t WHERE t.user_id = CAST(:userId AS uuid) " +
-           "AND (CAST(:accountId AS text) IS NULL OR t.account_id = CAST(:accountId AS uuid)) " +
-           "AND (CAST(:type AS text) IS NULL OR t.type = CAST(:type AS text)) " +
-           "AND (CAST(:startDate AS date) IS NULL OR t.transaction_date >= CAST(:startDate AS date)) " +
-           "AND (CAST(:endDate AS date) IS NULL OR t.transaction_date <= CAST(:endDate AS date))",
-           nativeQuery = true)
-    Page<Transaction> findByUserIdWithFilters(
-            @Param("userId") UUID userId,
-            @Param("accountId") UUID accountId,
-            @Param("type") String type,
-            @Param("startDate") LocalDate startDate,
-            @Param("endDate") LocalDate endDate,
-            Pageable pageable);
 }

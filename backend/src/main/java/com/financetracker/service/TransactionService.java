@@ -35,7 +35,8 @@ public class TransactionService {
 
     public Page<TransactionResponse> getTransactionsWithFilters(UUID userId, UUID accountId,
             String type, LocalDate startDate, LocalDate endDate, Pageable pageable) {
-        return transactionRepository.findByUserIdWithFilters(userId, accountId, type, startDate, endDate, pageable)
+        var spec = TransactionSpecification.withFilters(userId, accountId, type, startDate, endDate);
+        return transactionRepository.findAll(spec, pageable)
                 .map(this::toResponse);
     }
 
