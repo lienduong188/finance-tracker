@@ -50,7 +50,8 @@
     "redirectingToLogin": "ログインページにリダイレクトしています...",
     "goToLogin": "ログインへ",
     "invalidResetToken": "無効または期限切れのリセットトークン",
-    "requestNewToken": "新しいトークンをリクエスト"
+    "requestNewToken": "新しいトークンをリクエスト",
+    "sessionExpired": "操作がなかったため、セッションが終了しました。再度ログインしてください。"
   },
   "validation": {
     "required": "この項目は必須です",

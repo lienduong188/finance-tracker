@@ -50,7 +50,8 @@
     "redirectingToLogin": "Redirecting to login page...",
     "goToLogin": "Go to login",
     "invalidResetToken": "Invalid or expired reset token",
-    "requestNewToken": "Request new token"
+    "requestNewToken": "Request new token",
+    "sessionExpired": "Your session has expired due to inactivity. Please log in again."
   },
   "validation": {
     "required": "This field is required",

@@ -50,7 +50,8 @@
     "redirectingToLogin": "Đang chuyển hướng đến trang đăng nhập...",
     "goToLogin": "Đi đến đăng nhập",
     "invalidResetToken": "Token không hợp lệ hoặc đã hết hạn",
-    "requestNewToken": "Yêu cầu token mới"
+    "requestNewToken": "Yêu cầu token mới",
+    "sessionExpired": "Phiên đăng nhập đã hết hạn do không hoạt động. Vui lòng đăng nhập lại."
   },
   "validation": {
     "required": "Trường này là bắt buộc",

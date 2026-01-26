@@ -1,5 +1,5 @@
-import { useState } from "react"
-import { Link, Navigate } from "react-router-dom"
+import { useState, useEffect } from "react"
+import { Link, Navigate, useSearchParams } from "react-router-dom"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -11,8 +11,19 @@ import { LanguageSwitch } from "@/components/LanguageSwitch"
 export function LoginPage() {
   const { t } = useTranslation()
   const { login, isAuthenticated } = useAuth()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [sessionExpired, setSessionExpired] = useState(false)
+
+  useEffect(() => {
+    if (searchParams.get("expired") === "true") {
+      setSessionExpired(true)
+      // Clear the URL param
+      searchParams.delete("expired")
+      setSearchParams(searchParams, { replace: true })
+    }
+  }, [searchParams, setSearchParams])
 
   const loginSchema = z.object({
     email: z.string().email(t("validation.emailInvalid")),
@@ -58,6 +69,12 @@ export function LoginPage() {
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardContent className="space-y-4 p-4 pt-0 md:p-6 md:pt-0">
+            {sessionExpired && (
+              <div className="rounded-md bg-amber-500/10 p-3 text-sm text-amber-600">
+                {t("auth.sessionExpired")}
+              </div>
+            )}
+
             {error && (
               <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
                 {error}
