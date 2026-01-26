@@ -28,6 +28,10 @@ export function ChatWidget() {
       queryClient.invalidateQueries({ queryKey: ["chat-history"] })
       setMessage("")
     },
+    onError: (error: Error) => {
+      console.error("Chat error:", error)
+      alert(error.message || "Failed to send message")
+    },
   })
 
   // Clear history mutation
