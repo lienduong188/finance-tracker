@@ -8,6 +8,7 @@ import { X } from "lucide-react"
 import { Button, Input, Label, Select, EmojiPicker } from "@/components/ui"
 import { accountsApi } from "@/api"
 import { useAuth } from "@/context/AuthContext"
+import { VALIDATION } from "@/lib/validation"
 import type { Account, AccountRequest } from "@/types"
 
 interface AccountFormModalProps {
@@ -35,16 +36,18 @@ export function AccountFormModal({ isOpen, onClose, account }: AccountFormModalP
   const defaultCurrency = user?.defaultCurrency || "VND"
 
   const accountSchema = z.object({
-    name: z.string().min(1, t("validation.required")),
+    name: z.string()
+      .min(1, t("validation.required"))
+      .max(VALIDATION.NAME_MAX, t("errors.validation.maxLength", { field: t("accounts.accountName"), max: VALIDATION.NAME_MAX })),
     type: z.enum(["CASH", "BANK", "E_WALLET", "CREDIT_CARD"]),
     currency: z.string(),
-    initialBalance: z.number().min(0, t("validation.balanceMin")),
+    initialBalance: z.number().min(0, t("validation.balanceMin")).max(VALIDATION.AMOUNT_MAX),
     icon: z.string().optional(),
     color: z.string().optional(),
     // Credit card specific fields
-    creditLimit: z.number().min(0).optional(),
-    billingDay: z.number().min(1).max(31).optional(),
-    paymentDueDay: z.number().min(1).max(31).optional(),
+    creditLimit: z.number().min(0).max(VALIDATION.AMOUNT_MAX).optional(),
+    billingDay: z.number().min(VALIDATION.BILLING_DAY_MIN).max(VALIDATION.BILLING_DAY_MAX).optional(),
+    paymentDueDay: z.number().min(VALIDATION.BILLING_DAY_MIN).max(VALIDATION.BILLING_DAY_MAX).optional(),
   })
 
   type AccountForm = z.infer<typeof accountSchema>

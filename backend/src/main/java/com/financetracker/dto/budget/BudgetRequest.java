@@ -1,9 +1,7 @@
 package com.financetracker.dto.budget;
 
 import com.financetracker.entity.BudgetPeriod;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,14 +18,17 @@ import java.util.UUID;
 public class BudgetRequest {
 
     @NotBlank(message = "Budget name is required")
+    @Size(max = 100, message = "Budget name must not exceed 100 characters")
     private String name;
 
     private UUID categoryId;
 
     @NotNull(message = "Amount is required")
     @Positive(message = "Amount must be positive")
+    @DecimalMax(value = "999999999999.99", message = "Amount must not exceed 999,999,999,999.99")
     private BigDecimal amount;
 
+    @Size(min = 3, max = 3, message = "Currency must be 3 characters")
     private String currency = "VND";
 
     @NotNull(message = "Period is required")
@@ -38,5 +39,7 @@ public class BudgetRequest {
 
     private LocalDate endDate;
 
+    @Min(value = 1, message = "Alert threshold must be between 1 and 100")
+    @Max(value = 100, message = "Alert threshold must be between 1 and 100")
     private Integer alertThreshold = 80;
 }

@@ -8,20 +8,27 @@ import { X } from "lucide-react"
 import { format } from "date-fns"
 import { Button, Input, Label, Select } from "@/components/ui"
 import { budgetsApi, categoriesApi } from "@/api"
+import { VALIDATION } from "@/lib/validation"
 import type { Budget, BudgetRequest } from "@/types"
 
-const budgetSchema = z.object({
-  name: z.string().min(1, "Tên ngân sách là bắt buộc"),
-  categoryId: z.string().optional(),
-  amount: z.number().positive("Hạn mức phải lớn hơn 0"),
-  currency: z.string(),
-  period: z.enum(["DAILY", "WEEKLY", "MONTHLY", "YEARLY", "CUSTOM"]),
-  startDate: z.string(),
-  endDate: z.string().optional(),
-  alertThreshold: z.number().min(1).max(100),
-})
+type BudgetForm = z.infer<ReturnType<typeof createBudgetSchema>>
 
-type BudgetForm = z.infer<typeof budgetSchema>
+function createBudgetSchema(t: (key: string, options?: Record<string, unknown>) => string) {
+  return z.object({
+    name: z.string()
+      .min(1, t("validation.required"))
+      .max(VALIDATION.NAME_MAX, t("errors.validation.maxLength", { field: t("budgets.budgetName"), max: VALIDATION.NAME_MAX })),
+    categoryId: z.string().optional(),
+    amount: z.number()
+      .positive(t("validation.balanceMin"))
+      .max(VALIDATION.AMOUNT_MAX, t("errors.validation.maxValue", { field: t("budgets.amount"), max: VALIDATION.AMOUNT_MAX.toLocaleString() })),
+    currency: z.string(),
+    period: z.enum(["DAILY", "WEEKLY", "MONTHLY", "YEARLY", "CUSTOM"]),
+    startDate: z.string(),
+    endDate: z.string().optional(),
+    alertThreshold: z.number().min(VALIDATION.ALERT_THRESHOLD_MIN).max(VALIDATION.ALERT_THRESHOLD_MAX),
+  })
+}
 
 interface BudgetFormModalProps {
   isOpen: boolean
@@ -33,6 +40,8 @@ export function BudgetFormModal({ isOpen, onClose, budget }: BudgetFormModalProp
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const isEditing = !!budget
+
+  const budgetSchema = createBudgetSchema(t)
 
   const {
     register,

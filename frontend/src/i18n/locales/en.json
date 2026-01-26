@@ -377,5 +377,40 @@
         "content": "If you have questions about the Privacy Policy or wish to exercise your rights, please contact Admin via email privacy@duonglien.com or use the support chatbot on the website."
       }
     }
+  },
+  "errors": {
+    "auth": {
+      "invalidCredentials": "Invalid email or password",
+      "emailExists": "Email is already registered",
+      "invalidToken": "Invalid token",
+      "tokenExpired": "Token has expired",
+      "accountDisabled": "Account has been disabled"
+    },
+    "validation": {
+      "failed": "Validation failed",
+      "required": "{{field}} is required",
+      "emailInvalid": "Invalid email format",
+      "passwordWeak": "Password must be at least 8 characters with uppercase, lowercase, and number",
+      "maxLength": "{{field}} must not exceed {{max}} characters",
+      "minValue": "{{field}} must be greater than {{min}}",
+      "maxValue": "{{field}} must not exceed {{max}}"
+    },
+    "resource": {
+      "notFound": "{{resource}} not found",
+      "exists": "{{resource}} already exists",
+      "accessDenied": "You do not have permission to access this resource"
+    },
+    "transaction": {
+      "insufficientBalance": "Insufficient balance",
+      "invalidTransfer": "Invalid transfer",
+      "sameAccount": "Cannot transfer to the same account"
+    },
+    "budget": {
+      "periodOverlap": "Budget period overlaps with an existing budget"
+    },
+    "system": {
+      "internal": "An error occurred. Please try again.",
+      "unavailable": "Service is temporarily unavailable"
+    }
   }
 }

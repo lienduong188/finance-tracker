@@ -18,7 +18,9 @@ public class ErrorResponse {
 
     private OffsetDateTime timestamp;
     private int status;
-    private String code;
-    private String message;
-    private Map<String, String> errors;
+    private String code;        // Error code: AUTH_001, VAL_001, etc.
+    private String message;     // Default English message
+    private String messageKey;  // i18n key: "errors.auth.invalidCredentials"
+    private Map<String, String> errors;      // Field validation errors
+    private Map<String, String> errorKeys;   // Field error i18n keys
 }

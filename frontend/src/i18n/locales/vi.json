@@ -377,5 +377,40 @@
         "content": "Nếu bạn có câu hỏi về Chính sách bảo mật hoặc muốn thực hiện các quyền của mình, vui lòng liên hệ Admin qua email privacy@duonglien.com hoặc sử dụng chatbot hỗ trợ trên trang web."
       }
     }
+  },
+  "errors": {
+    "auth": {
+      "invalidCredentials": "Email hoặc mật khẩu không đúng",
+      "emailExists": "Email đã được đăng ký",
+      "invalidToken": "Token không hợp lệ",
+      "tokenExpired": "Token đã hết hạn",
+      "accountDisabled": "Tài khoản đã bị vô hiệu hóa"
+    },
+    "validation": {
+      "failed": "Dữ liệu không hợp lệ",
+      "required": "{{field}} là bắt buộc",
+      "emailInvalid": "Email không hợp lệ",
+      "passwordWeak": "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường và số",
+      "maxLength": "{{field}} không được vượt quá {{max}} ký tự",
+      "minValue": "{{field}} phải lớn hơn {{min}}",
+      "maxValue": "{{field}} không được vượt quá {{max}}"
+    },
+    "resource": {
+      "notFound": "Không tìm thấy {{resource}}",
+      "exists": "{{resource}} đã tồn tại",
+      "accessDenied": "Bạn không có quyền truy cập"
+    },
+    "transaction": {
+      "insufficientBalance": "Số dư không đủ",
+      "invalidTransfer": "Chuyển khoản không hợp lệ",
+      "sameAccount": "Không thể chuyển khoản cùng tài khoản"
+    },
+    "budget": {
+      "periodOverlap": "Chu kỳ ngân sách bị trùng lặp"
+    },
+    "system": {
+      "internal": "Đã xảy ra lỗi. Vui lòng thử lại.",
+      "unavailable": "Dịch vụ tạm thời không khả dụng"
+    }
   }
 }

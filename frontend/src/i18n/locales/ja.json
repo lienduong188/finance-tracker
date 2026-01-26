@@ -377,5 +377,40 @@
         "content": "プライバシーポリシーについてご質問がある場合、または権利を行使したい場合は、privacy@duonglien.comまでメールでお問い合わせいただくか、ウェブサイトのサポートチャットボットをご利用ください。"
       }
     }
+  },
+  "errors": {
+    "auth": {
+      "invalidCredentials": "メールアドレスまたはパスワードが正しくありません",
+      "emailExists": "このメールアドレスは既に登録されています",
+      "invalidToken": "無効なトークン",
+      "tokenExpired": "トークンの有効期限が切れています",
+      "accountDisabled": "アカウントが無効化されています"
+    },
+    "validation": {
+      "failed": "入力内容に誤りがあります",
+      "required": "{{field}}は必須です",
+      "emailInvalid": "メールアドレスの形式が正しくありません",
+      "passwordWeak": "パスワードは8文字以上で、大文字、小文字、数字を含む必要があります",
+      "maxLength": "{{field}}は{{max}}文字以内で入力してください",
+      "minValue": "{{field}}は{{min}}より大きい値を入力してください",
+      "maxValue": "{{field}}は{{max}}を超えることはできません"
+    },
+    "resource": {
+      "notFound": "{{resource}}が見つかりません",
+      "exists": "{{resource}}は既に存在します",
+      "accessDenied": "アクセス権限がありません"
+    },
+    "transaction": {
+      "insufficientBalance": "残高が不足しています",
+      "invalidTransfer": "無効な振替です",
+      "sameAccount": "同じ口座への振替はできません"
+    },
+    "budget": {
+      "periodOverlap": "予算期間が重複しています"
+    },
+    "system": {
+      "internal": "エラーが発生しました。もう一度お試しください。",
+      "unavailable": "サービスは一時的に利用できません"
+    }
   }
 }

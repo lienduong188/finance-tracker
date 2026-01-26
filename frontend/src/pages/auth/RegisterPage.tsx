@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next"
 import { useAuth } from "@/context/AuthContext"
 import { Button, Input, Label, Select, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui"
 import { LanguageSwitch } from "@/components/LanguageSwitch"
+import { VALIDATION, PASSWORD_REGEX } from "@/lib/validation"
 
 export function RegisterPage() {
   const { t } = useTranslation()
@@ -15,9 +16,13 @@ export function RegisterPage() {
   const [error, setError] = useState<string | null>(null)
 
   const registerSchema = z.object({
-    fullName: z.string().min(2, t("validation.nameMin", { min: 2 })),
+    fullName: z.string()
+      .min(VALIDATION.NAME_MIN, t("validation.nameMin", { min: VALIDATION.NAME_MIN }))
+      .max(VALIDATION.NAME_MAX, t("errors.validation.maxLength", { field: t("auth.fullName"), max: VALIDATION.NAME_MAX })),
     email: z.string().email(t("validation.emailInvalid")),
-    password: z.string().min(6, t("validation.passwordMin", { min: 6 })),
+    password: z.string()
+      .min(VALIDATION.PASSWORD_MIN, t("validation.passwordMin", { min: VALIDATION.PASSWORD_MIN }))
+      .regex(PASSWORD_REGEX, t("errors.validation.passwordWeak")),
     confirmPassword: z.string(),
     defaultCurrency: z.string(),
   }).refine((data) => data.password === data.confirmPassword, {

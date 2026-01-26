@@ -10,6 +10,25 @@ export const apiClient = axios.create({
   },
 })
 
+// Flag to prevent multiple refresh requests
+let isRefreshing = false
+// Queue of failed requests to retry after refresh
+let failedQueue: Array<{
+  resolve: (value: unknown) => void
+  reject: (reason?: unknown) => void
+}> = []
+
+const processQueue = (error: Error | null, token: string | null = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error)
+    } else {
+      prom.resolve(token)
+    }
+  })
+  failedQueue = []
+}
+
 // Request interceptor - add auth token
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
@@ -26,9 +45,26 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError<ApiError>) => {
-    const originalRequest = error.config
+    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean }
 
-    if (error.response?.status === 401 && originalRequest) {
+    if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
+      if (isRefreshing) {
+        // If refresh is in progress, queue this request
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject })
+        })
+          .then((token) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`
+            return apiClient(originalRequest)
+          })
+          .catch((err) => {
+            return Promise.reject(err)
+          })
+      }
+
+      originalRequest._retry = true
+      isRefreshing = true
+
       const refreshToken = localStorage.getItem("refreshToken")
 
       if (refreshToken) {
@@ -41,15 +77,22 @@ apiClient.interceptors.response.use(
           localStorage.setItem("accessToken", accessToken)
           localStorage.setItem("refreshToken", newRefreshToken)
 
+          processQueue(null, accessToken)
+
           originalRequest.headers.Authorization = `Bearer ${accessToken}`
           return apiClient(originalRequest)
-        } catch {
+        } catch (refreshError) {
+          processQueue(refreshError as Error, null)
           // Refresh failed, clear tokens and redirect to login
           localStorage.removeItem("accessToken")
           localStorage.removeItem("refreshToken")
           window.location.href = "/login"
+          return Promise.reject(refreshError)
+        } finally {
+          isRefreshing = false
         }
       } else {
+        isRefreshing = false
         window.location.href = "/login"
       }
     }
@@ -57,5 +100,17 @@ apiClient.interceptors.response.use(
     return Promise.reject(error)
   }
 )
+
+// Logout API call
+export const logoutApi = async (): Promise<void> => {
+  const refreshToken = localStorage.getItem("refreshToken")
+  if (refreshToken) {
+    try {
+      await apiClient.post("/auth/logout", { refreshToken })
+    } catch {
+      // Ignore errors during logout - we'll clear tokens anyway
+    }
+  }
+}
 
 export default apiClient

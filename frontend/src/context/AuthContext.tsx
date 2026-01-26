@@ -6,6 +6,7 @@ import {
   type ReactNode,
 } from "react"
 import { authApi } from "@/api"
+import { logoutApi } from "@/api/client"
 import type { AuthResponse, LoginRequest, RegisterRequest, User } from "@/types"
 
 interface AuthContextType {
@@ -15,7 +16,7 @@ interface AuthContextType {
   isLoading: boolean
   login: (data: LoginRequest) => Promise<void>
   register: (data: RegisterRequest) => Promise<void>
-  logout: () => void
+  logout: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -65,7 +66,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     handleAuthResponse(response)
   }
 
-  const logout = () => {
+  const logout = async () => {
+    // Call logout API to revoke refresh token
+    await logoutApi()
+    // Clear local storage
     localStorage.removeItem("accessToken")
     localStorage.removeItem("refreshToken")
     setUser(null)

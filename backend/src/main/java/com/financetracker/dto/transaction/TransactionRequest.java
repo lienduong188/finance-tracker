@@ -1,8 +1,7 @@
 package com.financetracker.dto.transaction;
 
 import com.financetracker.entity.TransactionType;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,10 +27,13 @@ public class TransactionRequest {
 
     @NotNull(message = "Amount is required")
     @Positive(message = "Amount must be positive")
+    @DecimalMax(value = "999999999999.99", message = "Amount must not exceed 999,999,999,999.99")
     private BigDecimal amount;
 
+    @Size(min = 3, max = 3, message = "Currency must be 3 characters")
     private String currency;
 
+    @Size(max = 500, message = "Description must not exceed 500 characters")
     private String description;
 
     @NotNull(message = "Transaction date is required")
@@ -39,5 +41,7 @@ public class TransactionRequest {
 
     // For TRANSFER type
     private UUID toAccountId;
+
+    @Positive(message = "Exchange rate must be positive")
     private BigDecimal exchangeRate;
 }

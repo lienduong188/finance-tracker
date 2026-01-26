@@ -9,6 +9,7 @@ import { format } from "date-fns"
 import { Button, Input, Label, Select } from "@/components/ui"
 import { transactionsApi, accountsApi, categoriesApi } from "@/api"
 import { cn, getCategoryName } from "@/lib/utils"
+import { VALIDATION } from "@/lib/validation"
 import type { Transaction, TransactionRequest, TransactionType } from "@/types"
 
 // Format number with thousand separators
@@ -51,8 +52,12 @@ export function TransactionFormModal({
     accountId: z.string().min(1, t("validation.required")),
     categoryId: z.string().optional(),
     type: z.enum(["INCOME", "EXPENSE", "TRANSFER"]),
-    amount: z.number().positive(t("validation.balanceMin")),
-    description: z.string().optional(),
+    amount: z.number()
+      .positive(t("validation.balanceMin"))
+      .max(VALIDATION.AMOUNT_MAX, t("errors.validation.maxValue", { field: t("transactions.amount"), max: VALIDATION.AMOUNT_MAX.toLocaleString() })),
+    description: z.string()
+      .max(VALIDATION.DESCRIPTION_MAX, t("errors.validation.maxLength", { field: t("transactions.description"), max: VALIDATION.DESCRIPTION_MAX }))
+      .optional(),
     transactionDate: z.string(),
     toAccountId: z.string().optional(),
   })

@@ -227,7 +227,13 @@ export interface ApiError {
   status: number
   code: string
   message: string
+  messageKey?: string
   errors?: Record<string, string>
+  errorKeys?: Record<string, string>
+}
+
+export interface LogoutRequest {
+  refreshToken: string
 }
 
 // Admin types

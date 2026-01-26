@@ -3,16 +3,21 @@ package com.financetracker.service;
 import com.financetracker.dto.auth.AuthResponse;
 import com.financetracker.dto.auth.ForgotPasswordRequest;
 import com.financetracker.dto.auth.LoginRequest;
+import com.financetracker.dto.auth.LogoutRequest;
 import com.financetracker.dto.auth.RefreshTokenRequest;
 import com.financetracker.dto.auth.RegisterRequest;
 import com.financetracker.dto.auth.ResetPasswordRequest;
+import com.financetracker.entity.RefreshToken;
 import com.financetracker.entity.User;
 import com.financetracker.exception.ApiException;
+import com.financetracker.exception.ErrorCode;
+import com.financetracker.repository.RefreshTokenRepository;
 import com.financetracker.repository.UserRepository;
 import com.financetracker.security.CustomUserDetails;
 import com.financetracker.security.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,21 +25,28 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final GeoLocationService geoLocationService;
 
+    @Value("${jwt.refresh-token-expiration:604800000}")
+    private long refreshTokenExpiration; // Default 7 days
+
+    private static final int MAX_REFRESH_TOKENS_PER_USER = 5;
+
     @Transactional
-    public AuthResponse register(RegisterRequest request) {
+    public AuthResponse register(RegisterRequest request, HttpServletRequest httpRequest) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw ApiException.conflict("Email already registered");
+            throw new ApiException(ErrorCode.AUTH_002);
         }
 
         User user = User.builder()
@@ -48,11 +60,11 @@ public class AuthService {
 
         CustomUserDetails userDetails = new CustomUserDetails(user);
         String accessToken = jwtService.generateToken(userDetails, user.getId());
-        String refreshToken = jwtService.generateRefreshToken(userDetails, user.getId());
+        String refreshTokenStr = createRefreshToken(user, httpRequest);
 
         return AuthResponse.builder()
                 .accessToken(accessToken)
-                .refreshToken(refreshToken)
+                .refreshToken(refreshTokenStr)
                 .tokenType("Bearer")
                 .userId(user.getId())
                 .email(user.getEmail())
@@ -60,6 +72,12 @@ public class AuthService {
                 .defaultCurrency(user.getDefaultCurrency())
                 .role(user.getRole().name())
                 .build();
+    }
+
+    // Keep backward compatible method
+    @Transactional
+    public AuthResponse register(RegisterRequest request) {
+        return register(request, null);
     }
 
     @Transactional
@@ -70,6 +88,10 @@ public class AuthService {
 
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> ApiException.notFound("User"));
+
+        if (!user.getEnabled()) {
+            throw new ApiException(ErrorCode.AUTH_005);
+        }
 
         // Update login tracking info
         String clientIp = getClientIp(httpRequest);
@@ -85,11 +107,11 @@ public class AuthService {
 
         CustomUserDetails userDetails = new CustomUserDetails(user);
         String accessToken = jwtService.generateToken(userDetails, user.getId());
-        String refreshToken = jwtService.generateRefreshToken(userDetails, user.getId());
+        String refreshTokenStr = createRefreshToken(user, httpRequest);
 
         return AuthResponse.builder()
                 .accessToken(accessToken)
-                .refreshToken(refreshToken)
+                .refreshToken(refreshTokenStr)
                 .tokenType("Bearer")
                 .userId(user.getId())
                 .email(user.getEmail())
@@ -99,7 +121,31 @@ public class AuthService {
                 .build();
     }
 
+    private String createRefreshToken(User user, HttpServletRequest httpRequest) {
+        // Clean up if user has too many active tokens
+        long activeTokenCount = refreshTokenRepository.countByUserAndRevokedFalse(user);
+        if (activeTokenCount >= MAX_REFRESH_TOKENS_PER_USER) {
+            refreshTokenRepository.revokeAllByUser(user);
+        }
+
+        String tokenStr = UUID.randomUUID().toString();
+        OffsetDateTime expiresAt = OffsetDateTime.now().plusSeconds(refreshTokenExpiration / 1000);
+
+        RefreshToken refreshToken = RefreshToken.builder()
+                .user(user)
+                .token(tokenStr)
+                .expiresAt(expiresAt)
+                .deviceInfo(httpRequest != null ? httpRequest.getHeader("User-Agent") : null)
+                .ipAddress(httpRequest != null ? getClientIp(httpRequest) : null)
+                .build();
+
+        refreshTokenRepository.save(refreshToken);
+
+        return tokenStr;
+    }
+
     private String getClientIp(HttpServletRequest request) {
+        if (request == null) return null;
         String xForwardedFor = request.getHeader("X-Forwarded-For");
         if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
             return xForwardedFor.split(",")[0].trim();
@@ -111,23 +157,33 @@ public class AuthService {
         return request.getRemoteAddr();
     }
 
-    public AuthResponse refreshToken(RefreshTokenRequest request) {
-        String userEmail = jwtService.extractUsername(request.getRefreshToken());
+    @Transactional
+    public AuthResponse refreshToken(RefreshTokenRequest request, HttpServletRequest httpRequest) {
+        RefreshToken refreshToken = refreshTokenRepository.findByTokenAndRevokedFalse(request.getRefreshToken())
+                .orElseThrow(() -> new ApiException(ErrorCode.AUTH_003));
 
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> ApiException.notFound("User"));
-
-        CustomUserDetails userDetails = new CustomUserDetails(user);
-
-        if (!jwtService.isTokenValid(request.getRefreshToken(), userDetails)) {
-            throw ApiException.unauthorized("Invalid refresh token");
+        if (!refreshToken.isValid()) {
+            throw new ApiException(ErrorCode.AUTH_004);
         }
 
+        User user = refreshToken.getUser();
+
+        if (!user.getEnabled()) {
+            throw new ApiException(ErrorCode.AUTH_005);
+        }
+
+        // Revoke old token
+        refreshToken.setRevoked(true);
+        refreshTokenRepository.save(refreshToken);
+
+        // Create new tokens (rotation)
+        CustomUserDetails userDetails = new CustomUserDetails(user);
         String accessToken = jwtService.generateToken(userDetails, user.getId());
+        String newRefreshTokenStr = createRefreshToken(user, httpRequest);
 
         return AuthResponse.builder()
                 .accessToken(accessToken)
-                .refreshToken(request.getRefreshToken())
+                .refreshToken(newRefreshTokenStr)
                 .tokenType("Bearer")
                 .userId(user.getId())
                 .email(user.getEmail())
@@ -135,6 +191,21 @@ public class AuthService {
                 .defaultCurrency(user.getDefaultCurrency())
                 .role(user.getRole().name())
                 .build();
+    }
+
+    // Keep backward compatible method
+    public AuthResponse refreshToken(RefreshTokenRequest request) {
+        return refreshToken(request, null);
+    }
+
+    @Transactional
+    public void logout(LogoutRequest request) {
+        refreshTokenRepository.revokeByToken(request.getRefreshToken());
+    }
+
+    @Transactional
+    public void logoutAll(User user) {
+        refreshTokenRepository.revokeAllByUser(user);
     }
 
     public String forgotPassword(ForgotPasswordRequest request) {
@@ -161,5 +232,8 @@ public class AuthService {
 
         user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
+
+        // Revoke all refresh tokens on password reset for security
+        refreshTokenRepository.revokeAllByUser(user);
     }
 }

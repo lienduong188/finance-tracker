@@ -16,7 +16,7 @@ export function LoginPage() {
 
   const loginSchema = z.object({
     email: z.string().email(t("validation.emailInvalid")),
-    password: z.string().min(6, t("validation.passwordMin", { min: 6 })),
+    password: z.string().min(8, t("validation.passwordMin", { min: 8 })),
   })
 
   type LoginForm = z.infer<typeof loginSchema>

@@ -1,7 +1,6 @@
 package com.financetracker.exception;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
@@ -25,6 +24,7 @@ public class GlobalExceptionHandler {
                 .status(ex.getStatus().value())
                 .code(ex.getCode())
                 .message(ex.getMessage())
+                .messageKey(ex.getMessageKey())
                 .build();
         return ResponseEntity.status(ex.getStatus()).body(error);
     }
@@ -32,42 +32,52 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
+        Map<String, String> errorKeys = new HashMap<>();
+
         ex.getBindingResult().getAllErrors().forEach(error -> {
             String fieldName = ((FieldError) error).getField();
             String message = error.getDefaultMessage();
             errors.put(fieldName, message);
+            errorKeys.put(fieldName, "errors.validation." + fieldName);
         });
 
+        ErrorCode errorCode = ErrorCode.VAL_001;
         ErrorResponse error = ErrorResponse.builder()
                 .timestamp(OffsetDateTime.now())
-                .status(HttpStatus.BAD_REQUEST.value())
-                .code("VALIDATION_ERROR")
-                .message("Validation failed")
+                .status(errorCode.getHttpStatus().value())
+                .code(errorCode.getCode())
+                .message(errorCode.getMessage())
+                .messageKey(errorCode.getMessageKey())
                 .errors(errors)
+                .errorKeys(errorKeys)
                 .build();
         return ResponseEntity.badRequest().body(error);
     }
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErrorResponse> handleBadCredentials(BadCredentialsException ex) {
+        ErrorCode errorCode = ErrorCode.AUTH_001;
         ErrorResponse error = ErrorResponse.builder()
                 .timestamp(OffsetDateTime.now())
-                .status(HttpStatus.UNAUTHORIZED.value())
-                .code("INVALID_CREDENTIALS")
-                .message("Invalid email or password")
+                .status(errorCode.getHttpStatus().value())
+                .code(errorCode.getCode())
+                .message(errorCode.getMessage())
+                .messageKey(errorCode.getMessageKey())
                 .build();
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+        return ResponseEntity.status(errorCode.getHttpStatus()).body(error);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
         log.error("Unexpected error", ex);
+        ErrorCode errorCode = ErrorCode.SYS_001;
         ErrorResponse error = ErrorResponse.builder()
                 .timestamp(OffsetDateTime.now())
-                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .code("INTERNAL_ERROR")
-                .message("An unexpected error occurred")
+                .status(errorCode.getHttpStatus().value())
+                .code(errorCode.getCode())
+                .message(errorCode.getMessage())
+                .messageKey(errorCode.getMessageKey())
                 .build();
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        return ResponseEntity.status(errorCode.getHttpStatus()).body(error);
     }
 }

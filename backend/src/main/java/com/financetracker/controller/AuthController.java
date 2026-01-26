@@ -3,6 +3,7 @@ package com.financetracker.controller;
 import com.financetracker.dto.auth.AuthResponse;
 import com.financetracker.dto.auth.ForgotPasswordRequest;
 import com.financetracker.dto.auth.LoginRequest;
+import com.financetracker.dto.auth.LogoutRequest;
 import com.financetracker.dto.auth.RefreshTokenRequest;
 import com.financetracker.dto.auth.RegisterRequest;
 import com.financetracker.dto.auth.ResetPasswordRequest;
@@ -27,25 +28,40 @@ public class AuthController {
 
     @PostMapping("/register")
     @Operation(summary = "Register a new user")
-    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
-        return ResponseEntity.ok(authService.register(request));
+    public ResponseEntity<AuthResponse> register(
+            @Valid @RequestBody RegisterRequest request,
+            HttpServletRequest httpRequest) {
+        return ResponseEntity.ok(authService.register(request, httpRequest));
     }
 
     @PostMapping("/login")
     @Operation(summary = "Login with email and password")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request, HttpServletRequest httpRequest) {
+    public ResponseEntity<AuthResponse> login(
+            @Valid @RequestBody LoginRequest request,
+            HttpServletRequest httpRequest) {
         return ResponseEntity.ok(authService.login(request, httpRequest));
     }
 
     @PostMapping("/refresh")
     @Operation(summary = "Refresh access token")
-    public ResponseEntity<AuthResponse> refresh(@Valid @RequestBody RefreshTokenRequest request) {
-        return ResponseEntity.ok(authService.refreshToken(request));
+    public ResponseEntity<AuthResponse> refresh(
+            @Valid @RequestBody RefreshTokenRequest request,
+            HttpServletRequest httpRequest) {
+        return ResponseEntity.ok(authService.refreshToken(request, httpRequest));
+    }
+
+    @PostMapping("/logout")
+    @Operation(summary = "Logout and revoke refresh token")
+    public ResponseEntity<java.util.Map<String, String>> logout(
+            @Valid @RequestBody LogoutRequest request) {
+        authService.logout(request);
+        return ResponseEntity.ok(java.util.Map.of("message", "Logged out successfully"));
     }
 
     @PostMapping("/forgot-password")
     @Operation(summary = "Request password reset")
-    public ResponseEntity<java.util.Map<String, String>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+    public ResponseEntity<java.util.Map<String, String>> forgotPassword(
+            @Valid @RequestBody ForgotPasswordRequest request) {
         String token = authService.forgotPassword(request);
         // In production, send this token via email instead of returning it
         return ResponseEntity.ok(java.util.Map.of(
@@ -56,14 +72,16 @@ public class AuthController {
 
     @PostMapping("/reset-password")
     @Operation(summary = "Reset password with token")
-    public ResponseEntity<java.util.Map<String, String>> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+    public ResponseEntity<java.util.Map<String, String>> resetPassword(
+            @Valid @RequestBody ResetPasswordRequest request) {
         authService.resetPassword(request);
         return ResponseEntity.ok(java.util.Map.of("message", "Password reset successful"));
     }
 
     @GetMapping("/me")
     @Operation(summary = "Get current user info")
-    public ResponseEntity<AuthResponse> getCurrentUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<AuthResponse> getCurrentUser(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(AuthResponse.builder()
                 .userId(userDetails.getId())
                 .email(userDetails.getEmail())
