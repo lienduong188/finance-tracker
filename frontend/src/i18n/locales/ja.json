@@ -275,8 +275,12 @@
     "categoryCreated": "カテゴリーが作成されました",
     "categoryUpdated": "カテゴリーが更新されました",
     "categoryDeleted": "カテゴリーが削除されました",
+    "categoriesDeleted": "{{count}}件のカテゴリーが削除されました",
     "confirmDeleteCategory": "このカテゴリーを削除してもよろしいですか？",
-    "cannotDeleteSystem": "システムカテゴリーは削除できません"
+    "cannotDeleteSystem": "システムカテゴリーは削除できません",
+    "selectAll": "すべて選択",
+    "deleteSelected": "削除 ({{count}})",
+    "deleteCategory": "カテゴリーを削除"
   },
   "legal": {
     "termsTitle": "利用規約",
@@ -316,7 +320,7 @@
       },
       "contact": {
         "title": "8. お問い合わせ",
-        "content": "利用規約についてご質問がある場合は、メールでお問い合わせください：support@duonglien.com"
+        "content": "利用規約についてご質問がある場合は、support@duonglien.comまでメールでお問い合わせいただくか、ウェブサイトのサポートチャットボットをご利用ください。"
       }
     },
     "privacy": {
@@ -327,9 +331,9 @@
       "collect": {
         "title": "2. 収集する情報",
         "content": "以下の種類の情報を収集します：",
-        "item1": "アカウント情報：メールアドレス、氏名、パスワード（暗号化）",
+        "item1": "アカウント情報：メールアドレス、表示名、パスワード（暗号化）",
         "item2": "財務データ：お客様が入力した口座、取引、予算情報",
-        "item3": "技術情報：IPアドレス、ブラウザの種類、アクセス時間"
+        "item3": "技術情報（ログ記録）：IPアドレス、ブラウザの種類、アクセス時間"
       },
       "use": {
         "title": "3. 情報の使用方法",
@@ -359,7 +363,7 @@
       },
       "contact": {
         "title": "8. プライバシーに関するお問い合わせ",
-        "content": "プライバシーポリシーについてご質問がある場合、または権利を行使したい場合は、こちらにご連絡ください：privacy@duonglien.com"
+        "content": "プライバシーポリシーについてご質問がある場合、または権利を行使したい場合は、privacy@duonglien.comまでメールでお問い合わせいただくか、ウェブサイトのサポートチャットボットをご利用ください。"
       }
     }
   }

@@ -7,7 +7,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { usersApi, categoriesApi } from "@/api"
 import { useAuth } from "@/context/AuthContext"
 import { Button, Input, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui"
-import { User, Lock, Check, AlertCircle, Tags, Plus, Pencil, Trash2 } from "lucide-react"
+import { User, Lock, Check, AlertCircle, Tags, Plus, Pencil, Trash2, CheckSquare, Square } from "lucide-react"
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
 import type { Category, CategoryType, CategoryRequest } from "@/types"
 
 const profileSchema = z.object({
@@ -48,6 +49,9 @@ export function SettingsPage() {
   const [showCategoryModal, setShowCategoryModal] = useState(false)
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
   const [categorySuccess, setCategorySuccess] = useState<string | null>(null)
+  const [selectedCategories, setSelectedCategories] = useState<Set<string>>(new Set())
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null)
 
   const profileForm = useForm<ProfileForm>({
     resolver: zodResolver(profileSchema),
@@ -137,6 +141,16 @@ export function SettingsPage() {
     },
   })
 
+  const deleteManyCategoriesMutation = useMutation({
+    mutationFn: categoriesApi.deleteMany,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["categories"] })
+      setSelectedCategories(new Set())
+      setCategorySuccess(t("settings.categoriesDeleted", { count: selectedCategories.size }))
+      setTimeout(() => setCategorySuccess(null), 3000)
+    },
+  })
+
   const onProfileSubmit = (data: ProfileForm) => {
     updateProfileMutation.mutate(data)
   }
@@ -180,8 +194,41 @@ export function SettingsPage() {
       alert(t("settings.cannotDeleteSystem"))
       return
     }
-    if (confirm(t("settings.confirmDeleteCategory"))) {
-      deleteCategoryMutation.mutate(category.id)
+    setCategoryToDelete(category)
+    setShowDeleteConfirm(true)
+  }
+
+  const confirmDeleteCategory = () => {
+    if (categoryToDelete) {
+      deleteCategoryMutation.mutate(categoryToDelete.id)
+    }
+    setShowDeleteConfirm(false)
+    setCategoryToDelete(null)
+  }
+
+  const toggleSelectCategory = (categoryId: string) => {
+    const newSelected = new Set(selectedCategories)
+    if (newSelected.has(categoryId)) {
+      newSelected.delete(categoryId)
+    } else {
+      newSelected.add(categoryId)
+    }
+    setSelectedCategories(newSelected)
+  }
+
+  const toggleSelectAll = () => {
+    const currentFiltered = categories.filter((c) => c.type === categoryTab && !c.parentId)
+    const customCategories = currentFiltered.filter((c) => !c.isSystem)
+    if (selectedCategories.size === customCategories.length && customCategories.length > 0) {
+      setSelectedCategories(new Set())
+    } else {
+      setSelectedCategories(new Set(customCategories.map((c) => c.id)))
+    }
+  }
+
+  const handleDeleteSelected = () => {
+    if (selectedCategories.size > 0) {
+      deleteManyCategoriesMutation.mutate(Array.from(selectedCategories))
     }
   }
 
@@ -359,10 +406,23 @@ export function SettingsPage() {
               </CardTitle>
               <CardDescription>{t("settings.categoriesDescription")}</CardDescription>
             </div>
-            <Button onClick={handleAddCategory} size="sm">
-              <Plus className="mr-2 h-4 w-4" />
-              {t("settings.addCategory")}
-            </Button>
+            <div className="flex gap-2">
+              {selectedCategories.size > 0 && (
+                <Button
+                  onClick={handleDeleteSelected}
+                  size="sm"
+                  variant="destructive"
+                  disabled={deleteManyCategoriesMutation.isPending}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  {t("settings.deleteSelected", { count: selectedCategories.size })}
+                </Button>
+              )}
+              <Button onClick={handleAddCategory} size="sm">
+                <Plus className="mr-2 h-4 w-4" />
+                {t("settings.addCategory")}
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -376,7 +436,10 @@ export function SettingsPage() {
           {/* Tabs */}
           <div className="mb-4 flex gap-2 border-b">
             <button
-              onClick={() => setCategoryTab("EXPENSE")}
+              onClick={() => {
+                setCategoryTab("EXPENSE")
+                setSelectedCategories(new Set())
+              }}
               className={`px-4 py-2 text-sm font-medium transition-colors ${
                 categoryTab === "EXPENSE"
                   ? "border-b-2 border-primary text-primary"
@@ -386,7 +449,10 @@ export function SettingsPage() {
               {t("settings.expenseCategories")}
             </button>
             <button
-              onClick={() => setCategoryTab("INCOME")}
+              onClick={() => {
+                setCategoryTab("INCOME")
+                setSelectedCategories(new Set())
+              }}
               className={`px-4 py-2 text-sm font-medium transition-colors ${
                 categoryTab === "INCOME"
                   ? "border-b-2 border-primary text-primary"
@@ -397,6 +463,24 @@ export function SettingsPage() {
             </button>
           </div>
 
+          {/* Select All */}
+          {filteredCategories.some((c) => !c.isSystem) && (
+            <div className="mb-2 flex items-center gap-2">
+              <button
+                onClick={toggleSelectAll}
+                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+              >
+                {selectedCategories.size === filteredCategories.filter((c) => !c.isSystem).length &&
+                filteredCategories.filter((c) => !c.isSystem).length > 0 ? (
+                  <CheckSquare className="h-4 w-4 text-primary" />
+                ) : (
+                  <Square className="h-4 w-4" />
+                )}
+                {t("settings.selectAll")}
+              </button>
+            </div>
+          )}
+
           {/* Categories List */}
           <div className="space-y-2">
             {filteredCategories.length === 0 ? (
@@ -405,9 +489,23 @@ export function SettingsPage() {
               filteredCategories.map((category) => (
                 <div
                   key={category.id}
-                  className="flex items-center justify-between rounded-lg border p-3"
+                  className={`flex items-center justify-between rounded-lg border p-3 ${
+                    selectedCategories.has(category.id) ? "border-primary bg-primary/5" : ""
+                  }`}
                 >
                   <div className="flex items-center gap-3">
+                    {!category.isSystem && (
+                      <button
+                        onClick={() => toggleSelectCategory(category.id)}
+                        className="flex-shrink-0"
+                      >
+                        {selectedCategories.has(category.id) ? (
+                          <CheckSquare className="h-5 w-5 text-primary" />
+                        ) : (
+                          <Square className="h-5 w-5 text-muted-foreground" />
+                        )}
+                      </button>
+                    )}
                     <span
                       className="flex h-8 w-8 items-center justify-center rounded-full text-lg"
                       style={{ backgroundColor: category.color || "#e5e7eb" }}
@@ -533,6 +631,21 @@ export function SettingsPage() {
           </div>
         </div>
       )}
+
+      {/* Delete Confirm Dialog */}
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        onClose={() => {
+          setShowDeleteConfirm(false)
+          setCategoryToDelete(null)
+        }}
+        onConfirm={confirmDeleteCategory}
+        title={t("settings.deleteCategory")}
+        message={t("settings.confirmDeleteCategory")}
+        confirmText={t("common.delete")}
+        cancelText={t("common.cancel")}
+        variant="danger"
+      />
     </div>
   )
 }

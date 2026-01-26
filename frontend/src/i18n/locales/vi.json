@@ -275,8 +275,12 @@
     "categoryCreated": "Đã tạo danh mục",
     "categoryUpdated": "Đã cập nhật danh mục",
     "categoryDeleted": "Đã xóa danh mục",
+    "categoriesDeleted": "Đã xóa {{count}} danh mục",
     "confirmDeleteCategory": "Bạn có chắc muốn xóa danh mục này?",
-    "cannotDeleteSystem": "Không thể xóa danh mục hệ thống"
+    "cannotDeleteSystem": "Không thể xóa danh mục hệ thống",
+    "selectAll": "Chọn tất cả",
+    "deleteSelected": "Xóa ({{count}})",
+    "deleteCategory": "Xóa danh mục"
   },
   "legal": {
     "termsTitle": "Điều khoản sử dụng",
@@ -316,7 +320,7 @@
       },
       "contact": {
         "title": "8. Liên hệ",
-        "content": "Nếu bạn có câu hỏi về Điều khoản sử dụng, vui lòng liên hệ chúng tôi qua email: support@duonglien.com"
+        "content": "Nếu bạn có câu hỏi về Điều khoản sử dụng, vui lòng liên hệ Admin qua email support@duonglien.com hoặc sử dụng chatbot hỗ trợ trên trang web."
       }
     },
     "privacy": {
@@ -327,9 +331,9 @@
       "collect": {
         "title": "2. Thông tin chúng tôi thu thập",
         "content": "Chúng tôi thu thập các loại thông tin sau:",
-        "item1": "Thông tin tài khoản: email, họ tên, mật khẩu (được mã hóa)",
+        "item1": "Thông tin tài khoản: email, tên hiển thị, mật khẩu (được mã hóa)",
         "item2": "Dữ liệu tài chính: thông tin về tài khoản, giao dịch, ngân sách mà bạn tự nhập",
-        "item3": "Thông tin kỹ thuật: địa chỉ IP, loại trình duyệt, thời gian truy cập"
+        "item3": "Thông tin kỹ thuật (được ghi log): địa chỉ IP, loại trình duyệt, thời gian truy cập"
       },
       "use": {
         "title": "3. Cách chúng tôi sử dụng thông tin",
@@ -359,7 +363,7 @@
       },
       "contact": {
         "title": "8. Liên hệ về quyền riêng tư",
-        "content": "Nếu bạn có câu hỏi về Chính sách bảo mật hoặc muốn thực hiện các quyền của mình, vui lòng liên hệ: privacy@duonglien.com"
+        "content": "Nếu bạn có câu hỏi về Chính sách bảo mật hoặc muốn thực hiện các quyền của mình, vui lòng liên hệ Admin qua email privacy@duonglien.com hoặc sử dụng chatbot hỗ trợ trên trang web."
       }
     }
   }
