@@ -11,12 +11,15 @@ import com.financetracker.exception.ApiException;
 import com.financetracker.repository.UserRepository;
 import com.financetracker.security.CustomUserDetails;
 import com.financetracker.security.JwtService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.OffsetDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -58,13 +61,20 @@ public class AuthService {
                 .build();
     }
 
-    public AuthResponse login(LoginRequest request) {
+    @Transactional
+    public AuthResponse login(LoginRequest request, HttpServletRequest httpRequest) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
 
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> ApiException.notFound("User"));
+
+        // Update login tracking info
+        user.setLastLoginAt(OffsetDateTime.now());
+        user.setLastLoginIp(getClientIp(httpRequest));
+        user.setLastUserAgent(httpRequest.getHeader("User-Agent"));
+        userRepository.save(user);
 
         CustomUserDetails userDetails = new CustomUserDetails(user);
         String accessToken = jwtService.generateToken(userDetails, user.getId());
@@ -80,6 +90,18 @@ public class AuthService {
                 .defaultCurrency(user.getDefaultCurrency())
                 .role(user.getRole().name())
                 .build();
+    }
+
+    private String getClientIp(HttpServletRequest request) {
+        String xForwardedFor = request.getHeader("X-Forwarded-For");
+        if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
+            return xForwardedFor.split(",")[0].trim();
+        }
+        String xRealIp = request.getHeader("X-Real-IP");
+        if (xRealIp != null && !xRealIp.isEmpty()) {
+            return xRealIp;
+        }
+        return request.getRemoteAddr();
     }
 
     public AuthResponse refreshToken(RefreshTokenRequest request) {

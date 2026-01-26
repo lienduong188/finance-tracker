@@ -24,6 +24,11 @@ public class AdminUserResponse {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 
+    // Login tracking
+    private OffsetDateTime lastLoginAt;
+    private String lastLoginIp;
+    private String lastUserAgent;
+
     // Statistics
     private Integer accountsCount;
     private Integer transactionsCount;

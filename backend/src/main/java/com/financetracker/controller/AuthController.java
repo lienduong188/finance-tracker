@@ -10,6 +10,7 @@ import com.financetracker.security.CustomUserDetails;
 import com.financetracker.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -32,8 +33,8 @@ public class AuthController {
 
     @PostMapping("/login")
     @Operation(summary = "Login with email and password")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
-        return ResponseEntity.ok(authService.login(request));
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request, HttpServletRequest httpRequest) {
+        return ResponseEntity.ok(authService.login(request, httpRequest));
     }
 
     @PostMapping("/refresh")

@@ -112,6 +112,9 @@ public class AdminUserService {
                 .enabled(user.getEnabled())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
+                .lastLoginAt(user.getLastLoginAt())
+                .lastLoginIp(user.getLastLoginIp())
+                .lastUserAgent(user.getLastUserAgent())
                 .accountsCount(accountsCount)
                 .transactionsCount(transactionsCount)
                 .build();

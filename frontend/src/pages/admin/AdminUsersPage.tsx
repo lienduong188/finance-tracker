@@ -10,11 +10,24 @@ import {
   ChevronRight,
   UserCheck,
   UserX,
+  Globe,
+  Monitor,
+  Clock,
 } from "lucide-react"
 import { adminApi } from "@/api"
 import { Button, Input, Card } from "@/components/ui"
 import type { AdminUser, Role } from "@/types"
 import { useAuth } from "@/context/AuthContext"
+
+function parseBrowser(userAgent: string): string {
+  if (userAgent.includes("Edg/")) return "Edge"
+  if (userAgent.includes("Chrome/")) return "Chrome"
+  if (userAgent.includes("Firefox/")) return "Firefox"
+  if (userAgent.includes("Safari/") && !userAgent.includes("Chrome")) return "Safari"
+  if (userAgent.includes("MSIE") || userAgent.includes("Trident/")) return "IE"
+  if (userAgent.includes("Opera") || userAgent.includes("OPR/")) return "Opera"
+  return "Unknown"
+}
 
 export function AdminUsersPage() {
   const [page, setPage] = useState(0)
@@ -130,6 +143,7 @@ export function AdminUsersPage() {
                 <th className="px-4 py-3 text-left text-sm font-medium">User</th>
                 <th className="px-4 py-3 text-left text-sm font-medium">Role</th>
                 <th className="px-4 py-3 text-left text-sm font-medium">Trạng thái</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">Hoạt động cuối</th>
                 <th className="px-4 py-3 text-left text-sm font-medium">Thống kê</th>
                 <th className="px-4 py-3 text-left text-sm font-medium">Ngày tạo</th>
                 <th className="px-4 py-3 text-right text-sm font-medium">Hành động</th>
@@ -185,6 +199,32 @@ export function AdminUsersPage() {
                         </>
                       )}
                     </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    {user.lastLoginAt ? (
+                      <div className="space-y-1 text-sm">
+                        <div className="flex items-center gap-1 text-muted-foreground">
+                          <Clock className="h-3 w-3" />
+                          <span>{new Date(user.lastLoginAt).toLocaleString("vi-VN")}</span>
+                        </div>
+                        {user.lastLoginIp && (
+                          <div className="flex items-center gap-1 text-muted-foreground">
+                            <Globe className="h-3 w-3" />
+                            <span className="font-mono text-xs">{user.lastLoginIp}</span>
+                          </div>
+                        )}
+                        {user.lastUserAgent && (
+                          <div className="flex items-center gap-1 text-muted-foreground" title={user.lastUserAgent}>
+                            <Monitor className="h-3 w-3" />
+                            <span className="max-w-[150px] truncate text-xs">
+                              {parseBrowser(user.lastUserAgent)}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-sm text-muted-foreground">Chưa đăng nhập</span>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-sm text-muted-foreground">
                     {user.accountsCount} accounts, {user.transactionsCount} transactions

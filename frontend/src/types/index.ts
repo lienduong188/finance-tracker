@@ -237,6 +237,9 @@ export interface AdminUser {
   enabled: boolean
   createdAt: string
   updatedAt: string
+  lastLoginAt: string | null
+  lastLoginIp: string | null
+  lastUserAgent: string | null
   accountsCount: number
   transactionsCount: number
 }

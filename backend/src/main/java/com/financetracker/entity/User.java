@@ -3,6 +3,7 @@ package com.financetracker.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,6 +37,15 @@ public class User extends BaseEntity {
     @Column
     @Builder.Default
     private Boolean enabled = true;
+
+    @Column(name = "last_login_at")
+    private OffsetDateTime lastLoginAt;
+
+    @Column(name = "last_login_ip", length = 45)
+    private String lastLoginIp;
+
+    @Column(name = "last_user_agent", length = 500)
+    private String lastUserAgent;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
