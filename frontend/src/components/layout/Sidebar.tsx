@@ -6,6 +6,7 @@ import {
   ArrowLeftRight,
   PiggyBank,
   Repeat,
+  HandCoins,
   Settings,
   LogOut,
   Shield,
@@ -22,6 +23,7 @@ const navItems = [
   { to: "/transactions", icon: ArrowLeftRight, labelKey: "nav.transactions" },
   { to: "/budgets", icon: PiggyBank, labelKey: "nav.budgets" },
   { to: "/recurring", icon: Repeat, labelKey: "nav.recurring" },
+  { to: "/debts", icon: HandCoins, labelKey: "nav.debts" },
 ]
 
 interface SidebarProps {

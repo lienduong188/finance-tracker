@@ -380,3 +380,49 @@ export interface ChatHistoryResponse {
   messages: ChatResponse[]
   totalCount: number
 }
+
+// Debt types
+export type DebtType = "LEND" | "BORROW"
+export type DebtStatus = "ACTIVE" | "PARTIALLY_PAID" | "PAID" | "CANCELLED"
+
+export interface Debt {
+  id: string
+  type: DebtType
+  personName: string
+  amount: number
+  currency: string
+  description: string | null
+  startDate: string
+  dueDate: string | null
+  status: DebtStatus
+  paidAmount: number
+  remainingAmount: number
+  note: string | null
+  overdue: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface DebtRequest {
+  type: DebtType
+  personName: string
+  amount: number
+  currency?: string
+  description?: string
+  startDate: string
+  dueDate?: string
+  note?: string
+}
+
+export interface DebtPaymentRequest {
+  amount: number
+  note?: string
+}
+
+export interface DebtSummary {
+  totalLent: number
+  totalBorrowed: number
+  netBalance: number
+  activeDebtsCount: number
+  overdueCount: number
+}

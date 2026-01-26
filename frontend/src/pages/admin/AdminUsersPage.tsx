@@ -13,6 +13,7 @@ import {
   MapPin,
   Monitor,
   Clock,
+  X,
 } from "lucide-react"
 import { adminApi } from "@/api"
 import { Button, Input, Card } from "@/components/ui"
@@ -128,8 +129,21 @@ export function AdminUsersPage() {
             placeholder="Tìm kiếm theo email hoặc tên..."
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            className="pl-10"
+            className="pl-10 pr-10"
           />
+          {searchInput && (
+            <button
+              type="button"
+              onClick={() => {
+                setSearchInput("")
+                setSearch("")
+                setPage(0)
+              }}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
         </div>
         <Button type="submit">Tìm kiếm</Button>
       </form>

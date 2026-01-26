@@ -35,6 +35,17 @@ interface RecurringTransactionFormModalProps {
   recurring: RecurringTransaction | null
 }
 
+function formatNumber(value: number | string): string {
+  const num = typeof value === "string" ? parseFloat(value.replace(/,/g, "")) : value
+  if (isNaN(num)) return ""
+  return num.toLocaleString("en-US")
+}
+
+function parseNumber(value: string): number {
+  const num = parseFloat(value.replace(/,/g, ""))
+  return isNaN(num) ? 0 : num
+}
+
 export function RecurringTransactionFormModal({
   isOpen,
   onClose,
@@ -44,6 +55,7 @@ export function RecurringTransactionFormModal({
   const queryClient = useQueryClient()
   const isEditing = !!recurring
   const [selectedType, setSelectedType] = useState<TransactionType>("EXPENSE")
+  const [amountDisplay, setAmountDisplay] = useState("")
 
   const {
     register,
@@ -95,6 +107,7 @@ export function RecurringTransactionFormModal({
         maxExecutions: recurring.maxExecutions ?? undefined,
       })
       setSelectedType(recurring.type)
+      setAmountDisplay(formatNumber(recurring.amount))
     } else {
       reset({
         accountId: "",
@@ -109,6 +122,7 @@ export function RecurringTransactionFormModal({
         endDate: "",
       })
       setSelectedType("EXPENSE")
+      setAmountDisplay("")
     }
   }, [recurring, reset])
 
@@ -216,10 +230,17 @@ export function RecurringTransactionFormModal({
             </Label>
             <Input
               id="amount"
-              type="number"
+              type="text"
+              inputMode="numeric"
               placeholder="0"
               error={errors.amount?.message}
-              {...register("amount", { valueAsNumber: true })}
+              value={amountDisplay}
+              onChange={(e) => {
+                const raw = e.target.value.replace(/[^0-9.]/g, "")
+                const num = parseNumber(raw)
+                setAmountDisplay(raw ? formatNumber(num) : "")
+                setValue("amount", num)
+              }}
             />
           </div>
 

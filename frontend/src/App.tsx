@@ -9,6 +9,7 @@ import { AccountsPage } from "./pages/accounts"
 import { TransactionsPage } from "./pages/transactions"
 import { BudgetsPage } from "./pages/budgets"
 import { RecurringTransactionsPage } from "./pages/recurring"
+import { DebtsPage } from "./pages/debts"
 import { SettingsPage } from "./pages/settings"
 import { AdminDashboardPage, AdminUsersPage, AdminCategoriesPage } from "./pages/admin"
 
@@ -43,6 +44,7 @@ function App() {
               <Route path="/transactions" element={<TransactionsPage />} />
               <Route path="/budgets" element={<BudgetsPage />} />
               <Route path="/recurring" element={<RecurringTransactionsPage />} />
+              <Route path="/debts" element={<DebtsPage />} />
               <Route path="/settings" element={<SettingsPage />} />
             </Route>
 
