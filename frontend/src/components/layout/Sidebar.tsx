@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom"
+import { NavLink, Link } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import {
   LayoutDashboard,
@@ -145,6 +145,17 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
               >
                 <LogOut className="h-4 w-4" />
               </button>
+            </div>
+
+            {/* Legal links */}
+            <div className="mt-3 flex justify-center gap-3 text-xs text-muted-foreground">
+              <Link to="/terms" className="hover:text-foreground hover:underline">
+                {t("legal.termsTitle")}
+              </Link>
+              <span>•</span>
+              <Link to="/privacy" className="hover:text-foreground hover:underline">
+                {t("legal.privacyTitle")}
+              </Link>
             </div>
           </div>
         </div>
