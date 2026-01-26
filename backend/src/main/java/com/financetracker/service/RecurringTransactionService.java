@@ -144,9 +144,10 @@ public class RecurringTransactionService {
 
         if (!oldStartDate.equals(request.getStartDate())) {
             LocalDate newNextDate = request.getStartDate();
-            // If new start date is in the past, use today
-            if (newNextDate.isBefore(LocalDate.now())) {
-                newNextDate = LocalDate.now();
+            LocalDate today = LocalDate.now();
+            // If new start date is in the past, calculate next valid date based on frequency
+            while (newNextDate.isBefore(today)) {
+                newNextDate = calculateNextDateFrom(newNextDate, recurring);
             }
             recurring.setNextExecutionDate(newNextDate);
         }
@@ -274,7 +275,10 @@ public class RecurringTransactionService {
     }
 
     private LocalDate calculateNextDate(RecurringTransaction recurring) {
-        LocalDate current = recurring.getNextExecutionDate();
+        return calculateNextDateFrom(recurring.getNextExecutionDate(), recurring);
+    }
+
+    private LocalDate calculateNextDateFrom(LocalDate current, RecurringTransaction recurring) {
         int interval = recurring.getIntervalValue();
 
         return switch (recurring.getFrequency()) {
