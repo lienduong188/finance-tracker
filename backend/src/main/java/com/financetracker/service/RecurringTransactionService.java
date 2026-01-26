@@ -135,9 +135,21 @@ public class RecurringTransactionService {
         recurring.setIntervalValue(request.getIntervalValue() != null ? request.getIntervalValue() : 1);
         recurring.setDayOfWeek(request.getDayOfWeek());
         recurring.setDayOfMonth(request.getDayOfMonth());
+
+        // Recalculate nextExecutionDate when startDate changes
+        LocalDate oldStartDate = recurring.getStartDate();
         recurring.setStartDate(request.getStartDate());
         recurring.setEndDate(request.getEndDate());
         recurring.setMaxExecutions(request.getMaxExecutions());
+
+        if (!oldStartDate.equals(request.getStartDate())) {
+            LocalDate newNextDate = request.getStartDate();
+            // If new start date is in the past, use today
+            if (newNextDate.isBefore(LocalDate.now())) {
+                newNextDate = LocalDate.now();
+            }
+            recurring.setNextExecutionDate(newNextDate);
+        }
 
         recurring = recurringRepository.save(recurring);
         log.info("Updated recurring transaction {} for user {}", recurring.getId(), userId);
