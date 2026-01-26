@@ -47,7 +47,7 @@ export function ChatWidget() {
 
   const handleSend = () => {
     if (!message.trim() || sendMutation.isPending) return
-    sendMutation.mutate({ message: message.trim() })
+    sendMutation.mutate({ message: message.trim(), language: i18n.language })
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {

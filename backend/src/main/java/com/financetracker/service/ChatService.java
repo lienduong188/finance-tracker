@@ -64,7 +64,8 @@ public class ChatService {
         Collections.reverse(recentMessages);
 
         // 4. Call Gemini API
-        String aiResponse = callGeminiApi(financialContext, recentMessages, request.getMessage());
+        String language = request.getLanguage() != null ? request.getLanguage() : "vi";
+        String aiResponse = callGeminiApi(financialContext, recentMessages, request.getMessage(), language);
 
         // 5. Save assistant response
         ChatMessage assistantMessage = ChatMessage.builder()
@@ -166,24 +167,9 @@ public class ChatService {
     }
 
     @SuppressWarnings("unchecked")
-    private String callGeminiApi(String financialContext, List<ChatMessage> history, String userMessage) {
-        String systemPrompt = """
-            Ban la tro ly tai chinh thong minh cho ung dung quan ly chi tieu ca nhan.
-
-            NHIEM VU:
-            - Tra loi cac cau hoi ve tai chinh cua nguoi dung dua tren du lieu thuc te
-            - Dua ra loi khuyen tai chinh phu hop
-            - Giai thich ro rang, de hieu
-            - Tra loi bang tieng Viet
-
-            QUY TAC:
-            - Chi su dung du lieu duoc cung cap, KHONG gia dinh so lieu
-            - Neu khong co du lieu, hay thong bao cho nguoi dung
-            - Tra loi ngan gon, truc tiep vao van de
-            - Co the su dung emoji de sinh dong hon
-
-            DU LIEU TAI CHINH HIEN TAI:
-            """ + financialContext;
+    private String callGeminiApi(String financialContext, List<ChatMessage> history, String userMessage, String language) {
+        String systemPrompt = buildSystemPrompt(language) + financialContext;
+        String ackMessage = getAckMessage(language);
 
         // Build conversation for Gemini
         List<Map<String, Object>> contents = new ArrayList<>();
@@ -197,7 +183,7 @@ public class ChatService {
         // Add acknowledgment
         Map<String, Object> ackContent = new HashMap<>();
         ackContent.put("role", "model");
-        ackContent.put("parts", List.of(Map.of("text", "Toi da hieu. Toi se tra loi dua tren du lieu tai chinh cua ban.")));
+        ackContent.put("parts", List.of(Map.of("text", ackMessage)));
         contents.add(ackContent);
 
         // Add conversation history (skip the just-saved user message since we add it separately)
@@ -242,11 +228,90 @@ public class ChatService {
                     }
                 }
             }
-            return "Xin loi, toi khong the xu ly yeu cau cua ban luc nay. Vui long thu lai sau.";
+            return getErrorMessage(language, false);
         } catch (Exception e) {
             log.error("Error calling Gemini API", e);
-            return "Co loi xay ra khi ket noi voi AI. Vui long thu lai sau.";
+            return getErrorMessage(language, true);
         }
+    }
+
+    private String buildSystemPrompt(String language) {
+        return switch (language) {
+            case "en" -> """
+                You are a smart financial assistant for a personal expense management app.
+
+                TASKS:
+                - Answer questions about the user's finances based on real data
+                - Provide appropriate financial advice
+                - Explain clearly and understandably
+                - Reply in English
+
+                RULES:
+                - Only use provided data, DO NOT assume figures
+                - If there is no data, inform the user
+                - Answer concisely, directly to the point
+                - You can use emojis for more engaging responses
+
+                CURRENT FINANCIAL DATA:
+                """;
+            case "ja" -> """
+                あなたは個人支出管理アプリのスマートな財務アシスタントです。
+
+                タスク：
+                - 実際のデータに基づいてユーザーの財務に関する質問に答える
+                - 適切な財務アドバイスを提供する
+                - 明確でわかりやすく説明する
+                - 日本語で返答する
+
+                ルール：
+                - 提供されたデータのみを使用し、数字を推測しない
+                - データがない場合はユーザーに通知する
+                - 簡潔に、要点を直接伝える
+                - より魅力的な返答のために絵文字を使用可能
+
+                現在の財務データ：
+                """;
+            default -> """
+                Ban la tro ly tai chinh thong minh cho ung dung quan ly chi tieu ca nhan.
+
+                NHIEM VU:
+                - Tra loi cac cau hoi ve tai chinh cua nguoi dung dua tren du lieu thuc te
+                - Dua ra loi khuyen tai chinh phu hop
+                - Giai thich ro rang, de hieu
+                - Tra loi bang tieng Viet
+
+                QUY TAC:
+                - Chi su dung du lieu duoc cung cap, KHONG gia dinh so lieu
+                - Neu khong co du lieu, hay thong bao cho nguoi dung
+                - Tra loi ngan gon, truc tiep vao van de
+                - Co the su dung emoji de sinh dong hon
+
+                DU LIEU TAI CHINH HIEN TAI:
+                """;
+        };
+    }
+
+    private String getAckMessage(String language) {
+        return switch (language) {
+            case "en" -> "I understand. I will answer based on your financial data.";
+            case "ja" -> "了解しました。あなたの財務データに基づいて回答します。";
+            default -> "Toi da hieu. Toi se tra loi dua tren du lieu tai chinh cua ban.";
+        };
+    }
+
+    private String getErrorMessage(String language, boolean isConnectionError) {
+        if (isConnectionError) {
+            return switch (language) {
+                case "en" -> "An error occurred while connecting to AI. Please try again later.";
+                case "ja" -> "AIへの接続中にエラーが発生しました。後でもう一度お試しください。";
+                default -> "Co loi xay ra khi ket noi voi AI. Vui long thu lai sau.";
+            };
+        }
+        return switch (language) {
+            case "en" -> "Sorry, I cannot process your request right now. Please try again later.";
+            case "ja" -> "申し訳ありませんが、現在リクエストを処理できません。後でもう一度お試しください。";
+            default -> "Xin loi, toi khong the xu ly yeu cau cua ban luc nay. Vui long thu lai sau.";
+        };
     }
 
     private ChatResponse toResponse(ChatMessage message) {

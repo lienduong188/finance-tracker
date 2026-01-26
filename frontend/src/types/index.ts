@@ -335,6 +335,7 @@ export interface ChatMessage {
 
 export interface ChatRequest {
   message: string
+  language?: string
 }
 
 export interface ChatResponse {
