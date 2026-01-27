@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { X } from "lucide-react"
+import { X, AlertCircle } from "lucide-react"
 import { format } from "date-fns"
 import { Button, Input, Label } from "@/components/ui"
 import { debtsApi } from "@/api"
@@ -46,6 +46,7 @@ export function DebtFormModal({ isOpen, onClose, debt }: DebtFormModalProps) {
   const queryClient = useQueryClient()
   const isEditing = !!debt
   const [amountDisplay, setAmountDisplay] = useState("")
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const {
     register,
@@ -66,6 +67,7 @@ export function DebtFormModal({ isOpen, onClose, debt }: DebtFormModalProps) {
 
   useEffect(() => {
     if (!isOpen) return
+    setErrorMessage(null)
     if (debt) {
       reset({
         type: debt.type,
@@ -96,7 +98,13 @@ export function DebtFormModal({ isOpen, onClose, debt }: DebtFormModalProps) {
     mutationFn: (data: DebtRequest) => debtsApi.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["debts"] })
+      setErrorMessage(null)
       onClose()
+    },
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : "Có lỗi xảy ra khi thêm khoản vay"
+      setErrorMessage(message)
+      console.error("Create debt error:", error)
     },
   })
 
@@ -104,7 +112,13 @@ export function DebtFormModal({ isOpen, onClose, debt }: DebtFormModalProps) {
     mutationFn: (data: DebtRequest) => debtsApi.update(debt!.id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["debts"] })
+      setErrorMessage(null)
       onClose()
+    },
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : "Có lỗi xảy ra khi cập nhật khoản vay"
+      setErrorMessage(message)
+      console.error("Update debt error:", error)
     },
   })
 
@@ -147,6 +161,14 @@ export function DebtFormModal({ isOpen, onClose, debt }: DebtFormModalProps) {
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {/* Error Message */}
+          {errorMessage && (
+            <div className="flex items-center gap-2 rounded-md bg-red-50 p-3 text-sm text-red-700">
+              <AlertCircle className="h-4 w-4 flex-shrink-0" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
+
           {/* Debt Type Tabs */}
           <div className="flex gap-1 rounded-lg bg-muted p-1">
             {(["LEND", "BORROW"] as const).map((type) => (
