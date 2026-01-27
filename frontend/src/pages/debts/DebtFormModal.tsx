@@ -65,6 +65,7 @@ export function DebtFormModal({ isOpen, onClose, debt }: DebtFormModalProps) {
     resolver: zodResolver(debtSchema),
     defaultValues: {
       type: "LEND",
+      currency: user?.defaultCurrency || "VND",
       startDate: format(new Date(), "yyyy-MM-dd"),
     },
   })
