@@ -9,6 +9,7 @@ import { format } from "date-fns"
 import { Button, Input, Label } from "@/components/ui"
 import { debtsApi } from "@/api"
 import { cn } from "@/lib/utils"
+import { useAuth } from "@/context/AuthContext"
 import type { Debt, DebtRequest } from "@/types"
 
 function createDebtSchema(t: (key: string) => string) {
@@ -45,6 +46,7 @@ interface DebtFormModalProps {
 
 export function DebtFormModal({ isOpen, onClose, debt }: DebtFormModalProps) {
   const { t } = useTranslation()
+  const { user } = useAuth()
   const queryClient = useQueryClient()
   const isEditing = !!debt
   const [amountDisplay, setAmountDisplay] = useState("")
@@ -89,6 +91,7 @@ export function DebtFormModal({ isOpen, onClose, debt }: DebtFormModalProps) {
         type: "LEND",
         personName: "",
         amount: 0,
+        currency: user?.defaultCurrency || "VND",
         description: "",
         startDate: format(new Date(), "yyyy-MM-dd"),
         dueDate: "",
@@ -96,7 +99,7 @@ export function DebtFormModal({ isOpen, onClose, debt }: DebtFormModalProps) {
       })
       setAmountDisplay("")
     }
-  }, [isOpen, debt, reset])
+  }, [isOpen, debt, reset, user])
 
   const createMutation = useMutation({
     mutationFn: (data: DebtRequest) => debtsApi.create(data),
