@@ -11,7 +11,7 @@ import { BudgetsPage } from "./pages/budgets"
 import { RecurringTransactionsPage } from "./pages/recurring"
 import { DebtsPage } from "./pages/debts"
 import { SettingsPage } from "./pages/settings"
-import { AdminDashboardPage, AdminUsersPage, AdminCategoriesPage } from "./pages/admin"
+import { AdminDashboardPage, AdminUsersPage, AdminCategoriesPage, AdminTokenUsagePage } from "./pages/admin"
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -53,6 +53,7 @@ function App() {
               <Route path="/admin" element={<AdminDashboardPage />} />
               <Route path="/admin/users" element={<AdminUsersPage />} />
               <Route path="/admin/categories" element={<AdminCategoriesPage />} />
+              <Route path="/admin/token-usage" element={<AdminTokenUsagePage />} />
             </Route>
           </Routes>
         </BrowserRouter>

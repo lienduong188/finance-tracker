@@ -30,6 +30,7 @@ public class ChatService {
     private final TransactionRepository transactionRepository;
     private final BudgetRepository budgetRepository;
     private final RestTemplate restTemplate;
+    private final TokenUsageService tokenUsageService;
 
     @Value("${groq.api-key:}")
     private String groqApiKey;
@@ -69,9 +70,16 @@ public class ChatService {
 
         // 4. Call Groq API
         String language = request.getLanguage() != null ? request.getLanguage() : "vi";
-        String aiResponse = callGroqApi(financialContext, recentMessages, request.getMessage(), language);
+        GroqApiResult apiResult = callGroqApi(financialContext, recentMessages, request.getMessage(), language);
 
-        // 5. Save assistant response
+        // 5. Track token usage
+        if (apiResult.inputTokens != null || apiResult.outputTokens != null) {
+            tokenUsageService.trackUsage(user, apiResult.inputTokens, apiResult.outputTokens,
+                    groqModel, "chat", null);
+        }
+
+        // 6. Save assistant response
+        String aiResponse = apiResult.content;
         ChatMessage assistantMessage = ChatMessage.builder()
                 .user(user)
                 .role(ChatRole.ASSISTANT)
@@ -170,8 +178,21 @@ public class ChatService {
         return context.toString();
     }
 
+    // Helper class to hold API response with token usage
+    private static class GroqApiResult {
+        String content;
+        Integer inputTokens;
+        Integer outputTokens;
+
+        GroqApiResult(String content, Integer inputTokens, Integer outputTokens) {
+            this.content = content;
+            this.inputTokens = inputTokens;
+            this.outputTokens = outputTokens;
+        }
+    }
+
     @SuppressWarnings("unchecked")
-    private String callGroqApi(String financialContext, List<ChatMessage> history, String userMessage, String language) {
+    private GroqApiResult callGroqApi(String financialContext, List<ChatMessage> history, String userMessage, String language) {
         String systemPrompt = buildSystemPrompt(language) + financialContext;
 
         // Build messages array for OpenAI-compatible API
@@ -208,24 +229,33 @@ public class ChatService {
             ResponseEntity<Map> response = restTemplate.postForEntity(groqApiUrl, entity, Map.class);
 
             if (response.getBody() != null) {
+                // Extract token usage from response
+                Integer inputTokens = null;
+                Integer outputTokens = null;
+                Map<String, Object> usage = (Map<String, Object>) response.getBody().get("usage");
+                if (usage != null) {
+                    inputTokens = usage.get("prompt_tokens") != null ? ((Number) usage.get("prompt_tokens")).intValue() : null;
+                    outputTokens = usage.get("completion_tokens") != null ? ((Number) usage.get("completion_tokens")).intValue() : null;
+                }
+
                 List<Map<String, Object>> choices = (List<Map<String, Object>>) response.getBody().get("choices");
                 if (choices != null && !choices.isEmpty()) {
                     Map<String, Object> message = (Map<String, Object>) choices.get(0).get("message");
                     if (message != null) {
-                        return (String) message.get("content");
+                        return new GroqApiResult((String) message.get("content"), inputTokens, outputTokens);
                     }
                 }
             }
-            return getErrorMessage(language, false);
+            return new GroqApiResult(getErrorMessage(language, false), null, null);
         } catch (HttpClientErrorException.TooManyRequests e) {
             log.warn("Groq API rate limit exceeded (429)");
-            return getMaintenanceMessage(language);
+            return new GroqApiResult(getMaintenanceMessage(language), null, null);
         } catch (Exception e) {
             log.error("Error calling Groq API", e);
             if (e.getMessage() != null && e.getMessage().contains("429")) {
-                return getMaintenanceMessage(language);
+                return new GroqApiResult(getMaintenanceMessage(language), null, null);
             }
-            return getErrorMessage(language, true);
+            return new GroqApiResult(getErrorMessage(language, true), null, null);
         }
     }
 

@@ -426,3 +426,39 @@ export interface DebtSummary {
   activeDebtsCount: number
   overdueCount: number
 }
+
+// Token Usage types (Admin)
+export interface TokenUsageStats {
+  totalTokens: number
+  totalInputTokens: number
+  totalOutputTokens: number
+  tokensLast7Days: number
+  tokensLast30Days: number
+  totalRequests: number
+  requestsLast7Days: number
+  requestsLast30Days: number
+  uniqueUsers: number
+  uniqueUsersLast7Days: number
+  uniqueUsersLast30Days: number
+  topUsers: TopUserUsage[]
+  dailyUsage: DailyTokenUsage[]
+  modelUsage: ModelUsage[]
+}
+
+export interface TopUserUsage {
+  id: string
+  email: string
+  fullName: string
+  totalTokens: number
+}
+
+export interface DailyTokenUsage {
+  date: string
+  tokens: number
+}
+
+export interface ModelUsage {
+  model: string
+  tokens: number
+  requests: number
+}

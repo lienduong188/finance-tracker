@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom"
-import { Users, FolderTree, ArrowLeft, Shield, LogOut, LayoutDashboard, X } from "lucide-react"
+import { Users, FolderTree, ArrowLeft, Shield, LogOut, LayoutDashboard, X, Zap } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/context/AuthContext"
 
@@ -7,6 +7,7 @@ const adminNavItems = [
   { to: "/admin", icon: LayoutDashboard, label: "Dashboard" },
   { to: "/admin/users", icon: Users, label: "Quản lý Users" },
   { to: "/admin/categories", icon: FolderTree, label: "System Categories" },
+  { to: "/admin/token-usage", icon: Zap, label: "Token Usage" },
 ]
 
 interface AdminSidebarProps {

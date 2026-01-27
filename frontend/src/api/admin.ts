@@ -6,6 +6,7 @@ import type {
   PageResponse,
   UpdateUserRoleRequest,
   AdminCategoryRequest,
+  TokenUsageStats,
 } from "@/types"
 
 export const adminApi = {
@@ -74,5 +75,11 @@ export const adminApi = {
 
   deleteSystemCategory: async (id: string): Promise<void> => {
     await apiClient.delete(`/admin/categories/${id}`)
+  },
+
+  // Token Usage
+  getTokenUsageStats: async (): Promise<TokenUsageStats> => {
+    const response = await apiClient.get<TokenUsageStats>("/admin/token-usage/stats")
+    return response.data
   },
 }
