@@ -1,11 +1,13 @@
 import { useState } from "react"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
-import { X } from "lucide-react"
-import { Button, Input, Label } from "@/components/ui"
-import { debtsApi } from "@/api"
+import { X, AlertCircle } from "lucide-react"
+import { AxiosError } from "axios"
+import { format } from "date-fns"
+import { Button, Input, Label, Select } from "@/components/ui"
+import { debtsApi, accountsApi } from "@/api"
 import { formatCurrency } from "@/lib/utils"
-import type { Debt } from "@/types"
+import type { Debt, ApiError } from "@/types"
 
 function formatNumber(value: number | string): string {
   const num = typeof value === "string" ? parseFloat(value.replace(/,/g, "")) : value
@@ -29,17 +31,38 @@ export function DebtPaymentModal({ isOpen, onClose, debt }: DebtPaymentModalProp
   const queryClient = useQueryClient()
   const [amountDisplay, setAmountDisplay] = useState("")
   const [amount, setAmount] = useState(0)
+  const [paymentDate, setPaymentDate] = useState(format(new Date(), "yyyy-MM-dd"))
+  const [accountId, setAccountId] = useState("")
   const [note, setNote] = useState("")
   const [error, setError] = useState("")
 
+  const { data: accounts } = useQuery({
+    queryKey: ["accounts"],
+    queryFn: accountsApi.getAll,
+    enabled: isOpen,
+  })
+
   const paymentMutation = useMutation({
-    mutationFn: () => debtsApi.recordPayment(debt!.id, { amount, note: note || undefined }),
+    mutationFn: () =>
+      debtsApi.recordPayment(debt!.id, {
+        amount,
+        paymentDate: paymentDate || undefined,
+        accountId: accountId || undefined,
+        note: note || undefined,
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["debts"] })
+      queryClient.invalidateQueries({ queryKey: ["accounts"] })
       handleClose()
     },
     onError: (err: unknown) => {
-      const message = err instanceof Error ? err.message : t("errors.debt.paymentFailed")
+      let message = t("errors.debt.paymentFailed")
+      if (err instanceof AxiosError && err.response?.data) {
+        const apiError = err.response.data as ApiError
+        message = apiError.message || err.message
+      } else if (err instanceof Error) {
+        message = err.message
+      }
       setError(message)
       console.error("Record payment error:", err)
     },
@@ -48,6 +71,8 @@ export function DebtPaymentModal({ isOpen, onClose, debt }: DebtPaymentModalProp
   const handleClose = () => {
     setAmountDisplay("")
     setAmount(0)
+    setPaymentDate(format(new Date(), "yyyy-MM-dd"))
+    setAccountId("")
     setNote("")
     setError("")
     onClose()
@@ -93,6 +118,13 @@ export function DebtPaymentModal({ isOpen, onClose, debt }: DebtPaymentModalProp
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {error && (
+            <div className="flex items-center gap-2 rounded-md bg-red-50 p-3 text-sm text-red-700">
+              <AlertCircle className="h-4 w-4 flex-shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
+
           <div className="space-y-2">
             <Label htmlFor="paymentAmount" required>
               {t("debts.paymentAmount")}
@@ -113,6 +145,34 @@ export function DebtPaymentModal({ isOpen, onClose, debt }: DebtPaymentModalProp
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="paymentDate" required>
+              {t("debts.paymentDate")}
+            </Label>
+            <Input
+              id="paymentDate"
+              type="date"
+              value={paymentDate}
+              onChange={(e) => setPaymentDate(e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="accountId">{t("debts.paymentAccount")}</Label>
+            <Select
+              id="accountId"
+              value={accountId}
+              onChange={(e) => setAccountId(e.target.value)}
+            >
+              <option value="">{t("common.select")}</option>
+              {accounts?.map((account) => (
+                <option key={account.id} value={account.id}>
+                  {account.name} ({account.currency})
+                </option>
+              ))}
+            </Select>
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="paymentNote">{t("debts.note")}</Label>
             <Input
               id="paymentNote"
@@ -121,8 +181,6 @@ export function DebtPaymentModal({ isOpen, onClose, debt }: DebtPaymentModalProp
               onChange={(e) => setNote(e.target.value)}
             />
           </div>
-
-          {error && <p className="text-sm text-destructive">{error}</p>}
 
           <div className="flex justify-end gap-2 pt-4">
             <Button type="button" variant="outline" onClick={handleClose}>

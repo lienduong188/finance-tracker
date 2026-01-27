@@ -7,7 +7,7 @@ import { z } from "zod"
 import { X, AlertCircle } from "lucide-react"
 import { format } from "date-fns"
 import { AxiosError } from "axios"
-import { Button, Input, Label } from "@/components/ui"
+import { Button, Input, Label, Select } from "@/components/ui"
 import { debtsApi } from "@/api"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/context/AuthContext"
@@ -223,24 +223,36 @@ export function DebtFormModal({ isOpen, onClose, debt }: DebtFormModalProps) {
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="amount" required>
-              {t("transactions.amount")}
-            </Label>
-            <Input
-              id="amount"
-              type="text"
-              inputMode="numeric"
-              placeholder="0"
-              error={errors.amount?.message}
-              value={amountDisplay}
-              onChange={(e) => {
-                const raw = e.target.value.replace(/[^0-9.]/g, "")
-                const num = parseNumber(raw)
-                setAmountDisplay(raw ? formatNumber(num) : "")
-                setValue("amount", num)
-              }}
-            />
+          <div className="grid grid-cols-3 gap-3">
+            <div className="col-span-2 space-y-2">
+              <Label htmlFor="amount" required>
+                {t("transactions.amount")}
+              </Label>
+              <Input
+                id="amount"
+                type="text"
+                inputMode="numeric"
+                placeholder="0"
+                error={errors.amount?.message}
+                value={amountDisplay}
+                onChange={(e) => {
+                  const raw = e.target.value.replace(/[^0-9.]/g, "")
+                  const num = parseNumber(raw)
+                  setAmountDisplay(raw ? formatNumber(num) : "")
+                  setValue("amount", num)
+                }}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="currency">{t("accounts.currency")}</Label>
+              <Select id="currency" {...register("currency")}>
+                <option value="VND">VND</option>
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="JPY">JPY</option>
+              </Select>
+            </div>
           </div>
 
           <div className="space-y-2">

@@ -13,7 +13,8 @@
     "noData": "データがありません",
     "confirm": "確認",
     "yes": "はい",
-    "no": "いいえ"
+    "no": "いいえ",
+    "select": "-- 選択 --"
   },
   "auth": {
     "login": "ログイン",
@@ -268,6 +269,8 @@
     "confirmCancel": "この貸借をキャンセルしてもよろしいですか？",
     "confirmDelete": "この貸借を削除してもよろしいですか？",
     "paymentAmount": "返済額",
+    "paymentDate": "返済日",
+    "paymentAccount": "支払い口座",
     "paymentNotePlaceholder": "返済メモ",
     "confirm": "確認",
     "amountRequired": "金額を入力してください",

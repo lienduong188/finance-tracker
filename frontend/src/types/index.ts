@@ -419,6 +419,8 @@ export interface DebtRequest {
 
 export interface DebtPaymentRequest {
   amount: number
+  paymentDate?: string
+  accountId?: string
   note?: string
 }
 

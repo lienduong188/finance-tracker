@@ -1,11 +1,13 @@
 package com.financetracker.service;
 
 import com.financetracker.dto.debt.*;
+import com.financetracker.entity.Account;
 import com.financetracker.entity.Debt;
 import com.financetracker.entity.DebtStatus;
 import com.financetracker.entity.DebtType;
 import com.financetracker.entity.User;
 import com.financetracker.exception.ApiException;
+import com.financetracker.repository.AccountRepository;
 import com.financetracker.repository.DebtRepository;
 import com.financetracker.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,6 +31,7 @@ public class DebtService {
 
     private final DebtRepository debtRepository;
     private final UserRepository userRepository;
+    private final AccountRepository accountRepository;
 
     @Transactional(readOnly = true)
     public Page<DebtResponse> getAll(UUID userId, DebtType type, DebtStatus status, Pageable pageable) {
@@ -123,10 +127,25 @@ public class DebtService {
         }
 
         debt.setPaidAmount(newPaidAmount);
-        if (request.getNote() != null && !request.getNote().isBlank()) {
-            String existingNote = debt.getNote() != null ? debt.getNote() + "\n" : "";
-            debt.setNote(existingNote + "[Payment] " + request.getNote());
+
+        // Build payment note with date and account info
+        LocalDate paymentDate = request.getPaymentDate() != null ? request.getPaymentDate() : LocalDate.now();
+        StringBuilder paymentNote = new StringBuilder();
+        paymentNote.append("[").append(paymentDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))).append("] ");
+        paymentNote.append("Thanh toán: ").append(request.getAmount());
+
+        if (request.getAccountId() != null) {
+            accountRepository.findById(request.getAccountId()).ifPresent(account -> {
+                paymentNote.append(" từ ").append(account.getName());
+            });
         }
+
+        if (request.getNote() != null && !request.getNote().isBlank()) {
+            paymentNote.append(" - ").append(request.getNote());
+        }
+
+        String existingNote = debt.getNote() != null ? debt.getNote() + "\n" : "";
+        debt.setNote(existingNote + paymentNote);
 
         updateStatus(debt);
 

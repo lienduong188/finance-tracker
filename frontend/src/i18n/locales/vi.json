@@ -13,7 +13,8 @@
     "noData": "Không có dữ liệu",
     "confirm": "Xác nhận",
     "yes": "Có",
-    "no": "Không"
+    "no": "Không",
+    "select": "-- Chọn --"
   },
   "auth": {
     "login": "Đăng nhập",
@@ -268,6 +269,8 @@
     "confirmCancel": "Bạn có chắc muốn hủy khoản vay này?",
     "confirmDelete": "Bạn có chắc muốn xóa khoản vay này?",
     "paymentAmount": "Số tiền thanh toán",
+    "paymentDate": "Ngày thanh toán",
+    "paymentAccount": "Tài khoản thanh toán",
     "paymentNotePlaceholder": "Ghi chú thanh toán",
     "confirm": "Xác nhận",
     "amountRequired": "Vui lòng nhập số tiền",
