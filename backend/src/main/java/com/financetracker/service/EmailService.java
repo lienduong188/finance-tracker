@@ -1,8 +1,8 @@
 package com.financetracker.service;
 
 import com.financetracker.entity.User;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -10,7 +10,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class EmailService {
 
@@ -22,8 +21,22 @@ public class EmailService {
     @Value("${app.mail.verification-url:http://localhost:5173/verify-email}")
     private String verificationBaseUrl;
 
+    @Autowired(required = false)
+    public EmailService(JavaMailSender mailSender) {
+        this.mailSender = mailSender;
+        if (mailSender == null) {
+            log.warn("JavaMailSender not configured. Email sending will be disabled.");
+        }
+    }
+
     @Async
     public void sendVerificationEmail(User user, String token) {
+        if (mailSender == null) {
+            log.warn("Cannot send verification email - JavaMailSender not configured. Token for {}: {}",
+                user.getEmail(), token);
+            return;
+        }
+
         try {
             String verificationLink = verificationBaseUrl + "?token=" + token;
 
