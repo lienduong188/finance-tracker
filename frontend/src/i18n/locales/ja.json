@@ -460,5 +460,12 @@
       "internal": "エラーが発生しました。もう一度お試しください。",
       "unavailable": "サービスは一時的に利用できません"
     }
+  },
+  "exchangeRates": {
+    "title": "為替レート",
+    "refresh": "更新",
+    "base": "基準",
+    "noData": "為替レートデータがありません",
+    "converter": "通貨換算"
   }
 }

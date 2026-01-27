@@ -460,5 +460,12 @@
       "internal": "An error occurred. Please try again.",
       "unavailable": "Service is temporarily unavailable"
     }
+  },
+  "exchangeRates": {
+    "title": "Exchange Rates",
+    "refresh": "Refresh",
+    "base": "Base",
+    "noData": "No exchange rate data",
+    "converter": "Quick Convert"
   }
 }
