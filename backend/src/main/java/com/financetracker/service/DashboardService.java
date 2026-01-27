@@ -4,6 +4,7 @@ import com.financetracker.dto.dashboard.CashflowReport;
 import com.financetracker.dto.dashboard.CategoryReport;
 import com.financetracker.dto.dashboard.DashboardSummary;
 import com.financetracker.entity.Account;
+import com.financetracker.entity.AccountType;
 import com.financetracker.entity.Transaction;
 import com.financetracker.entity.TransactionType;
 import com.financetracker.repository.AccountRepository;
@@ -31,7 +32,10 @@ public class DashboardService {
 
         Map<String, BigDecimal> balanceByCurrency = new HashMap<>();
         for (Account account : accounts) {
-            balanceByCurrency.merge(account.getCurrency(), account.getCurrentBalance(), BigDecimal::add);
+            // Không tính credit card vào tổng số dư
+            if (account.getType() != AccountType.CREDIT_CARD) {
+                balanceByCurrency.merge(account.getCurrency(), account.getCurrentBalance(), BigDecimal::add);
+            }
         }
 
         BigDecimal totalBalance = balanceByCurrency.getOrDefault(primaryCurrency, BigDecimal.ZERO);
