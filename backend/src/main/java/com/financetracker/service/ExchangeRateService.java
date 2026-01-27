@@ -26,8 +26,8 @@ public class ExchangeRateService {
     private final ExchangeRateRepository exchangeRateRepository;
     private final RestTemplate restTemplate;
 
-    @Value("${exchange-rate.api-url:https://api.frankfurter.app}")
-    private String apiUrl;
+    @Value("${exchange-rate.api-key:}")
+    private String apiKey;
 
     @Value("${exchange-rate.cache-duration-minutes:60}")
     private int cacheDurationMinutes;
@@ -35,10 +35,12 @@ public class ExchangeRateService {
     @Value("${exchange-rate.fallback-enabled:true}")
     private boolean fallbackEnabled;
 
-    // In-memory cache
-    private final Map<String, CachedRate> rateCache = new ConcurrentHashMap<>();
+    private static final String API_URL = "https://v6.exchangerate-api.com/v6";
 
-    private record CachedRate(BigDecimal rate, OffsetDateTime cachedAt, String source) {
+    // In-memory cache for all rates from a base currency
+    private final Map<String, CachedRates> ratesCache = new ConcurrentHashMap<>();
+
+    private record CachedRates(Map<String, BigDecimal> rates, OffsetDateTime cachedAt) {
         boolean isExpired(int ttlMinutes) {
             return cachedAt.plusMinutes(ttlMinutes).isBefore(OffsetDateTime.now());
         }
@@ -56,41 +58,48 @@ public class ExchangeRateService {
                     .build();
         }
 
-        String cacheKey = from.toUpperCase() + "_" + to.toUpperCase();
-        CachedRate cached = rateCache.get(cacheKey);
+        String fromUpper = from.toUpperCase();
+        String toUpper = to.toUpperCase();
 
+        // Check cache first
+        CachedRates cached = ratesCache.get(fromUpper);
         if (cached != null && !cached.isExpired(cacheDurationMinutes)) {
-            log.debug("Cache hit for {}", cacheKey);
-            return ExchangeRateResponse.builder()
-                    .fromCurrency(from)
-                    .toCurrency(to)
-                    .rate(cached.rate())
-                    .date(LocalDate.now())
-                    .source("cache")
-                    .updatedAt(cached.cachedAt())
-                    .build();
+            BigDecimal rate = cached.rates().get(toUpper);
+            if (rate != null) {
+                log.debug("Cache hit for {} to {}", fromUpper, toUpper);
+                return ExchangeRateResponse.builder()
+                        .fromCurrency(fromUpper)
+                        .toCurrency(toUpper)
+                        .rate(rate)
+                        .date(LocalDate.now())
+                        .source("cache")
+                        .updatedAt(cached.cachedAt())
+                        .build();
+            }
         }
 
-        // Try to fetch from API
+        // Fetch from API
         try {
-            BigDecimal rate = fetchRateFromApi(from, to);
-            CachedRate newCache = new CachedRate(rate, OffsetDateTime.now(), "frankfurter");
-            rateCache.put(cacheKey, newCache);
+            Map<String, BigDecimal> rates = fetchRatesFromApi(fromUpper);
+            BigDecimal rate = rates.get(toUpper);
+
+            if (rate == null) {
+                throw new RuntimeException("Rate not found for " + toUpper);
+            }
 
             return ExchangeRateResponse.builder()
-                    .fromCurrency(from)
-                    .toCurrency(to)
+                    .fromCurrency(fromUpper)
+                    .toCurrency(toUpper)
                     .rate(rate)
                     .date(LocalDate.now())
-                    .source("frankfurter")
+                    .source("exchangerate-api")
                     .updatedAt(OffsetDateTime.now())
                     .build();
         } catch (Exception e) {
             log.warn("Failed to fetch rate from API: {}", e.getMessage());
 
             if (fallbackEnabled) {
-                // Try database fallback
-                Optional<ExchangeRate> dbRate = exchangeRateRepository.findLatestRate(from.toUpperCase(), to.toUpperCase());
+                Optional<ExchangeRate> dbRate = exchangeRateRepository.findLatestRate(fromUpper, toUpper);
                 if (dbRate.isPresent()) {
                     ExchangeRate rate = dbRate.get();
                     return ExchangeRateResponse.builder()
@@ -109,26 +118,35 @@ public class ExchangeRateService {
     }
 
     public ExchangeRatesResponse getAllRates(String baseCurrency) {
-        Map<String, BigDecimal> rates = new LinkedHashMap<>();
-        List<String> targetCurrencies = getSupportedCurrencies().stream()
-                .filter(c -> !c.equalsIgnoreCase(baseCurrency))
-                .toList();
+        String baseUpper = baseCurrency.toUpperCase();
 
-        for (String target : targetCurrencies) {
-            try {
-                ExchangeRateResponse rate = getLatestRate(baseCurrency, target);
-                rates.put(target, rate.getRate());
-            } catch (Exception e) {
-                log.warn("Failed to get rate for {} to {}: {}", baseCurrency, target, e.getMessage());
+        try {
+            Map<String, BigDecimal> rates = fetchRatesFromApi(baseUpper);
+
+            // Filter to only supported currencies
+            List<String> supported = getSupportedCurrencies();
+            Map<String, BigDecimal> filteredRates = new LinkedHashMap<>();
+            for (String currency : supported) {
+                if (!currency.equals(baseUpper) && rates.containsKey(currency)) {
+                    filteredRates.put(currency, rates.get(currency));
+                }
             }
-        }
 
-        return ExchangeRatesResponse.builder()
-                .baseCurrency(baseCurrency)
-                .date(LocalDate.now())
-                .rates(rates)
-                .source("frankfurter")
-                .build();
+            return ExchangeRatesResponse.builder()
+                    .baseCurrency(baseUpper)
+                    .date(LocalDate.now())
+                    .rates(filteredRates)
+                    .source("exchangerate-api")
+                    .build();
+        } catch (Exception e) {
+            log.error("Failed to fetch all rates: {}", e.getMessage());
+            return ExchangeRatesResponse.builder()
+                    .baseCurrency(baseUpper)
+                    .date(LocalDate.now())
+                    .rates(Map.of())
+                    .source("error")
+                    .build();
+        }
     }
 
     public ConvertResponse convert(BigDecimal amount, String from, String to) {
@@ -148,26 +166,28 @@ public class ExchangeRateService {
 
     @Transactional
     public void fetchAndSaveRates() {
-        log.info("Fetching exchange rates from API...");
+        log.info("Fetching exchange rates from ExchangeRate-API...");
         List<String> currencies = getSupportedCurrencies();
         LocalDate today = LocalDate.now();
         int savedCount = 0;
 
         for (String from : currencies) {
-            for (String to : currencies) {
-                if (from.equals(to)) continue;
+            try {
+                Map<String, BigDecimal> rates = fetchRatesFromApi(from);
 
-                try {
-                    BigDecimal rate = fetchRateFromApi(from, to);
+                for (String to : currencies) {
+                    if (from.equals(to)) continue;
 
-                    // Check if rate already exists for today
+                    BigDecimal rate = rates.get(to);
+                    if (rate == null) continue;
+
                     Optional<ExchangeRate> existing = exchangeRateRepository
                             .findByFromCurrencyAndToCurrencyAndDate(from, to, today);
 
                     if (existing.isPresent()) {
                         ExchangeRate entity = existing.get();
                         entity.setRate(rate);
-                        entity.setSource("frankfurter");
+                        entity.setSource("exchangerate-api");
                         exchangeRateRepository.save(entity);
                     } else {
                         ExchangeRate entity = ExchangeRate.builder()
@@ -175,19 +195,14 @@ public class ExchangeRateService {
                                 .toCurrency(to)
                                 .rate(rate)
                                 .date(today)
-                                .source("frankfurter")
+                                .source("exchangerate-api")
                                 .build();
                         exchangeRateRepository.save(entity);
                     }
-
-                    // Update cache
-                    String cacheKey = from + "_" + to;
-                    rateCache.put(cacheKey, new CachedRate(rate, OffsetDateTime.now(), "frankfurter"));
                     savedCount++;
-
-                } catch (Exception e) {
-                    log.error("Failed to fetch rate for {} to {}: {}", from, to, e.getMessage());
                 }
+            } catch (Exception e) {
+                log.error("Failed to fetch rates for {}: {}", from, e.getMessage());
             }
         }
 
@@ -195,17 +210,15 @@ public class ExchangeRateService {
     }
 
     public void clearCache() {
-        rateCache.clear();
+        ratesCache.clear();
         log.info("Exchange rate cache cleared");
     }
 
     public List<String> getSupportedCurrencies() {
-        // Get currencies from database (from accounts and exchange_rates)
         Set<String> currencies = new HashSet<>();
         currencies.addAll(exchangeRateRepository.findDistinctFromCurrencies());
         currencies.addAll(exchangeRateRepository.findDistinctToCurrencies());
 
-        // Add default currencies if empty
         if (currencies.isEmpty()) {
             currencies.add("VND");
             currencies.add("JPY");
@@ -216,49 +229,25 @@ public class ExchangeRateService {
         return new ArrayList<>(currencies);
     }
 
-    private BigDecimal fetchRateFromApi(String from, String to) {
-        // Frankfurter API doesn't support VND directly, so we need to use USD as intermediate
-        // For VND conversions, we'll use a workaround
-        if (from.equalsIgnoreCase("VND") || to.equalsIgnoreCase("VND")) {
-            return fetchVndRate(from, to);
+    private Map<String, BigDecimal> fetchRatesFromApi(String baseCurrency) {
+        if (apiKey == null || apiKey.isEmpty()) {
+            throw new RuntimeException("Exchange rate API key not configured");
         }
 
-        String url = String.format("%s/latest?from=%s&to=%s", apiUrl, from.toUpperCase(), to.toUpperCase());
-        log.debug("Fetching rate from: {}", url);
+        String url = String.format("%s/%s/latest/%s", API_URL, apiKey, baseCurrency);
+        log.debug("Fetching rates from ExchangeRate-API for base: {}", baseCurrency);
 
-        FrankfurterResponse response = restTemplate.getForObject(url, FrankfurterResponse.class);
-        if (response == null || response.getRates() == null || response.getRates().isEmpty()) {
-            throw new RuntimeException("Empty response from Frankfurter API");
+        ExchangeRateApiResponse response = restTemplate.getForObject(url, ExchangeRateApiResponse.class);
+
+        if (response == null || !"success".equals(response.getResult())) {
+            throw new RuntimeException("Failed to fetch rates from ExchangeRate-API");
         }
 
-        return response.getRates().get(to.toUpperCase());
-    }
+        Map<String, BigDecimal> rates = response.getConversionRates();
 
-    private BigDecimal fetchVndRate(String from, String to) {
-        // Frankfurter doesn't support VND, so we use hardcoded rates or database fallback
-        // In production, you might want to use a different API that supports VND
+        // Update cache
+        ratesCache.put(baseCurrency, new CachedRates(rates, OffsetDateTime.now()));
 
-        // Check database first
-        Optional<ExchangeRate> dbRate = exchangeRateRepository.findLatestRate(from.toUpperCase(), to.toUpperCase());
-        if (dbRate.isPresent()) {
-            return dbRate.get().getRate();
-        }
-
-        // Fallback hardcoded rates (approximate)
-        Map<String, BigDecimal> vndRates = Map.of(
-                "USD_VND", new BigDecimal("24500"),
-                "VND_USD", new BigDecimal("0.0000408"),
-                "EUR_VND", new BigDecimal("26500"),
-                "VND_EUR", new BigDecimal("0.0000377"),
-                "JPY_VND", new BigDecimal("163"),
-                "VND_JPY", new BigDecimal("0.00613")
-        );
-
-        String key = from.toUpperCase() + "_" + to.toUpperCase();
-        if (vndRates.containsKey(key)) {
-            return vndRates.get(key);
-        }
-
-        throw new RuntimeException("VND rate not available for " + from + " to " + to);
+        return rates;
     }
 }
