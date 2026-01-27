@@ -465,6 +465,7 @@
     "title": "Tỷ giá",
     "refresh": "Làm mới",
     "base": "Đơn vị",
-    "noData": "Không có dữ liệu tỷ giá"
+    "noData": "Không có dữ liệu tỷ giá",
+    "converter": "Quy đổi nhanh"
   }
 }
