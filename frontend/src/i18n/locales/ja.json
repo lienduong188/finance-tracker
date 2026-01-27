@@ -52,7 +52,20 @@
     "goToLogin": "ログインへ",
     "invalidResetToken": "無効または期限切れのリセットトークン",
     "requestNewToken": "新しいトークンをリクエスト",
-    "sessionExpired": "操作がなかったため、セッションが終了しました。再度ログインしてください。"
+    "sessionExpired": "操作がなかったため、セッションが終了しました。再度ログインしてください。",
+    "rememberEmail": "メールアドレスを保存",
+    "registrationSuccess": "登録が完了しました！",
+    "checkEmailToVerify": "メールを確認してアカウントを認証してください。",
+    "resendVerification": "認証メールを再送信",
+    "emailVerification": "メール認証",
+    "verificationFailed": "メール認証に失敗しました",
+    "invalidVerificationToken": "無効な認証リンク",
+    "verificationSuccess": "メールが正常に認証されました！",
+    "generatePassword": "パスワードを生成",
+    "copied": "コピーしました！",
+    "passwordRequirements": "8文字以上、大文字、小文字、数字を含む",
+    "showPassword": "パスワードを表示",
+    "hidePassword": "パスワードを非表示"
   },
   "validation": {
     "required": "この項目は必須です",
@@ -440,7 +453,10 @@
       "emailExists": "このメールアドレスは既に登録されています",
       "invalidToken": "無効なトークン",
       "tokenExpired": "トークンの有効期限が切れています",
-      "accountDisabled": "アカウントが無効化されています"
+      "accountDisabled": "アカウントが無効化されています",
+      "emailNotVerified": "メールが認証されていません。受信トレイを確認してください。",
+      "invalidVerificationToken": "無効な認証リンク",
+      "verificationTokenExpired": "認証リンクの有効期限が切れています"
     },
     "validation": {
       "failed": "入力内容に誤りがあります",

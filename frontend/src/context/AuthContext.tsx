@@ -21,7 +21,7 @@ interface AuthContextType {
   isAdmin: boolean
   isLoading: boolean
   login: (data: LoginRequest) => Promise<void>
-  register: (data: RegisterRequest) => Promise<void>
+  register: (data: RegisterRequest) => Promise<{ message: string }>
   logout: () => Promise<void>
   resetActivity: () => void
 }
@@ -153,9 +153,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     handleAuthResponse(response)
   }
 
-  const register = async (data: RegisterRequest) => {
+  const register = async (data: RegisterRequest): Promise<{ message: string }> => {
     const response = await authApi.register(data)
-    handleAuthResponse(response)
+    // Don't auto-login - user needs to verify email first
+    return response
   }
 
   const logout = async () => {

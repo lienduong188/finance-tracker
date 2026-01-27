@@ -6,6 +6,7 @@ import com.financetracker.dto.auth.LoginRequest;
 import com.financetracker.dto.auth.LogoutRequest;
 import com.financetracker.dto.auth.RefreshTokenRequest;
 import com.financetracker.dto.auth.RegisterRequest;
+import com.financetracker.dto.auth.ResendVerificationRequest;
 import com.financetracker.dto.auth.ResetPasswordRequest;
 import com.financetracker.security.CustomUserDetails;
 import com.financetracker.service.AuthService;
@@ -28,10 +29,23 @@ public class AuthController {
 
     @PostMapping("/register")
     @Operation(summary = "Register a new user")
-    public ResponseEntity<AuthResponse> register(
+    public ResponseEntity<java.util.Map<String, String>> register(
             @Valid @RequestBody RegisterRequest request,
             HttpServletRequest httpRequest) {
         return ResponseEntity.ok(authService.register(request, httpRequest));
+    }
+
+    @GetMapping("/verify-email")
+    @Operation(summary = "Verify email with token")
+    public ResponseEntity<java.util.Map<String, String>> verifyEmail(@RequestParam String token) {
+        return ResponseEntity.ok(authService.verifyEmail(token));
+    }
+
+    @PostMapping("/resend-verification")
+    @Operation(summary = "Resend verification email")
+    public ResponseEntity<java.util.Map<String, String>> resendVerification(
+            @Valid @RequestBody ResendVerificationRequest request) {
+        return ResponseEntity.ok(authService.resendVerification(request.getEmail()));
     }
 
     @PostMapping("/login")

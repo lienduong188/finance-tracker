@@ -11,6 +11,9 @@ public enum ErrorCode {
     AUTH_003("AUTH_003", "Invalid refresh token", "errors.auth.invalidToken", HttpStatus.UNAUTHORIZED),
     AUTH_004("AUTH_004", "Token expired", "errors.auth.tokenExpired", HttpStatus.UNAUTHORIZED),
     AUTH_005("AUTH_005", "Account disabled", "errors.auth.accountDisabled", HttpStatus.FORBIDDEN),
+    AUTH_006("AUTH_006", "Email not verified", "errors.auth.emailNotVerified", HttpStatus.FORBIDDEN),
+    AUTH_007("AUTH_007", "Invalid verification token", "errors.auth.invalidVerificationToken", HttpStatus.BAD_REQUEST),
+    AUTH_008("AUTH_008", "Verification token expired", "errors.auth.verificationTokenExpired", HttpStatus.BAD_REQUEST),
 
     // Validation errors (VAL_xxx)
     VAL_001("VAL_001", "Validation failed", "errors.validation.failed", HttpStatus.BAD_REQUEST),

@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { AuthProvider } from "./context/AuthContext"
 import { MainLayout, AdminLayout } from "./components/layout"
-import { LoginPage, RegisterPage, ForgotPasswordPage, ResetPasswordPage } from "./pages/auth"
+import { LoginPage, RegisterPage, ForgotPasswordPage, ResetPasswordPage, VerifyEmailPage } from "./pages/auth"
 import { TermsPage, PrivacyPage } from "./pages/legal"
 import { DashboardPage } from "./pages/dashboard"
 import { AccountsPage } from "./pages/accounts"
@@ -34,6 +34,7 @@ function App() {
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route path="/verify-email" element={<VerifyEmailPage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
 

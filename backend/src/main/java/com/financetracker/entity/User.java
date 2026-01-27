@@ -38,6 +38,10 @@ public class User extends BaseEntity {
     @Builder.Default
     private Boolean enabled = true;
 
+    @Column(name = "email_verified")
+    @Builder.Default
+    private Boolean emailVerified = false;
+
     @Column(name = "last_login_at")
     private OffsetDateTime lastLoginAt;
 

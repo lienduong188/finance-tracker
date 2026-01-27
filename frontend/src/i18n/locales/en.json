@@ -52,7 +52,20 @@
     "goToLogin": "Go to login",
     "invalidResetToken": "Invalid or expired reset token",
     "requestNewToken": "Request new token",
-    "sessionExpired": "Your session has expired due to inactivity. Please log in again."
+    "sessionExpired": "Your session has expired due to inactivity. Please log in again.",
+    "rememberEmail": "Remember my email",
+    "registrationSuccess": "Registration successful!",
+    "checkEmailToVerify": "Please check your email to verify your account.",
+    "resendVerification": "Resend verification email",
+    "emailVerification": "Email Verification",
+    "verificationFailed": "Email verification failed",
+    "invalidVerificationToken": "Invalid verification link",
+    "verificationSuccess": "Email verified successfully!",
+    "generatePassword": "Generate password",
+    "copied": "Copied!",
+    "passwordRequirements": "At least 8 characters, including uppercase, lowercase, and number",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
   },
   "validation": {
     "required": "This field is required",
@@ -440,7 +453,10 @@
       "emailExists": "Email is already registered",
       "invalidToken": "Invalid token",
       "tokenExpired": "Token has expired",
-      "accountDisabled": "Account has been disabled"
+      "accountDisabled": "Account has been disabled",
+      "emailNotVerified": "Email not verified. Please check your inbox.",
+      "invalidVerificationToken": "Invalid verification link",
+      "verificationTokenExpired": "Verification link has expired"
     },
     "validation": {
       "failed": "Validation failed",

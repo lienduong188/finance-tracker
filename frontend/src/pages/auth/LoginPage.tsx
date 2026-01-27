@@ -8,6 +8,8 @@ import { useAuth } from "@/context/AuthContext"
 import { Button, Input, Label, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui"
 import { LanguageSwitch } from "@/components/LanguageSwitch"
 
+const REMEMBERED_EMAIL_KEY = "rememberedEmail"
+
 export function LoginPage() {
   const { t } = useTranslation()
   const { login, isAuthenticated } = useAuth()
@@ -15,15 +17,7 @@ export function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [sessionExpired, setSessionExpired] = useState(false)
-
-  useEffect(() => {
-    if (searchParams.get("expired") === "true") {
-      setSessionExpired(true)
-      // Clear the URL param
-      searchParams.delete("expired")
-      setSearchParams(searchParams, { replace: true })
-    }
-  }, [searchParams, setSearchParams])
+  const [rememberMe, setRememberMe] = useState(false)
 
   const loginSchema = z.object({
     email: z.string().email(t("validation.emailInvalid")),
@@ -35,10 +29,27 @@ export function LoginPage() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
   })
+
+  useEffect(() => {
+    if (searchParams.get("expired") === "true") {
+      setSessionExpired(true)
+      searchParams.delete("expired")
+      setSearchParams(searchParams, { replace: true })
+    }
+  }, [searchParams, setSearchParams])
+
+  useEffect(() => {
+    const savedEmail = localStorage.getItem(REMEMBERED_EMAIL_KEY)
+    if (savedEmail) {
+      setValue("email", savedEmail)
+      setRememberMe(true)
+    }
+  }, [setValue])
 
   if (isAuthenticated) {
     return <Navigate to="/" replace />
@@ -50,6 +61,11 @@ export function LoginPage() {
 
     try {
       await login(data)
+      if (rememberMe) {
+        localStorage.setItem(REMEMBERED_EMAIL_KEY, data.email)
+      } else {
+        localStorage.removeItem(REMEMBERED_EMAIL_KEY)
+      }
     } catch {
       setError(t("auth.loginFailed"))
     } finally {
@@ -106,6 +122,19 @@ export function LoginPage() {
                 error={errors.password?.message}
                 {...register("password")}
               />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="rememberMe"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+              />
+              <label htmlFor="rememberMe" className="text-sm text-muted-foreground cursor-pointer">
+                {t("auth.rememberEmail")}
+              </label>
             </div>
           </CardContent>
 

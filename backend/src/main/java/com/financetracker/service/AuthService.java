@@ -7,10 +7,12 @@ import com.financetracker.dto.auth.LogoutRequest;
 import com.financetracker.dto.auth.RefreshTokenRequest;
 import com.financetracker.dto.auth.RegisterRequest;
 import com.financetracker.dto.auth.ResetPasswordRequest;
+import com.financetracker.entity.EmailVerificationToken;
 import com.financetracker.entity.RefreshToken;
 import com.financetracker.entity.User;
 import com.financetracker.exception.ApiException;
 import com.financetracker.exception.ErrorCode;
+import com.financetracker.repository.EmailVerificationTokenRepository;
 import com.financetracker.repository.RefreshTokenRepository;
 import com.financetracker.repository.UserRepository;
 import com.financetracker.security.CustomUserDetails;
@@ -25,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -33,18 +36,23 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final EmailVerificationTokenRepository emailVerificationTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final GeoLocationService geoLocationService;
+    private final EmailService emailService;
 
     @Value("${jwt.refresh-token-expiration:604800000}")
     private long refreshTokenExpiration; // Default 7 days
 
+    @Value("${app.mail.verification-token-expiry-hours:24}")
+    private int verificationTokenExpiryHours;
+
     private static final int MAX_REFRESH_TOKENS_PER_USER = 5;
 
     @Transactional
-    public AuthResponse register(RegisterRequest request, HttpServletRequest httpRequest) {
+    public Map<String, String> register(RegisterRequest request, HttpServletRequest httpRequest) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new ApiException(ErrorCode.AUTH_002);
         }
@@ -54,29 +62,21 @@ public class AuthService {
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .fullName(request.getFullName())
                 .defaultCurrency(request.getDefaultCurrency() != null ? request.getDefaultCurrency() : "VND")
+                .emailVerified(false)
                 .build();
 
         user = userRepository.save(user);
 
-        CustomUserDetails userDetails = new CustomUserDetails(user);
-        String accessToken = jwtService.generateToken(userDetails, user.getId());
-        String refreshTokenStr = createRefreshToken(user, httpRequest);
+        // Create verification token and send email
+        String token = createVerificationToken(user);
+        emailService.sendVerificationEmail(user, token);
 
-        return AuthResponse.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshTokenStr)
-                .tokenType("Bearer")
-                .userId(user.getId())
-                .email(user.getEmail())
-                .fullName(user.getFullName())
-                .defaultCurrency(user.getDefaultCurrency())
-                .role(user.getRole().name())
-                .build();
+        return Map.of("message", "Registration successful. Please check your email to verify your account.");
     }
 
     // Keep backward compatible method
     @Transactional
-    public AuthResponse register(RegisterRequest request) {
+    public Map<String, String> register(RegisterRequest request) {
         return register(request, null);
     }
 
@@ -88,6 +88,10 @@ public class AuthService {
 
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> ApiException.notFound("User"));
+
+        if (!user.getEmailVerified()) {
+            throw new ApiException(ErrorCode.AUTH_006);
+        }
 
         if (!user.getEnabled()) {
             throw new ApiException(ErrorCode.AUTH_005);
@@ -235,5 +239,57 @@ public class AuthService {
 
         // Revoke all refresh tokens on password reset for security
         refreshTokenRepository.revokeAllByUser(user);
+    }
+
+    private String createVerificationToken(User user) {
+        // Invalidate previous tokens
+        emailVerificationTokenRepository.markAllUsedByUser(user);
+
+        String tokenStr = UUID.randomUUID().toString();
+        OffsetDateTime expiresAt = OffsetDateTime.now().plusHours(verificationTokenExpiryHours);
+
+        EmailVerificationToken token = EmailVerificationToken.builder()
+                .user(user)
+                .token(tokenStr)
+                .expiresAt(expiresAt)
+                .build();
+
+        emailVerificationTokenRepository.save(token);
+        return tokenStr;
+    }
+
+    @Transactional
+    public Map<String, String> verifyEmail(String token) {
+        EmailVerificationToken verificationToken = emailVerificationTokenRepository
+                .findByTokenAndUsedFalse(token)
+                .orElseThrow(() -> new ApiException(ErrorCode.AUTH_007));
+
+        if (verificationToken.isExpired()) {
+            throw new ApiException(ErrorCode.AUTH_008);
+        }
+
+        User user = verificationToken.getUser();
+        user.setEmailVerified(true);
+        userRepository.save(user);
+
+        verificationToken.setUsed(true);
+        emailVerificationTokenRepository.save(verificationToken);
+
+        return Map.of("message", "Email verified successfully. You can now login.");
+    }
+
+    @Transactional
+    public Map<String, String> resendVerification(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> ApiException.notFound("User"));
+
+        if (user.getEmailVerified()) {
+            return Map.of("message", "Email is already verified.");
+        }
+
+        String token = createVerificationToken(user);
+        emailService.sendVerificationEmail(user, token);
+
+        return Map.of("message", "Verification email sent.");
     }
 }

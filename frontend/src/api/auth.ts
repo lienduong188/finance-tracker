@@ -7,8 +7,8 @@ export const authApi = {
     return response.data
   },
 
-  register: async (data: RegisterRequest): Promise<AuthResponse> => {
-    const response = await apiClient.post<AuthResponse>("/auth/register", data)
+  register: async (data: RegisterRequest): Promise<{ message: string }> => {
+    const response = await apiClient.post<{ message: string }>("/auth/register", data)
     return response.data
   },
 
@@ -30,5 +30,15 @@ export const authApi = {
       role: data.role || "USER",
       createdAt: new Date().toISOString(),
     }
+  },
+
+  verifyEmail: async (token: string): Promise<{ message: string }> => {
+    const response = await apiClient.get<{ message: string }>(`/auth/verify-email?token=${token}`)
+    return response.data
+  },
+
+  resendVerification: async (email: string): Promise<{ message: string }> => {
+    const response = await apiClient.post<{ message: string }>("/auth/resend-verification", { email })
+    return response.data
   },
 }
