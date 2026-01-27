@@ -460,5 +460,11 @@
       "internal": "Đã xảy ra lỗi. Vui lòng thử lại.",
       "unavailable": "Dịch vụ tạm thời không khả dụng"
     }
+  },
+  "exchangeRates": {
+    "title": "Tỷ giá",
+    "refresh": "Làm mới",
+    "base": "Đơn vị",
+    "noData": "Không có dữ liệu tỷ giá"
   }
 }

@@ -27,6 +27,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui"
 import { dashboardApi, recurringApi } from "@/api"
 import { formatCurrency, formatShortDate, formatFullDate, cn } from "@/lib/utils"
 import { useAuth } from "@/context/AuthContext"
+import { ExchangeRateCard } from "@/components/ExchangeRateCard"
 
 export function DashboardPage() {
   const { t, i18n } = useTranslation()
@@ -259,8 +260,13 @@ export function DashboardPage() {
         </Card>
       </div>
 
-      {/* Upcoming Recurring Transactions */}
-      <Card>
+      {/* Exchange Rates & Upcoming Transactions */}
+      <div className="grid gap-4 md:gap-6 lg:grid-cols-3">
+        {/* Exchange Rates */}
+        <ExchangeRateCard baseCurrency={currency} />
+
+        {/* Upcoming Recurring Transactions */}
+        <Card className="lg:col-span-2">
         <CardHeader className="flex flex-row items-center justify-between p-4 md:p-6">
           <CardTitle className="flex items-center gap-2 text-base md:text-lg">
             <Repeat className="h-5 w-5" />
@@ -330,7 +336,8 @@ export function DashboardPage() {
             </div>
           )}
         </CardContent>
-      </Card>
+        </Card>
+      </div>
     </div>
   )
 }
