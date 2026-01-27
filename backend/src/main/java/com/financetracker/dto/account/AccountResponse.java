@@ -32,4 +32,6 @@ public class AccountResponse {
     private BigDecimal creditLimit;
     private Integer billingDay;
     private Integer paymentDueDay;
+    private UUID linkedAccountId;
+    private String linkedAccountName;
 }

@@ -110,7 +110,10 @@
     "creditLimit": "Hạn mức tín dụng",
     "creditLimitPlaceholder": "VD: 50,000,000",
     "billingDay": "Ngày chốt sao kê",
-    "paymentDueDay": "Ngày đến hạn thanh toán"
+    "paymentDueDay": "Ngày đến hạn thanh toán",
+    "linkedAccount": "Tài khoản thanh toán tự động",
+    "selectLinkedAccount": "Chọn tài khoản",
+    "linkedAccountHelp": "Vào ngày chốt sao kê, số dư sẽ được tự động thanh toán từ tài khoản này"
   },
   "transactions": {
     "title": "Giao dịch",

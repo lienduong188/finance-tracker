@@ -59,6 +59,10 @@ public class Account extends BaseEntity {
     @Column(name = "payment_due_day")
     private Integer paymentDueDay;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "linked_account_id")
+    private Account linkedAccount;
+
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
     @Builder.Default
     private List<Transaction> transactions = new ArrayList<>();

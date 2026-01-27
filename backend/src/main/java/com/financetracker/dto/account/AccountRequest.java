@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -45,4 +46,7 @@ public class AccountRequest {
     @Min(value = 1, message = "Payment due day must be between 1 and 31")
     @Max(value = 31, message = "Payment due day must be between 1 and 31")
     private Integer paymentDueDay;
+
+    // Linked account for auto-payment
+    private UUID linkedAccountId;
 }

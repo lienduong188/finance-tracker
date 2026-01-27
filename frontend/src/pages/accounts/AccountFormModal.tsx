@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -48,6 +48,7 @@ export function AccountFormModal({ isOpen, onClose, account }: AccountFormModalP
     creditLimit: z.number().min(0).max(VALIDATION.AMOUNT_MAX).optional(),
     billingDay: z.number().min(VALIDATION.BILLING_DAY_MIN).max(VALIDATION.BILLING_DAY_MAX).optional(),
     paymentDueDay: z.number().min(VALIDATION.BILLING_DAY_MIN).max(VALIDATION.BILLING_DAY_MAX).optional(),
+    linkedAccountId: z.string().optional(),
   })
 
   type AccountForm = z.infer<typeof accountSchema>
@@ -68,11 +69,19 @@ export function AccountFormModal({ isOpen, onClose, account }: AccountFormModalP
       creditLimit: undefined,
       billingDay: undefined,
       paymentDueDay: undefined,
+      linkedAccountId: "",
     },
   })
 
   const iconValue = watch("icon")
   const typeValue = watch("type")
+
+  // Get all accounts for linked account dropdown (exclude credit cards)
+  const { data: allAccounts } = useQuery({
+    queryKey: ["accounts"],
+    queryFn: accountsApi.getAll,
+  })
+  const paymentAccounts = allAccounts?.filter(a => a.type !== "CREDIT_CARD" && a.id !== account?.id)
 
   // Handle balance input change with formatting
   const handleBalanceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -103,6 +112,7 @@ export function AccountFormModal({ isOpen, onClose, account }: AccountFormModalP
         creditLimit: account.creditLimit || undefined,
         billingDay: account.billingDay || undefined,
         paymentDueDay: account.paymentDueDay || undefined,
+        linkedAccountId: account.linkedAccountId || "",
       })
       setBalanceDisplay(formatNumberWithSeparator(account.initialBalance, i18n.language))
       setCreditLimitDisplay(account.creditLimit ? formatNumberWithSeparator(account.creditLimit, i18n.language) : "")
@@ -117,6 +127,7 @@ export function AccountFormModal({ isOpen, onClose, account }: AccountFormModalP
         creditLimit: undefined,
         billingDay: undefined,
         paymentDueDay: undefined,
+        linkedAccountId: "",
       })
       setBalanceDisplay("")
       setCreditLimitDisplay("")
@@ -151,6 +162,7 @@ export function AccountFormModal({ isOpen, onClose, account }: AccountFormModalP
       creditLimit: data.type === "CREDIT_CARD" ? data.creditLimit : undefined,
       billingDay: data.type === "CREDIT_CARD" ? data.billingDay : undefined,
       paymentDueDay: data.type === "CREDIT_CARD" ? data.paymentDueDay : undefined,
+      linkedAccountId: data.type === "CREDIT_CARD" && data.linkedAccountId ? data.linkedAccountId : undefined,
     }
 
     if (isEditing) {
@@ -262,6 +274,21 @@ export function AccountFormModal({ isOpen, onClose, account }: AccountFormModalP
                     error={errors.paymentDueDay?.message}
                   />
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="linkedAccountId">{t("accounts.linkedAccount")}</Label>
+                <Select id="linkedAccountId" {...register("linkedAccountId")}>
+                  <option value="">{t("accounts.selectLinkedAccount")}</option>
+                  {paymentAccounts?.map((acc) => (
+                    <option key={acc.id} value={acc.id}>
+                      {acc.name} ({acc.currency})
+                    </option>
+                  ))}
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  {t("accounts.linkedAccountHelp")}
+                </p>
               </div>
             </>
           )}

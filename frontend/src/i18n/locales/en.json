@@ -110,7 +110,10 @@
     "creditLimit": "Credit Limit",
     "creditLimitPlaceholder": "e.g. 5,000",
     "billingDay": "Billing Day",
-    "paymentDueDay": "Payment Due Day"
+    "paymentDueDay": "Payment Due Day",
+    "linkedAccount": "Auto-payment Account",
+    "selectLinkedAccount": "Select account",
+    "linkedAccountHelp": "On billing day, balance will be automatically paid from this account"
   },
   "transactions": {
     "title": "Transactions",

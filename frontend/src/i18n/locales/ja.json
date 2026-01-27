@@ -110,7 +110,10 @@
     "creditLimit": "利用限度額",
     "creditLimitPlaceholder": "例：500,000",
     "billingDay": "締め日",
-    "paymentDueDay": "支払い日"
+    "paymentDueDay": "支払い日",
+    "linkedAccount": "自動引き落とし口座",
+    "selectLinkedAccount": "口座を選択",
+    "linkedAccountHelp": "締め日に、この口座から自動的に支払われます"
   },
   "transactions": {
     "title": "取引",

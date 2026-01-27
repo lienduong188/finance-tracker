@@ -63,6 +63,8 @@ export interface Account {
   creditLimit: number | null
   billingDay: number | null
   paymentDueDay: number | null
+  linkedAccountId: string | null
+  linkedAccountName: string | null
 }
 
 export interface AccountRequest {
@@ -76,6 +78,7 @@ export interface AccountRequest {
   creditLimit?: number
   billingDay?: number
   paymentDueDay?: number
+  linkedAccountId?: string
 }
 
 // Category types

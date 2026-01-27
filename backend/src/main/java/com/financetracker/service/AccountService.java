@@ -3,6 +3,7 @@ package com.financetracker.service;
 import com.financetracker.dto.account.AccountRequest;
 import com.financetracker.dto.account.AccountResponse;
 import com.financetracker.entity.Account;
+import com.financetracker.entity.AccountType;
 import com.financetracker.entity.User;
 import com.financetracker.exception.ApiException;
 import com.financetracker.repository.AccountRepository;
@@ -40,6 +41,15 @@ public class AccountService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> ApiException.notFound("User"));
 
+        Account linkedAccount = null;
+        if (request.getLinkedAccountId() != null) {
+            linkedAccount = accountRepository.findByIdAndUserId(request.getLinkedAccountId(), userId)
+                    .orElseThrow(() -> ApiException.notFound("Linked account"));
+            if (linkedAccount.getType() == AccountType.CREDIT_CARD) {
+                throw ApiException.badRequest("Cannot link to another credit card");
+            }
+        }
+
         Account account = Account.builder()
                 .user(user)
                 .name(request.getName())
@@ -53,6 +63,7 @@ public class AccountService {
                 .creditLimit(request.getCreditLimit())
                 .billingDay(request.getBillingDay())
                 .paymentDueDay(request.getPaymentDueDay())
+                .linkedAccount(linkedAccount)
                 .build();
 
         account = accountRepository.save(account);
@@ -82,6 +93,18 @@ public class AccountService {
         account.setBillingDay(request.getBillingDay());
         account.setPaymentDueDay(request.getPaymentDueDay());
 
+        // Update linked account
+        if (request.getLinkedAccountId() != null) {
+            Account linkedAccount = accountRepository.findByIdAndUserId(request.getLinkedAccountId(), userId)
+                    .orElseThrow(() -> ApiException.notFound("Linked account"));
+            if (linkedAccount.getType() == AccountType.CREDIT_CARD) {
+                throw ApiException.badRequest("Cannot link to another credit card");
+            }
+            account.setLinkedAccount(linkedAccount);
+        } else {
+            account.setLinkedAccount(null);
+        }
+
         account = accountRepository.save(account);
         return toResponse(account);
     }
@@ -110,6 +133,8 @@ public class AccountService {
                 .creditLimit(account.getCreditLimit())
                 .billingDay(account.getBillingDay())
                 .paymentDueDay(account.getPaymentDueDay())
+                .linkedAccountId(account.getLinkedAccount() != null ? account.getLinkedAccount().getId() : null)
+                .linkedAccountName(account.getLinkedAccount() != null ? account.getLinkedAccount().getName() : null)
                 .build();
     }
 }

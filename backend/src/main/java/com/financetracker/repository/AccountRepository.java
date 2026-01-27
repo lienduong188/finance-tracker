@@ -28,4 +28,7 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
 
     @Query("SELECT a.currency, SUM(a.currentBalance) FROM Account a WHERE a.user.id = :userId AND a.isActive = true GROUP BY a.currency")
     List<Object[]> sumBalanceByUserIdGroupByCurrency(@Param("userId") UUID userId);
+
+    @Query("SELECT a FROM Account a WHERE a.type = 'CREDIT_CARD' AND a.isActive = true AND a.billingDay = :day AND a.linkedAccount IS NOT NULL")
+    List<Account> findCreditCardsDueForPayment(@Param("day") int day);
 }
