@@ -65,6 +65,7 @@ export function DebtFormModal({ isOpen, onClose, debt }: DebtFormModalProps) {
   const watchType = watch("type")
 
   useEffect(() => {
+    if (!isOpen) return
     if (debt) {
       reset({
         type: debt.type,
@@ -89,7 +90,7 @@ export function DebtFormModal({ isOpen, onClose, debt }: DebtFormModalProps) {
       })
       setAmountDisplay("")
     }
-  }, [debt, reset])
+  }, [isOpen, debt, reset])
 
   const createMutation = useMutation({
     mutationFn: (data: DebtRequest) => debtsApi.create(data),

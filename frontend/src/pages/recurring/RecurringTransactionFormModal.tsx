@@ -90,6 +90,7 @@ export function RecurringTransactionFormModal({
   })
 
   useEffect(() => {
+    if (!isOpen) return
     if (recurring) {
       reset({
         accountId: recurring.accountId,
@@ -124,7 +125,7 @@ export function RecurringTransactionFormModal({
       setSelectedType("EXPENSE")
       setAmountDisplay("")
     }
-  }, [recurring, reset])
+  }, [isOpen, recurring, reset])
 
   useEffect(() => {
     setSelectedType(watchType)

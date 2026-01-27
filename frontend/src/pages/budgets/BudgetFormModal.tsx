@@ -67,6 +67,7 @@ export function BudgetFormModal({ isOpen, onClose, budget }: BudgetFormModalProp
   })
 
   useEffect(() => {
+    if (!isOpen) return
     if (budget) {
       reset({
         name: budget.name,
@@ -90,7 +91,7 @@ export function BudgetFormModal({ isOpen, onClose, budget }: BudgetFormModalProp
         alertThreshold: 80,
       })
     }
-  }, [budget, reset])
+  }, [isOpen, budget, reset])
 
   const createMutation = useMutation({
     mutationFn: (data: BudgetRequest) => budgetsApi.create(data),
