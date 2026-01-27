@@ -9,17 +9,19 @@ import { adminApi } from "@/api"
 import { Button, Input, Label, Select } from "@/components/ui"
 import type { Category } from "@/types"
 
-const categorySchema = z.object({
-  name: z.string().min(1, "Tên category là bắt buộc"),
-  nameVi: z.string().optional(),
-  nameEn: z.string().optional(),
-  nameJa: z.string().optional(),
-  type: z.enum(["INCOME", "EXPENSE"]),
-  icon: z.string().optional(),
-  color: z.string().optional(),
-})
+function createCategorySchema(t: (key: string) => string) {
+  return z.object({
+    name: z.string().min(1, t("validation.required")),
+    nameVi: z.string().optional(),
+    nameEn: z.string().optional(),
+    nameJa: z.string().optional(),
+    type: z.enum(["INCOME", "EXPENSE"]),
+    icon: z.string().optional(),
+    color: z.string().optional(),
+  })
+}
 
-type CategoryForm = z.output<typeof categorySchema>
+type CategoryForm = z.infer<ReturnType<typeof createCategorySchema>>
 
 interface AdminCategoryFormModalProps {
   isOpen: boolean
@@ -36,6 +38,8 @@ export function AdminCategoryFormModal({
   const queryClient = useQueryClient()
   const isEditing = !!category
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+
+  const categorySchema = createCategorySchema(t)
 
   const {
     register,

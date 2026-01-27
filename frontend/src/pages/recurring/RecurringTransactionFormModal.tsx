@@ -11,23 +11,25 @@ import { recurringApi, accountsApi, categoriesApi } from "@/api"
 import { cn } from "@/lib/utils"
 import type { RecurringTransaction, RecurringTransactionRequest, TransactionType } from "@/types"
 
-const recurringSchema = z.object({
-  accountId: z.string().min(1),
-  categoryId: z.string().optional(),
-  type: z.enum(["INCOME", "EXPENSE", "TRANSFER"]),
-  amount: z.number().positive(),
-  description: z.string().optional(),
-  toAccountId: z.string().optional(),
-  frequency: z.enum(["DAILY", "WEEKLY", "MONTHLY", "YEARLY"]),
-  intervalValue: z.number().min(1),
-  dayOfWeek: z.number().min(0).max(6).optional(),
-  dayOfMonth: z.number().min(1).max(31).optional(),
-  startDate: z.string(),
-  endDate: z.string().optional(),
-  maxExecutions: z.number().optional(),
-})
+function createRecurringSchema(t: (key: string) => string) {
+  return z.object({
+    accountId: z.string().min(1, t("validation.required")),
+    categoryId: z.string().optional(),
+    type: z.enum(["INCOME", "EXPENSE", "TRANSFER"]),
+    amount: z.number().positive(t("validation.balanceMin")),
+    description: z.string().optional(),
+    toAccountId: z.string().optional(),
+    frequency: z.enum(["DAILY", "WEEKLY", "MONTHLY", "YEARLY"]),
+    intervalValue: z.number().min(1),
+    dayOfWeek: z.number().min(0).max(6).optional(),
+    dayOfMonth: z.number().min(1).max(31).optional(),
+    startDate: z.string(),
+    endDate: z.string().optional(),
+    maxExecutions: z.number().optional(),
+  })
+}
 
-type RecurringForm = z.output<typeof recurringSchema>
+type RecurringForm = z.infer<ReturnType<typeof createRecurringSchema>>
 
 interface RecurringTransactionFormModalProps {
   isOpen: boolean
@@ -57,6 +59,8 @@ export function RecurringTransactionFormModal({
   const [selectedType, setSelectedType] = useState<TransactionType>("EXPENSE")
   const [amountDisplay, setAmountDisplay] = useState("")
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+
+  const recurringSchema = createRecurringSchema(t)
 
   const {
     register,

@@ -11,18 +11,20 @@ import { debtsApi } from "@/api"
 import { cn } from "@/lib/utils"
 import type { Debt, DebtRequest } from "@/types"
 
-const debtSchema = z.object({
-  type: z.enum(["LEND", "BORROW"]),
-  personName: z.string().min(1),
-  amount: z.number().positive(),
-  currency: z.string().optional(),
-  description: z.string().optional(),
-  startDate: z.string(),
-  dueDate: z.string().optional(),
-  note: z.string().optional(),
-})
+function createDebtSchema(t: (key: string) => string) {
+  return z.object({
+    type: z.enum(["LEND", "BORROW"]),
+    personName: z.string().min(1, t("validation.required")),
+    amount: z.number().positive(t("validation.balanceMin")),
+    currency: z.string().optional(),
+    description: z.string().optional(),
+    startDate: z.string(),
+    dueDate: z.string().optional(),
+    note: z.string().optional(),
+  })
+}
 
-type DebtForm = z.output<typeof debtSchema>
+type DebtForm = z.infer<ReturnType<typeof createDebtSchema>>
 
 function formatNumber(value: number | string): string {
   const num = typeof value === "string" ? parseFloat(value.replace(/,/g, "")) : value
@@ -47,6 +49,8 @@ export function DebtFormModal({ isOpen, onClose, debt }: DebtFormModalProps) {
   const isEditing = !!debt
   const [amountDisplay, setAmountDisplay] = useState("")
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+
+  const debtSchema = createDebtSchema(t)
 
   const {
     register,
