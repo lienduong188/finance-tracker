@@ -61,6 +61,7 @@ export function DebtFormModal({ isOpen, onClose, debt }: DebtFormModalProps) {
     reset,
     watch,
     setValue,
+    clearErrors,
     formState: { errors },
   } = useForm<DebtForm>({
     resolver: zodResolver(debtSchema),
@@ -196,7 +197,10 @@ export function DebtFormModal({ isOpen, onClose, debt }: DebtFormModalProps) {
               <button
                 key={type}
                 type="button"
-                onClick={() => setValue("type", type)}
+                onClick={() => {
+                  setValue("type", type)
+                  clearErrors()
+                }}
                 className={cn(
                   "flex-1 rounded-md px-3 py-2 text-sm font-medium transition-colors",
                   watchType === type

@@ -68,6 +68,7 @@ export function RecurringTransactionFormModal({
     reset,
     watch,
     setValue,
+    clearErrors,
     formState: { errors },
   } = useForm<RecurringForm>({
     resolver: zodResolver(recurringSchema),
@@ -233,7 +234,10 @@ export function RecurringTransactionFormModal({
               <button
                 key={type}
                 type="button"
-                onClick={() => setValue("type", type)}
+                onClick={() => {
+                  setValue("type", type)
+                  clearErrors()
+                }}
                 className={cn(
                   "flex-1 rounded-md px-2 py-2 text-xs font-medium transition-colors md:px-3 md:text-sm",
                   watchType === type
