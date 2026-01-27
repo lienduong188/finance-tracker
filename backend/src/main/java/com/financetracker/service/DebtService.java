@@ -57,12 +57,20 @@ public class DebtService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ApiException("User not found", HttpStatus.NOT_FOUND));
 
+        String currency = request.getCurrency();
+        if (currency == null || currency.isBlank()) {
+            currency = user.getDefaultCurrency();
+        }
+        if (currency == null || currency.isBlank()) {
+            currency = "VND";
+        }
+
         Debt debt = Debt.builder()
                 .user(user)
                 .type(request.getType())
                 .personName(request.getPersonName())
                 .amount(request.getAmount())
-                .currency(request.getCurrency() != null ? request.getCurrency() : user.getDefaultCurrency())
+                .currency(currency)
                 .description(request.getDescription())
                 .startDate(request.getStartDate())
                 .dueDate(request.getDueDate())
