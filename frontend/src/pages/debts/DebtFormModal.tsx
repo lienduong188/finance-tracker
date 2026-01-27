@@ -6,11 +6,12 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { X, AlertCircle } from "lucide-react"
 import { format } from "date-fns"
+import { AxiosError } from "axios"
 import { Button, Input, Label } from "@/components/ui"
 import { debtsApi } from "@/api"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/context/AuthContext"
-import type { Debt, DebtRequest } from "@/types"
+import type { Debt, DebtRequest, ApiError } from "@/types"
 
 function createDebtSchema(t: (key: string) => string) {
   return z.object({
@@ -110,7 +111,13 @@ export function DebtFormModal({ isOpen, onClose, debt }: DebtFormModalProps) {
       onClose()
     },
     onError: (error: unknown) => {
-      const message = error instanceof Error ? error.message : t("errors.debt.createFailed")
+      let message = t("errors.debt.createFailed")
+      if (error instanceof AxiosError && error.response?.data) {
+        const apiError = error.response.data as ApiError
+        message = apiError.message || error.message
+      } else if (error instanceof Error) {
+        message = error.message
+      }
       setErrorMessage(message)
       console.error("Create debt error:", error)
     },
@@ -124,7 +131,13 @@ export function DebtFormModal({ isOpen, onClose, debt }: DebtFormModalProps) {
       onClose()
     },
     onError: (error: unknown) => {
-      const message = error instanceof Error ? error.message : t("errors.debt.updateFailed")
+      let message = t("errors.debt.updateFailed")
+      if (error instanceof AxiosError && error.response?.data) {
+        const apiError = error.response.data as ApiError
+        message = apiError.message || error.message
+      } else if (error instanceof Error) {
+        message = error.message
+      }
       setErrorMessage(message)
       console.error("Update debt error:", error)
     },
