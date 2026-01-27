@@ -156,6 +156,7 @@
     "addBudget": "予算を追加",
     "editBudget": "予算を編集",
     "budgetName": "予算名",
+    "budgetNamePlaceholder": "例：1月の支出、食費...",
     "amount": "上限額",
     "spent": "使用済み",
     "remaining": "残り",
@@ -163,6 +164,7 @@
     "startDate": "開始日",
     "endDate": "終了日",
     "alertThreshold": "警告しきい値",
+    "alertThresholdHelp": "支出がこのしきい値に達すると警告が表示されます",
     "periods": {
       "DAILY": "毎日",
       "WEEKLY": "毎週",

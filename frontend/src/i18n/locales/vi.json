@@ -156,6 +156,7 @@
     "addBudget": "Thêm ngân sách",
     "editBudget": "Chỉnh sửa ngân sách",
     "budgetName": "Tên ngân sách",
+    "budgetNamePlaceholder": "VD: Chi tiêu tháng 1, Tiền ăn...",
     "amount": "Hạn mức",
     "spent": "Đã chi",
     "remaining": "Còn lại",
@@ -163,6 +164,7 @@
     "startDate": "Ngày bắt đầu",
     "endDate": "Ngày kết thúc",
     "alertThreshold": "Ngưỡng cảnh báo",
+    "alertThresholdHelp": "Bạn sẽ được cảnh báo khi chi tiêu đạt ngưỡng này",
     "periods": {
       "DAILY": "Hàng ngày",
       "WEEKLY": "Hàng tuần",

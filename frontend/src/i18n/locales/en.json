@@ -156,6 +156,7 @@
     "addBudget": "Add Budget",
     "editBudget": "Edit Budget",
     "budgetName": "Budget Name",
+    "budgetNamePlaceholder": "e.g. January expenses, Food...",
     "amount": "Limit",
     "spent": "Spent",
     "remaining": "Remaining",
@@ -163,6 +164,7 @@
     "startDate": "Start Date",
     "endDate": "End Date",
     "alertThreshold": "Alert Threshold",
+    "alertThresholdHelp": "You will be notified when spending reaches this threshold",
     "periods": {
       "DAILY": "Daily",
       "WEEKLY": "Weekly",

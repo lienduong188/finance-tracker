@@ -138,7 +138,7 @@ export function BudgetFormModal({ isOpen, onClose, budget }: BudgetFormModalProp
       <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg bg-background p-6 shadow-lg">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-xl font-semibold">
-            {isEditing ? "Chỉnh sửa ngân sách" : "Thêm ngân sách mới"}
+            {isEditing ? t("budgets.editBudget") : t("budgets.addBudget")}
           </h2>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
             <X className="h-5 w-5" />
@@ -147,10 +147,10 @@ export function BudgetFormModal({ isOpen, onClose, budget }: BudgetFormModalProp
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name" required>Tên ngân sách</Label>
+            <Label htmlFor="name" required>{t("budgets.budgetName")}</Label>
             <Input
               id="name"
-              placeholder="VD: Chi tiêu tháng 1, Tiền ăn..."
+              placeholder={t("budgets.budgetNamePlaceholder")}
               error={errors.name?.message}
               {...register("name")}
             />
@@ -170,7 +170,7 @@ export function BudgetFormModal({ isOpen, onClose, budget }: BudgetFormModalProp
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="amount" required>Hạn mức</Label>
+              <Label htmlFor="amount" required>{t("budgets.amount")}</Label>
               <Input
                 id="amount"
                 type="number"
@@ -181,7 +181,7 @@ export function BudgetFormModal({ isOpen, onClose, budget }: BudgetFormModalProp
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="currency">Tiền tệ</Label>
+              <Label htmlFor="currency">{t("accounts.currency")}</Label>
               <Select id="currency" {...register("currency")}>
                 <option value="VND">VND</option>
                 <option value="USD">USD</option>
@@ -191,31 +191,31 @@ export function BudgetFormModal({ isOpen, onClose, budget }: BudgetFormModalProp
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="period" required>Chu kỳ</Label>
+            <Label htmlFor="period" required>{t("budgets.period")}</Label>
             <Select id="period" {...register("period")}>
-              <option value="DAILY">Hằng ngày</option>
-              <option value="WEEKLY">Hằng tuần</option>
-              <option value="MONTHLY">Hằng tháng</option>
-              <option value="YEARLY">Hằng năm</option>
-              <option value="CUSTOM">Tùy chỉnh</option>
+              <option value="DAILY">{t("budgets.periods.DAILY")}</option>
+              <option value="WEEKLY">{t("budgets.periods.WEEKLY")}</option>
+              <option value="MONTHLY">{t("budgets.periods.MONTHLY")}</option>
+              <option value="YEARLY">{t("budgets.periods.YEARLY")}</option>
+              <option value="CUSTOM">{t("budgets.periods.CUSTOM")}</option>
             </Select>
           </div>
 
           {watchPeriod === "CUSTOM" && (
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="startDate" required>Ngày bắt đầu</Label>
+                <Label htmlFor="startDate" required>{t("budgets.startDate")}</Label>
                 <Input id="startDate" type="date" {...register("startDate")} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="endDate" required>Ngày kết thúc</Label>
+                <Label htmlFor="endDate" required>{t("budgets.endDate")}</Label>
                 <Input id="endDate" type="date" {...register("endDate")} />
               </div>
             </div>
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="alertThreshold">Ngưỡng cảnh báo (%)</Label>
+            <Label htmlFor="alertThreshold">{t("budgets.alertThreshold")} (%)</Label>
             <Input
               id="alertThreshold"
               type="number"
@@ -225,16 +225,16 @@ export function BudgetFormModal({ isOpen, onClose, budget }: BudgetFormModalProp
               {...register("alertThreshold", { valueAsNumber: true })}
             />
             <p className="text-xs text-muted-foreground">
-              Bạn sẽ được cảnh báo khi chi tiêu đạt ngưỡng này
+              {t("budgets.alertThresholdHelp")}
             </p>
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
             <Button type="button" variant="outline" onClick={onClose}>
-              Hủy
+              {t("common.cancel")}
             </Button>
             <Button type="submit" isLoading={isLoading}>
-              {isEditing ? "Cập nhật" : "Thêm"}
+              {isEditing ? t("common.update") : t("common.add")}
             </Button>
           </div>
         </form>
