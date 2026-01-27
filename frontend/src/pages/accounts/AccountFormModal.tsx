@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useTranslation } from "react-i18next"
-import { X } from "lucide-react"
+import { X, AlertCircle } from "lucide-react"
 import { Button, Input, Label, Select, EmojiPicker } from "@/components/ui"
 import { accountsApi } from "@/api"
 import { useAuth } from "@/context/AuthContext"
@@ -32,6 +32,7 @@ export function AccountFormModal({ isOpen, onClose, account }: AccountFormModalP
   const isEditing = !!account
   const [balanceDisplay, setBalanceDisplay] = useState("")
   const [creditLimitDisplay, setCreditLimitDisplay] = useState("")
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const defaultCurrency = user?.defaultCurrency || "VND"
 
@@ -101,6 +102,7 @@ export function AccountFormModal({ isOpen, onClose, account }: AccountFormModalP
 
   useEffect(() => {
     if (!isOpen) return
+    setErrorMessage(null)
     if (account) {
       reset({
         name: account.name,
@@ -138,7 +140,13 @@ export function AccountFormModal({ isOpen, onClose, account }: AccountFormModalP
     mutationFn: (data: AccountRequest) => accountsApi.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["accounts"] })
+      setErrorMessage(null)
       onClose()
+    },
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : t("errors.account.createFailed")
+      setErrorMessage(message)
+      console.error("Create account error:", error)
     },
   })
 
@@ -146,7 +154,13 @@ export function AccountFormModal({ isOpen, onClose, account }: AccountFormModalP
     mutationFn: (data: AccountRequest) => accountsApi.update(account!.id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["accounts"] })
+      setErrorMessage(null)
       onClose()
+    },
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : t("errors.account.updateFailed")
+      setErrorMessage(message)
+      console.error("Update account error:", error)
     },
   })
 
@@ -189,6 +203,13 @@ export function AccountFormModal({ isOpen, onClose, account }: AccountFormModalP
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {errorMessage && (
+            <div className="flex items-center gap-2 rounded-md bg-red-50 p-3 text-sm text-red-700">
+              <AlertCircle className="h-4 w-4 flex-shrink-0" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
+
           <div className="space-y-2">
             <Label htmlFor="name" required>{t("accounts.accountName")}</Label>
             <Input

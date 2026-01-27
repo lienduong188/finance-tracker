@@ -456,14 +456,36 @@
     "transaction": {
       "insufficientBalance": "Insufficient balance",
       "invalidTransfer": "Invalid transfer",
-      "sameAccount": "Cannot transfer to the same account"
+      "sameAccount": "Cannot transfer to the same account",
+      "createFailed": "Failed to create transaction",
+      "updateFailed": "Failed to update transaction"
+    },
+    "account": {
+      "createFailed": "Failed to create account",
+      "updateFailed": "Failed to update account"
     },
     "budget": {
-      "periodOverlap": "Budget period overlaps with an existing budget"
+      "periodOverlap": "Budget period overlaps with an existing budget",
+      "createFailed": "Failed to create budget",
+      "updateFailed": "Failed to update budget"
+    },
+    "recurring": {
+      "createFailed": "Failed to create recurring transaction",
+      "updateFailed": "Failed to update recurring transaction"
+    },
+    "debt": {
+      "createFailed": "Failed to create debt",
+      "updateFailed": "Failed to update debt",
+      "paymentFailed": "Failed to record payment"
+    },
+    "category": {
+      "createFailed": "Failed to create category",
+      "updateFailed": "Failed to update category"
     },
     "system": {
       "internal": "An error occurred. Please try again.",
-      "unavailable": "Service is temporarily unavailable"
+      "unavailable": "Service is temporarily unavailable",
+      "networkError": "Network error. Please check your connection."
     }
   },
   "exchangeRates": {

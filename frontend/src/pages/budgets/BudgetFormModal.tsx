@@ -1,10 +1,10 @@
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { X } from "lucide-react"
+import { X, AlertCircle } from "lucide-react"
 import { format } from "date-fns"
 import { Button, Input, Label, Select } from "@/components/ui"
 import { budgetsApi, categoriesApi } from "@/api"
@@ -40,6 +40,7 @@ export function BudgetFormModal({ isOpen, onClose, budget }: BudgetFormModalProp
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const isEditing = !!budget
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const budgetSchema = createBudgetSchema(t)
 
@@ -68,6 +69,7 @@ export function BudgetFormModal({ isOpen, onClose, budget }: BudgetFormModalProp
 
   useEffect(() => {
     if (!isOpen) return
+    setErrorMessage(null)
     if (budget) {
       reset({
         name: budget.name,
@@ -98,7 +100,13 @@ export function BudgetFormModal({ isOpen, onClose, budget }: BudgetFormModalProp
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["budgets"] })
       queryClient.invalidateQueries({ queryKey: ["dashboard-summary"] })
+      setErrorMessage(null)
       onClose()
+    },
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : t("errors.budget.createFailed")
+      setErrorMessage(message)
+      console.error("Create budget error:", error)
     },
   })
 
@@ -107,7 +115,13 @@ export function BudgetFormModal({ isOpen, onClose, budget }: BudgetFormModalProp
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["budgets"] })
       queryClient.invalidateQueries({ queryKey: ["dashboard-summary"] })
+      setErrorMessage(null)
       onClose()
+    },
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : t("errors.budget.updateFailed")
+      setErrorMessage(message)
+      console.error("Update budget error:", error)
     },
   })
 
@@ -147,6 +161,13 @@ export function BudgetFormModal({ isOpen, onClose, budget }: BudgetFormModalProp
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {errorMessage && (
+            <div className="flex items-center gap-2 rounded-md bg-red-50 p-3 text-sm text-red-700">
+              <AlertCircle className="h-4 w-4 flex-shrink-0" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
+
           <div className="space-y-2">
             <Label htmlFor="name" required>{t("budgets.budgetName")}</Label>
             <Input

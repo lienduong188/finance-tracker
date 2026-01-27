@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { X } from "lucide-react"
+import { X, AlertCircle } from "lucide-react"
 import { format } from "date-fns"
 import { Button, Input, Label, Select } from "@/components/ui"
 import { transactionsApi, accountsApi, categoriesApi } from "@/api"
@@ -47,6 +47,7 @@ export function TransactionFormModal({
   const isEditing = !!transaction
   const [selectedType, setSelectedType] = useState<TransactionType>("EXPENSE")
   const [amountDisplay, setAmountDisplay] = useState("")
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const transactionSchema = z.object({
     accountId: z.string().min(1, t("validation.required")),
@@ -106,6 +107,7 @@ export function TransactionFormModal({
 
   useEffect(() => {
     if (!isOpen) return
+    setErrorMessage(null)
     if (transaction) {
       reset({
         accountId: transaction.accountId,
@@ -143,7 +145,13 @@ export function TransactionFormModal({
       queryClient.invalidateQueries({ queryKey: ["transactions"] })
       queryClient.invalidateQueries({ queryKey: ["accounts"] })
       queryClient.invalidateQueries({ queryKey: ["dashboard-summary"] })
+      setErrorMessage(null)
       onClose()
+    },
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : t("errors.transaction.createFailed")
+      setErrorMessage(message)
+      console.error("Create transaction error:", error)
     },
   })
 
@@ -154,7 +162,13 @@ export function TransactionFormModal({
       queryClient.invalidateQueries({ queryKey: ["transactions"] })
       queryClient.invalidateQueries({ queryKey: ["accounts"] })
       queryClient.invalidateQueries({ queryKey: ["dashboard-summary"] })
+      setErrorMessage(null)
       onClose()
+    },
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : t("errors.transaction.updateFailed")
+      setErrorMessage(message)
+      console.error("Update transaction error:", error)
     },
   })
 
@@ -196,6 +210,13 @@ export function TransactionFormModal({
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {errorMessage && (
+            <div className="flex items-center gap-2 rounded-md bg-red-50 p-3 text-sm text-red-700">
+              <AlertCircle className="h-4 w-4 flex-shrink-0" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
+
           {/* Transaction Type Tabs */}
           <div className="flex gap-1 rounded-lg bg-muted p-1">
             {(["EXPENSE", "INCOME", "TRANSFER"] as const).map((type) => (

@@ -1,9 +1,10 @@
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { X } from "lucide-react"
+import { useTranslation } from "react-i18next"
+import { X, AlertCircle } from "lucide-react"
 import { adminApi } from "@/api"
 import { Button, Input, Label, Select } from "@/components/ui"
 import type { Category } from "@/types"
@@ -31,8 +32,10 @@ export function AdminCategoryFormModal({
   onClose,
   category,
 }: AdminCategoryFormModalProps) {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const isEditing = !!category
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const {
     register,
@@ -53,6 +56,7 @@ export function AdminCategoryFormModal({
   })
 
   useEffect(() => {
+    setErrorMessage(null)
     if (category) {
       reset({
         name: category.name,
@@ -80,7 +84,13 @@ export function AdminCategoryFormModal({
     mutationFn: adminApi.createSystemCategory,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "categories"] })
+      setErrorMessage(null)
       onClose()
+    },
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : t("errors.category.createFailed")
+      setErrorMessage(message)
+      console.error("Create category error:", error)
     },
   })
 
@@ -89,7 +99,13 @@ export function AdminCategoryFormModal({
       adminApi.updateSystemCategory(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "categories"] })
+      setErrorMessage(null)
       onClose()
+    },
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : t("errors.category.updateFailed")
+      setErrorMessage(message)
+      console.error("Update category error:", error)
     },
   })
 
@@ -121,6 +137,13 @@ export function AdminCategoryFormModal({
 
         {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {errorMessage && (
+            <div className="flex items-center gap-2 rounded-md bg-red-50 p-3 text-sm text-red-700">
+              <AlertCircle className="h-4 w-4 flex-shrink-0" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
+
           <div>
             <Label htmlFor="name">Tên mặc định</Label>
             <Input

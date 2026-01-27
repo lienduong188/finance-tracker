@@ -102,7 +102,7 @@ export function DebtFormModal({ isOpen, onClose, debt }: DebtFormModalProps) {
       onClose()
     },
     onError: (error: unknown) => {
-      const message = error instanceof Error ? error.message : "Có lỗi xảy ra khi thêm khoản vay"
+      const message = error instanceof Error ? error.message : t("errors.debt.createFailed")
       setErrorMessage(message)
       console.error("Create debt error:", error)
     },
@@ -116,7 +116,7 @@ export function DebtFormModal({ isOpen, onClose, debt }: DebtFormModalProps) {
       onClose()
     },
     onError: (error: unknown) => {
-      const message = error instanceof Error ? error.message : "Có lỗi xảy ra khi cập nhật khoản vay"
+      const message = error instanceof Error ? error.message : t("errors.debt.updateFailed")
       setErrorMessage(message)
       console.error("Update debt error:", error)
     },

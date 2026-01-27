@@ -456,14 +456,36 @@
     "transaction": {
       "insufficientBalance": "残高が不足しています",
       "invalidTransfer": "無効な振替です",
-      "sameAccount": "同じ口座への振替はできません"
+      "sameAccount": "同じ口座への振替はできません",
+      "createFailed": "取引の作成に失敗しました",
+      "updateFailed": "取引の更新に失敗しました"
+    },
+    "account": {
+      "createFailed": "口座の作成に失敗しました",
+      "updateFailed": "口座の更新に失敗しました"
     },
     "budget": {
-      "periodOverlap": "予算期間が重複しています"
+      "periodOverlap": "予算期間が重複しています",
+      "createFailed": "予算の作成に失敗しました",
+      "updateFailed": "予算の更新に失敗しました"
+    },
+    "recurring": {
+      "createFailed": "定期取引の作成に失敗しました",
+      "updateFailed": "定期取引の更新に失敗しました"
+    },
+    "debt": {
+      "createFailed": "借入の作成に失敗しました",
+      "updateFailed": "借入の更新に失敗しました",
+      "paymentFailed": "支払いの記録に失敗しました"
+    },
+    "category": {
+      "createFailed": "カテゴリの作成に失敗しました",
+      "updateFailed": "カテゴリの更新に失敗しました"
     },
     "system": {
       "internal": "エラーが発生しました。もう一度お試しください。",
-      "unavailable": "サービスは一時的に利用できません"
+      "unavailable": "サービスは一時的に利用できません",
+      "networkError": "ネットワークエラー。接続を確認してください。"
     }
   },
   "exchangeRates": {

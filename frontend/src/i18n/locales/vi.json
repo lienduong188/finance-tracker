@@ -456,14 +456,36 @@
     "transaction": {
       "insufficientBalance": "Số dư không đủ",
       "invalidTransfer": "Chuyển khoản không hợp lệ",
-      "sameAccount": "Không thể chuyển khoản cùng tài khoản"
+      "sameAccount": "Không thể chuyển khoản cùng tài khoản",
+      "createFailed": "Không thể tạo giao dịch",
+      "updateFailed": "Không thể cập nhật giao dịch"
+    },
+    "account": {
+      "createFailed": "Không thể tạo tài khoản",
+      "updateFailed": "Không thể cập nhật tài khoản"
     },
     "budget": {
-      "periodOverlap": "Chu kỳ ngân sách bị trùng lặp"
+      "periodOverlap": "Chu kỳ ngân sách bị trùng lặp",
+      "createFailed": "Không thể tạo ngân sách",
+      "updateFailed": "Không thể cập nhật ngân sách"
+    },
+    "recurring": {
+      "createFailed": "Không thể tạo giao dịch định kỳ",
+      "updateFailed": "Không thể cập nhật giao dịch định kỳ"
+    },
+    "debt": {
+      "createFailed": "Không thể tạo khoản vay",
+      "updateFailed": "Không thể cập nhật khoản vay",
+      "paymentFailed": "Không thể ghi nhận thanh toán"
+    },
+    "category": {
+      "createFailed": "Không thể tạo danh mục",
+      "updateFailed": "Không thể cập nhật danh mục"
     },
     "system": {
       "internal": "Đã xảy ra lỗi. Vui lòng thử lại.",
-      "unavailable": "Dịch vụ tạm thời không khả dụng"
+      "unavailable": "Dịch vụ tạm thời không khả dụng",
+      "networkError": "Lỗi kết nối mạng. Vui lòng kiểm tra kết nối."
     }
   },
   "exchangeRates": {

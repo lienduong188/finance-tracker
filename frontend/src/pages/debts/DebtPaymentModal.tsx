@@ -38,8 +38,10 @@ export function DebtPaymentModal({ isOpen, onClose, debt }: DebtPaymentModalProp
       queryClient.invalidateQueries({ queryKey: ["debts"] })
       handleClose()
     },
-    onError: (err: Error) => {
-      setError(err.message)
+    onError: (err: unknown) => {
+      const message = err instanceof Error ? err.message : t("errors.debt.paymentFailed")
+      setError(message)
+      console.error("Record payment error:", err)
     },
   })
 
