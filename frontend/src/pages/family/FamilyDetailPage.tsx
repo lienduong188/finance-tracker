@@ -92,13 +92,13 @@ export default function FamilyDetailPage() {
   }
 
   const handleRemoveMember = (member: FamilyMember) => {
-    if (confirm(`Xóa ${member.fullName} khỏi gia đình?`)) {
+    if (confirm(`Xóa ${member.fullName} khỏi nhóm?`)) {
       removeMemberMutation.mutate(member.id)
     }
   }
 
   const handleLeave = () => {
-    if (confirm("Bạn có chắc muốn rời khỏi gia đình này?")) {
+    if (confirm("Bạn có chắc muốn rời khỏi nhóm này?")) {
       leaveMutation.mutate()
     }
   }
@@ -112,7 +112,7 @@ export default function FamilyDetailPage() {
   }
 
   if (!family) {
-    return <div>Không tìm thấy gia đình</div>
+    return <div>Không tìm thấy nhóm</div>
   }
 
   const canManageMembers = family.myRole === "OWNER" || family.myRole === "ADMIN"
@@ -131,7 +131,7 @@ export default function FamilyDetailPage() {
         {family.myRole !== "OWNER" && (
           <Button variant="outline" onClick={handleLeave}>
             <LogOut className="w-4 h-4 mr-2" />
-            Rời gia đình
+            Rời nhóm
           </Button>
         )}
       </div>

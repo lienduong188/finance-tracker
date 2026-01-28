@@ -18,6 +18,11 @@ public class Family extends BaseEntity {
     @Column(nullable = false, length = 100)
     private String name;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    @Builder.Default
+    private GroupType type = GroupType.FAMILY;
+
     @Column(columnDefinition = "TEXT")
     private String description;
 

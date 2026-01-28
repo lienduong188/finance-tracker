@@ -47,8 +47,8 @@ export default function InvitationsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Lời mời gia đình</h1>
-        <p className="text-muted-foreground">Các lời mời tham gia gia đình đang chờ xử lý</p>
+        <h1 className="text-2xl font-bold">Lời mời nhóm</h1>
+        <p className="text-muted-foreground">Các lời mời tham gia nhóm đang chờ xử lý</p>
       </div>
 
       {!invitations || invitations.length === 0 ? (
@@ -57,7 +57,7 @@ export default function InvitationsPage() {
             <Mail className="w-12 h-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-medium mb-2">Không có lời mời nào</h3>
             <p className="text-muted-foreground text-center">
-              Khi có ai đó mời bạn tham gia gia đình, lời mời sẽ xuất hiện ở đây
+              Khi có ai đó mời bạn tham gia nhóm, lời mời sẽ xuất hiện ở đây
             </p>
           </CardContent>
         </Card>

@@ -473,7 +473,8 @@ export interface ModelUsage {
   requests: number
 }
 
-// Family types
+// Group/Family types
+export type GroupType = "FAMILY" | "FRIENDS" | "WORK" | "OTHER"
 export type FamilyRole = "OWNER" | "ADMIN" | "MEMBER"
 export type InvitationStatus = "PENDING" | "ACCEPTED" | "DECLINED" | "EXPIRED" | "CANCELLED"
 export type AccountVisibility = "PRIVATE" | "FAMILY_VISIBLE" | "SPECIFIC_MEMBERS"
@@ -482,6 +483,7 @@ export type SavingsGoalStatus = "ACTIVE" | "COMPLETED" | "CANCELLED"
 export interface Family {
   id: string
   name: string
+  type: GroupType
   description: string | null
   currency: string
   createdById: string
@@ -493,6 +495,7 @@ export interface Family {
 
 export interface FamilyRequest {
   name: string
+  type?: GroupType
   description?: string
   currency?: string
 }

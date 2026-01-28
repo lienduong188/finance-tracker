@@ -185,7 +185,7 @@ export default function SavingsFormModal({ isOpen, onClose, goal }: SavingsFormM
 
           {!isEditing && families && families.length > 0 && (
             <div>
-              <label className="block text-sm font-medium mb-1">Gia đình (tùy chọn)</label>
+              <label className="block text-sm font-medium mb-1">Nhóm (tùy chọn)</label>
               <select {...register("familyId")} className="w-full border rounded-md p-2">
                 <option value="">Mục tiêu cá nhân</option>
                 {families.map((family) => (
@@ -195,7 +195,7 @@ export default function SavingsFormModal({ isOpen, onClose, goal }: SavingsFormM
                 ))}
               </select>
               <p className="text-xs text-muted-foreground mt-1">
-                Chọn gia đình nếu muốn tạo mục tiêu tiết kiệm chung
+                Chọn nhóm nếu muốn tạo mục tiêu tiết kiệm chung
               </p>
             </div>
           )}

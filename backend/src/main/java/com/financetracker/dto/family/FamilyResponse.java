@@ -1,6 +1,7 @@
 package com.financetracker.dto.family;
 
 import com.financetracker.entity.FamilyRole;
+import com.financetracker.entity.GroupType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,6 +17,7 @@ import java.util.UUID;
 public class FamilyResponse {
     private UUID id;
     private String name;
+    private GroupType type;
     private String description;
     private String currency;
     private UUID createdById;

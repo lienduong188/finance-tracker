@@ -1,9 +1,9 @@
 import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { Plus, Users, Crown, Shield, User, Settings } from "lucide-react"
+import { Plus, Users, Crown, Shield, User, Settings, Home, Briefcase, HelpCircle } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { familiesApi } from "@/api"
-import type { Family, FamilyRole } from "@/types"
+import type { Family, FamilyRole, GroupType } from "@/types"
 import { Button, Card, CardContent, CardHeader, CardTitle } from "@/components/ui"
 import FamilyFormModal from "./FamilyFormModal"
 
@@ -17,6 +17,20 @@ const roleLabels: Record<FamilyRole, string> = {
   OWNER: "Chủ sở hữu",
   ADMIN: "Quản trị viên",
   MEMBER: "Thành viên",
+}
+
+const groupTypeIcons: Record<GroupType, React.ReactNode> = {
+  FAMILY: <Home className="w-4 h-4" />,
+  FRIENDS: <Users className="w-4 h-4" />,
+  WORK: <Briefcase className="w-4 h-4" />,
+  OTHER: <HelpCircle className="w-4 h-4" />,
+}
+
+const groupTypeLabels: Record<GroupType, string> = {
+  FAMILY: "Gia đình",
+  FRIENDS: "Bạn bè",
+  WORK: "Công việc",
+  OTHER: "Khác",
 }
 
 export default function FamilyPage() {
@@ -44,10 +58,10 @@ export default function FamilyPage() {
 
   const handleDelete = (family: Family) => {
     if (family.myRole !== "OWNER") {
-      alert("Chỉ chủ sở hữu mới có thể xóa gia đình")
+      alert("Chỉ chủ sở hữu mới có thể xóa nhóm")
       return
     }
-    if (confirm(`Bạn có chắc muốn xóa gia đình "${family.name}"?`)) {
+    if (confirm(`Bạn có chắc muốn xóa nhóm "${family.name}"?`)) {
       deleteMutation.mutate(family.id)
     }
   }
@@ -69,12 +83,12 @@ export default function FamilyPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold">Gia đình</h1>
-          <p className="text-muted-foreground">Quản lý tài chính chung với gia đình</p>
+          <h1 className="text-2xl font-bold">Nhóm</h1>
+          <p className="text-muted-foreground">Quản lý tài chính chung với gia đình, bạn bè</p>
         </div>
         <Button onClick={() => setIsModalOpen(true)}>
           <Plus className="w-4 h-4 mr-2" />
-          Tạo gia đình
+          Tạo nhóm
         </Button>
       </div>
 
@@ -82,13 +96,13 @@ export default function FamilyPage() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Users className="w-12 h-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">Chưa có gia đình nào</h3>
+            <h3 className="text-lg font-medium mb-2">Chưa có nhóm nào</h3>
             <p className="text-muted-foreground text-center mb-4">
-              Tạo gia đình để quản lý tài chính chung với người thân
+              Tạo nhóm để quản lý tài chính chung với gia đình hoặc bạn bè
             </p>
             <Button onClick={() => setIsModalOpen(true)}>
               <Plus className="w-4 h-4 mr-2" />
-              Tạo gia đình đầu tiên
+              Tạo nhóm đầu tiên
             </Button>
           </CardContent>
         </Card>
@@ -102,11 +116,17 @@ export default function FamilyPage() {
             >
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-start">
-                  <CardTitle className="text-lg">{family.name}</CardTitle>
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground" title={groupTypeLabels[family.type]}>
+                      {groupTypeIcons[family.type]}
+                    </span>
+                    <CardTitle className="text-lg">{family.name}</CardTitle>
+                  </div>
                   <div className="flex items-center gap-1" title={roleLabels[family.myRole]}>
                     {roleIcons[family.myRole]}
                   </div>
                 </div>
+                <span className="text-xs text-muted-foreground">{groupTypeLabels[family.type]}</span>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground mb-4 line-clamp-2">

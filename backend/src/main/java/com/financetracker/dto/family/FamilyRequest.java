@@ -1,5 +1,6 @@
 package com.financetracker.dto.family;
 
+import com.financetracker.entity.GroupType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -13,9 +14,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class FamilyRequest {
 
-    @NotBlank(message = "Tên gia đình là bắt buộc")
-    @Size(max = 100, message = "Tên gia đình tối đa 100 ký tự")
+    @NotBlank(message = "Tên nhóm là bắt buộc")
+    @Size(max = 100, message = "Tên nhóm tối đa 100 ký tự")
     private String name;
+
+    private GroupType type;
 
     private String description;
 

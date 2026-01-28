@@ -29,6 +29,7 @@ public class FamilyService {
 
         Family family = Family.builder()
                 .name(request.getName())
+                .type(request.getType() != null ? request.getType() : GroupType.FAMILY)
                 .description(request.getDescription())
                 .currency(request.getCurrency() != null ? request.getCurrency() : user.getDefaultCurrency())
                 .createdBy(user)
@@ -85,6 +86,9 @@ public class FamilyService {
         }
 
         family.setName(request.getName());
+        if (request.getType() != null) {
+            family.setType(request.getType());
+        }
         family.setDescription(request.getDescription());
         if (request.getCurrency() != null) {
             family.setCurrency(request.getCurrency());
@@ -203,6 +207,7 @@ public class FamilyService {
         return FamilyResponse.builder()
                 .id(family.getId())
                 .name(family.getName())
+                .type(family.getType())
                 .description(family.getDescription())
                 .currency(family.getCurrency())
                 .createdById(family.getCreatedBy().getId())
