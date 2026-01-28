@@ -6,7 +6,6 @@ import {
   Calendar,
   MessageSquare,
   Cpu,
-  Gauge,
   Send,
 } from "lucide-react"
 import { adminApi } from "@/api"
@@ -160,59 +159,24 @@ export function AdminTokenUsagePage() {
         <p className="text-muted-foreground">Thống kê sử dụng AI Chatbot (Groq Free Tier)</p>
       </div>
 
-      {/* Request Quota - Primary (Groq Free Tier) */}
+      {/* Request Quota - Groq Free Tier */}
       <Card className="p-4">
         <div className="mb-4 flex items-center gap-2">
           <Send className="h-5 w-5 text-primary" />
-          <h2 className="text-lg font-semibold">Hạn mức Requests (Groq Free Tier: 14,400/ngày)</h2>
+          <h2 className="text-lg font-semibold">Hạn mức Requests (Groq Free Tier)</h2>
         </div>
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2">
           <QuotaProgressBar
             used={stats?.requestsToday ?? 0}
             limit={stats?.dailyRequestLimit ?? 14400}
-            label="Hôm nay"
+            label="Hôm nay (14,400 RPD)"
             unit="requests"
           />
-          <QuotaProgressBar
-            used={stats?.requestsThisWeek ?? 0}
-            limit={stats?.weeklyRequestLimit ?? 100800}
-            label="Tuần này"
-            unit="requests"
-          />
-          <QuotaProgressBar
-            used={stats?.requestsThisMonth ?? 0}
-            limit={stats?.monthlyRequestLimit ?? 432000}
-            label="Tháng này"
-            unit="requests"
-          />
-        </div>
-      </Card>
-
-      {/* Token Usage - Secondary (for monitoring) */}
-      <Card className="p-4">
-        <div className="mb-4 flex items-center gap-2">
-          <Gauge className="h-5 w-5 text-primary" />
-          <h2 className="text-lg font-semibold">Token Usage (Monitoring)</h2>
-        </div>
-        <div className="grid gap-6 md:grid-cols-3">
-          <QuotaProgressBar
-            used={stats?.tokensToday ?? 0}
-            limit={stats?.dailyTokenLimit ?? 500000}
-            label="Hôm nay"
-            unit="tokens"
-          />
-          <QuotaProgressBar
-            used={stats?.tokensThisWeek ?? 0}
-            limit={stats?.weeklyTokenLimit ?? 3500000}
-            label="Tuần này"
-            unit="tokens"
-          />
-          <QuotaProgressBar
-            used={stats?.tokensThisMonth ?? 0}
-            limit={stats?.monthlyTokenLimit ?? 15000000}
-            label="Tháng này"
-            unit="tokens"
-          />
+          <div className="rounded-lg bg-muted/50 p-4">
+            <div className="text-sm font-medium text-muted-foreground">Tokens hôm nay</div>
+            <div className="mt-1 text-2xl font-bold">{(stats?.tokensToday ?? 0).toLocaleString()}</div>
+            <div className="mt-1 text-xs text-muted-foreground">Groq Free Tier: 30 RPM, 14,400 RPD</div>
+          </div>
         </div>
       </Card>
 

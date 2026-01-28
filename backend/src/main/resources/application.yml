@@ -58,14 +58,9 @@ groq:
 # AI Limits (global) - Based on Groq Free Tier
 ai:
   limits:
-    # Groq Free: 14,400 requests/day
-    daily-requests: ${AI_DAILY_REQUESTS:14400}
-    weekly-requests: ${AI_WEEKLY_REQUESTS:100800}
-    monthly-requests: ${AI_MONTHLY_REQUESTS:432000}
-    # Token limits (for monitoring, Groq limits tokens per minute not per day)
-    daily-tokens: ${AI_DAILY_TOKENS:500000}
-    weekly-tokens: ${AI_WEEKLY_TOKENS:3500000}
-    monthly-tokens: ${AI_MONTHLY_TOKENS:15000000}
+    # Groq Free Tier: 30 RPM, 14,400 RPD
+    requests-per-day: ${AI_REQUESTS_PER_DAY:14400}
+    requests-per-minute: ${AI_REQUESTS_PER_MINUTE:30}
 
 # Exchange Rate Configuration
 exchange-rate:

@@ -302,9 +302,9 @@ public class ChatService {
 
     private String getQuotaExceededMessage(String language) {
         return switch (language) {
-            case "en" -> "AI quota has been exceeded. Please try again later.";
-            case "ja" -> "AIの利用制限に達しました。後でもう一度お試しください。";
-            default -> "Đã hết hạn mức AI. Vui lòng thử lại sau.";
+            case "en" -> "AI quota for today has been exceeded. Please try again tomorrow.";
+            case "ja" -> "本日のAI利用制限に達しました。明日もう一度お試しください。";
+            default -> "Đã hết hạn mức AI cho hôm nay. Vui lòng thử lại sau.";
         };
     }
 

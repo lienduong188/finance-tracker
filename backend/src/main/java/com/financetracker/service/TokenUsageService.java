@@ -14,8 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.time.temporal.TemporalAdjusters;
-import java.time.DayOfWeek;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -27,25 +25,12 @@ public class TokenUsageService {
 
     private final TokenUsageRepository tokenUsageRepository;
 
-    // Request limits (Groq Free Tier: 14,400 requests/day)
-    @Value("${ai.limits.daily-requests:14400}")
-    private Long dailyRequestLimit;
+    // Groq Free Tier limits: 30 RPM, 14,400 RPD
+    @Value("${ai.limits.requests-per-day:14400}")
+    private Long requestsPerDayLimit;
 
-    @Value("${ai.limits.weekly-requests:100800}")
-    private Long weeklyRequestLimit;
-
-    @Value("${ai.limits.monthly-requests:432000}")
-    private Long monthlyRequestLimit;
-
-    // Token limits (for monitoring)
-    @Value("${ai.limits.daily-tokens:500000}")
-    private Long dailyTokenLimit;
-
-    @Value("${ai.limits.weekly-tokens:3500000}")
-    private Long weeklyTokenLimit;
-
-    @Value("${ai.limits.monthly-tokens:15000000}")
-    private Long monthlyTokenLimit;
+    @Value("${ai.limits.requests-per-minute:30}")
+    private Long requestsPerMinuteLimit;
 
     @Transactional
     public TokenUsage trackUsage(User user, Integer inputTokens, Integer outputTokens,
@@ -72,73 +57,25 @@ public class TokenUsageService {
     }
 
     /**
-     * Check if global quota allows the request
-     * Primary: Check request limits (Groq's main limit)
-     * Secondary: Check token limits
+     * Check if global quota allows the request (Groq Free Tier: 14,400 RPD)
      */
     public boolean hasQuotaAvailable() {
-        // Check request limits (primary - Groq's main rate limit)
         Long requestsToday = getRequestsToday();
-        if (requestsToday >= dailyRequestLimit) {
-            log.warn("Daily request limit reached: {} / {}", requestsToday, dailyRequestLimit);
+        if (requestsToday >= requestsPerDayLimit) {
+            log.warn("Daily request limit reached: {} / {}", requestsToday, requestsPerDayLimit);
             return false;
         }
-
-        Long requestsThisWeek = getRequestsThisWeek();
-        if (requestsThisWeek >= weeklyRequestLimit) {
-            log.warn("Weekly request limit reached: {} / {}", requestsThisWeek, weeklyRequestLimit);
-            return false;
-        }
-
-        Long requestsThisMonth = getRequestsThisMonth();
-        if (requestsThisMonth >= monthlyRequestLimit) {
-            log.warn("Monthly request limit reached: {} / {}", requestsThisMonth, monthlyRequestLimit);
-            return false;
-        }
-
         return true;
     }
 
-    // Request counting methods
     public Long getRequestsToday() {
         OffsetDateTime startOfDay = LocalDate.now().atStartOfDay().atOffset(ZoneOffset.UTC);
         return tokenUsageRepository.countByCreatedAtAfter(startOfDay);
     }
 
-    public Long getRequestsThisWeek() {
-        LocalDate today = LocalDate.now();
-        LocalDate startOfWeek = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
-        OffsetDateTime startOfWeekTime = startOfWeek.atStartOfDay().atOffset(ZoneOffset.UTC);
-        return tokenUsageRepository.countByCreatedAtAfter(startOfWeekTime);
-    }
-
-    public Long getRequestsThisMonth() {
-        LocalDate today = LocalDate.now();
-        LocalDate startOfMonth = today.withDayOfMonth(1);
-        OffsetDateTime startOfMonthTime = startOfMonth.atStartOfDay().atOffset(ZoneOffset.UTC);
-        return tokenUsageRepository.countByCreatedAtAfter(startOfMonthTime);
-    }
-
-    // Token counting methods
     public Long getTokensToday() {
         OffsetDateTime startOfDay = LocalDate.now().atStartOfDay().atOffset(ZoneOffset.UTC);
         Long tokens = tokenUsageRepository.sumAllTotalTokensSince(startOfDay);
-        return tokens != null ? tokens : 0L;
-    }
-
-    public Long getTokensThisWeek() {
-        LocalDate today = LocalDate.now();
-        LocalDate startOfWeek = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
-        OffsetDateTime startOfWeekTime = startOfWeek.atStartOfDay().atOffset(ZoneOffset.UTC);
-        Long tokens = tokenUsageRepository.sumAllTotalTokensSince(startOfWeekTime);
-        return tokens != null ? tokens : 0L;
-    }
-
-    public Long getTokensThisMonth() {
-        LocalDate today = LocalDate.now();
-        LocalDate startOfMonth = today.withDayOfMonth(1);
-        OffsetDateTime startOfMonthTime = startOfMonth.atStartOfDay().atOffset(ZoneOffset.UTC);
-        Long tokens = tokenUsageRepository.sumAllTotalTokensSince(startOfMonthTime);
         return tokens != null ? tokens : 0L;
     }
 
@@ -194,13 +131,9 @@ public class TokenUsageService {
                         .build())
                 .collect(Collectors.toList());
 
-        // Current period usage
-        Long tokensToday = getTokensToday();
-        Long tokensThisWeek = getTokensThisWeek();
-        Long tokensThisMonth = getTokensThisMonth();
+        // Current usage
         Long requestsToday = getRequestsToday();
-        Long requestsThisWeek = getRequestsThisWeek();
-        Long requestsThisMonth = getRequestsThisMonth();
+        Long tokensToday = getTokensToday();
 
         return TokenUsageStatsResponse.builder()
                 .totalTokens(totalTokens != null ? totalTokens : 0L)
@@ -217,26 +150,11 @@ public class TokenUsageService {
                 .topUsers(topUsers)
                 .dailyUsage(dailyUsage)
                 .modelUsage(modelUsage)
-                // Request limits (Groq Free Tier)
-                .dailyRequestLimit(dailyRequestLimit)
-                .weeklyRequestLimit(weeklyRequestLimit)
-                .monthlyRequestLimit(monthlyRequestLimit)
+                // Groq Free Tier: 14,400 requests/day
+                .dailyRequestLimit(requestsPerDayLimit)
                 .requestsToday(requestsToday)
-                .requestsThisWeek(requestsThisWeek)
-                .requestsThisMonth(requestsThisMonth)
-                .remainingRequestsToday(Math.max(0, dailyRequestLimit - requestsToday))
-                .remainingRequestsThisWeek(Math.max(0, weeklyRequestLimit - requestsThisWeek))
-                .remainingRequestsThisMonth(Math.max(0, monthlyRequestLimit - requestsThisMonth))
-                // Token limits (for monitoring)
-                .dailyTokenLimit(dailyTokenLimit)
-                .weeklyTokenLimit(weeklyTokenLimit)
-                .monthlyTokenLimit(monthlyTokenLimit)
+                .remainingRequestsToday(Math.max(0, requestsPerDayLimit - requestsToday))
                 .tokensToday(tokensToday)
-                .tokensThisWeek(tokensThisWeek)
-                .tokensThisMonth(tokensThisMonth)
-                .remainingTokensToday(Math.max(0, dailyTokenLimit - tokensToday))
-                .remainingTokensThisWeek(Math.max(0, weeklyTokenLimit - tokensThisWeek))
-                .remainingTokensThisMonth(Math.max(0, monthlyTokenLimit - tokensThisMonth))
                 .build();
     }
 }
