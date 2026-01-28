@@ -95,17 +95,27 @@ public class NotificationScheduler {
                         .divide(limitAmount, 0, java.math.RoundingMode.HALF_UP)
                         .intValue();
 
+                String categoryName = budget.getCategory() != null
+                        ? budget.getCategory().getName()
+                        : "Tổng";
+
                 // Notify at 80%
                 if (percentage >= 80 && percentage < 100) {
                     if (!notificationService.hasRecentNotification(
                             budget.getUser().getId(),
                             NotificationType.BUDGET_WARNING,
                             24)) {
-
-                        String categoryName = budget.getCategory() != null
-                                ? budget.getCategory().getName()
-                                : "Tổng";
                         notificationService.notifyBudgetWarning(budget.getUser(), categoryName, percentage);
+                    }
+                }
+
+                // Notify at 100%+ (exceeded)
+                if (percentage >= 100) {
+                    if (!notificationService.hasRecentNotification(
+                            budget.getUser().getId(),
+                            NotificationType.BUDGET_EXCEEDED,
+                            24)) {
+                        notificationService.notifyBudgetExceeded(budget.getUser(), categoryName, percentage);
                     }
                 }
             }

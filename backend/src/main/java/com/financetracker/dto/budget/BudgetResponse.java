@@ -22,6 +22,8 @@ public class BudgetResponse {
     private UUID categoryId;
     private String categoryName;
     private String categoryIcon;
+    private UUID familyId;
+    private String familyName;
     private BigDecimal amount;
     private String currency;
     private BudgetPeriod period;

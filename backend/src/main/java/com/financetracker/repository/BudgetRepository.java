@@ -29,4 +29,18 @@ public interface BudgetRepository extends JpaRepository<Budget, UUID> {
 
     @Query("SELECT b FROM Budget b WHERE b.user.id = :userId AND b.category.id = :categoryId AND b.isActive = true")
     List<Budget> findByCategoryIdAndActive(@Param("userId") UUID userId, @Param("categoryId") UUID categoryId);
+
+    // Family budgets
+    List<Budget> findByFamilyId(UUID familyId);
+
+    List<Budget> findByFamilyIdAndIsActiveTrue(UUID familyId);
+
+    Optional<Budget> findByIdAndFamilyId(UUID id, UUID familyId);
+
+    // Find all accessible budgets (user's personal + family budgets)
+    @Query("SELECT b FROM Budget b WHERE b.user.id = :userId OR b.family.id IN :familyIds")
+    List<Budget> findAccessibleBudgets(@Param("userId") UUID userId, @Param("familyIds") List<UUID> familyIds);
+
+    @Query("SELECT b FROM Budget b WHERE (b.user.id = :userId OR b.family.id IN :familyIds) AND b.isActive = true")
+    List<Budget> findAccessibleActiveBudgets(@Param("userId") UUID userId, @Param("familyIds") List<UUID> familyIds);
 }

@@ -2,16 +2,11 @@ package com.financetracker.service;
 
 import com.financetracker.dto.budget.BudgetRequest;
 import com.financetracker.dto.budget.BudgetResponse;
-import com.financetracker.entity.Budget;
-import com.financetracker.entity.BudgetPeriod;
-import com.financetracker.entity.Category;
-import com.financetracker.entity.User;
+import com.financetracker.entity.*;
 import com.financetracker.exception.ApiException;
-import com.financetracker.repository.BudgetRepository;
-import com.financetracker.repository.CategoryRepository;
-import com.financetracker.repository.TransactionRepository;
-import com.financetracker.repository.UserRepository;
+import com.financetracker.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,10 +26,35 @@ public class BudgetService {
     private final CategoryRepository categoryRepository;
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
+    private final FamilyRepository familyRepository;
+    private final FamilyMemberRepository familyMemberRepository;
 
     public List<BudgetResponse> getAllBudgets(UUID userId) {
-        return budgetRepository.findByUserIdAndIsActiveTrue(userId)
-                .stream()
+        // Get user's family IDs
+        List<UUID> familyIds = familyMemberRepository.findByUserId(userId).stream()
+                .map(m -> m.getFamily().getId())
+                .collect(Collectors.toList());
+
+        List<Budget> budgets;
+        if (familyIds.isEmpty()) {
+            budgets = budgetRepository.findByUserIdAndIsActiveTrue(userId);
+        } else {
+            budgets = budgetRepository.findAccessibleActiveBudgets(userId, familyIds);
+        }
+
+        return budgets.stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    // Get budgets for a specific family
+    public List<BudgetResponse> getFamilyBudgets(UUID userId, UUID familyId) {
+        // Verify user is member
+        if (!familyMemberRepository.existsByFamilyIdAndUserId(familyId, userId)) {
+            throw new ApiException("Bạn không phải thành viên của nhóm", HttpStatus.FORBIDDEN);
+        }
+
+        return budgetRepository.findByFamilyIdAndIsActiveTrue(familyId).stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }
@@ -56,12 +76,28 @@ public class BudgetService {
                     .orElseThrow(() -> ApiException.notFound("Category"));
         }
 
+        Family family = null;
+        if (request.getFamilyId() != null) {
+            family = familyRepository.findById(request.getFamilyId())
+                    .orElseThrow(() -> new ApiException("Không tìm thấy nhóm", HttpStatus.NOT_FOUND));
+
+            // Verify user is member with permission
+            FamilyMember member = familyMemberRepository.findByFamilyIdAndUserId(family.getId(), userId)
+                    .orElseThrow(() -> new ApiException("Bạn không phải thành viên của nhóm", HttpStatus.FORBIDDEN));
+
+            if (member.getRole() != FamilyRole.OWNER && member.getRole() != FamilyRole.ADMIN) {
+                throw new ApiException("Chỉ Owner hoặc Admin mới có thể tạo ngân sách nhóm", HttpStatus.FORBIDDEN);
+            }
+        }
+
         Budget budget = Budget.builder()
-                .user(user)
+                .user(family == null ? user : null)  // Personal budget has user, family budget doesn't
+                .family(family)
                 .name(request.getName())
                 .category(category)
                 .amount(request.getAmount())
-                .currency(request.getCurrency() != null ? request.getCurrency() : user.getDefaultCurrency())
+                .currency(request.getCurrency() != null ? request.getCurrency() :
+                        (family != null ? family.getCurrency() : user.getDefaultCurrency()))
                 .period(request.getPeriod())
                 .startDate(request.getStartDate())
                 .endDate(request.getEndDate())
@@ -178,6 +214,8 @@ public class BudgetService {
                 .categoryId(budget.getCategory() != null ? budget.getCategory().getId() : null)
                 .categoryName(budget.getCategory() != null ? budget.getCategory().getName() : null)
                 .categoryIcon(budget.getCategory() != null ? budget.getCategory().getIcon() : null)
+                .familyId(budget.getFamily() != null ? budget.getFamily().getId() : null)
+                .familyName(budget.getFamily() != null ? budget.getFamily().getName() : null)
                 .amount(budget.getAmount())
                 .currency(budget.getCurrency())
                 .period(budget.getPeriod())

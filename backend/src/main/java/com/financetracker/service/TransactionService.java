@@ -27,6 +27,8 @@ public class TransactionService {
     private final UserRepository userRepository;
     private final BudgetService budgetService;
     private final RecurringTransactionRepository recurringTransactionRepository;
+    private final FamilyRepository familyRepository;
+    private final FamilyMemberRepository familyMemberRepository;
 
     public Page<TransactionResponse> getTransactions(UUID userId, Pageable pageable) {
         return transactionRepository.findByUserId(userId, pageable)
@@ -76,8 +78,21 @@ public class TransactionService {
                     .orElseThrow(() -> ApiException.notFound("To account"));
         }
 
+        // Handle family transaction
+        Family family = null;
+        if (request.getFamilyId() != null) {
+            family = familyRepository.findById(request.getFamilyId())
+                    .orElseThrow(() -> ApiException.notFound("Family"));
+
+            // Verify user is member
+            if (!familyMemberRepository.existsByFamilyIdAndUserId(family.getId(), userId)) {
+                throw ApiException.forbidden("Bạn không phải thành viên của nhóm");
+            }
+        }
+
         Transaction transaction = Transaction.builder()
                 .user(user)
+                .family(family)
                 .account(account)
                 .category(category)
                 .type(request.getType())
@@ -258,6 +273,10 @@ public class TransactionService {
                 .categoryId(transaction.getCategory() != null ? transaction.getCategory().getId() : null)
                 .categoryName(transaction.getCategory() != null ? transaction.getCategory().getName() : null)
                 .categoryIcon(transaction.getCategory() != null ? transaction.getCategory().getIcon() : null)
+                .familyId(transaction.getFamily() != null ? transaction.getFamily().getId() : null)
+                .familyName(transaction.getFamily() != null ? transaction.getFamily().getName() : null)
+                .createdByUserId(transaction.getUser().getId())
+                .createdByUserName(transaction.getUser().getFullName())
                 .type(transaction.getType())
                 .amount(transaction.getAmount())
                 .currency(transaction.getCurrency())
@@ -268,5 +287,15 @@ public class TransactionService {
                 .exchangeRate(transaction.getExchangeRate())
                 .createdAt(transaction.getCreatedAt())
                 .build();
+    }
+
+    // Get family transactions
+    public Page<TransactionResponse> getFamilyTransactions(UUID userId, UUID familyId, Pageable pageable) {
+        if (!familyMemberRepository.existsByFamilyIdAndUserId(familyId, userId)) {
+            throw ApiException.forbidden("Bạn không phải thành viên của nhóm");
+        }
+
+        return transactionRepository.findByFamilyId(familyId, pageable)
+                .map(this::toResponse);
     }
 }

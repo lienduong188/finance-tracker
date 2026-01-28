@@ -518,5 +518,30 @@
     "base": "基準",
     "noData": "為替レートデータがありません",
     "converter": "通貨換算"
+  },
+  "notifications": {
+    "title": "通知",
+    "invitations": "招待",
+    "noNotifications": "新しい通知はありません",
+    "noInvitations": "招待はありません",
+    "markAllRead": "すべて既読にする",
+    "accept": "承諾",
+    "decline": "辞退",
+    "invitedBy": "招待者",
+    "types": {
+      "INVITATION_RECEIVED": "グループへの招待",
+      "INVITATION_ACCEPTED": "招待が承諾されました",
+      "RECURRING_DUE_SOON": "定期取引が近づいています",
+      "DEBT_DUE_SOON": "借入の期限が近づいています",
+      "BUDGET_WARNING": "予算警告",
+      "BUDGET_EXCEEDED": "予算超過",
+      "ACCOUNT_LOW_BALANCE": "残高不足",
+      "ACCOUNT_EMPTY": "残高なし",
+      "EXCHANGE_RATE_ALERT": "為替レートアラート",
+      "SAVINGS_CONTRIBUTION": "貯蓄への入金",
+      "SAVINGS_GOAL_REACHED": "貯蓄目標達成",
+      "MEMBER_JOINED": "新しいメンバーが参加",
+      "MEMBER_LEFT": "メンバーが退出"
+    }
   }
 }

@@ -22,6 +22,8 @@ public class TransactionRequest {
 
     private UUID categoryId;
 
+    private UUID familyId;  // If set, this is a family/group transaction
+
     @NotNull(message = "Transaction type is required")
     private TransactionType type;
 

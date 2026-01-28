@@ -68,4 +68,41 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID>,
             @Param("endDate") LocalDate endDate);
 
     long countByCreatedAtAfter(OffsetDateTime date);
+
+    // Family transactions
+    List<Transaction> findByFamilyId(UUID familyId);
+
+    Page<Transaction> findByFamilyId(UUID familyId, Pageable pageable);
+
+    @Query("SELECT t FROM Transaction t WHERE t.family.id = :familyId " +
+           "AND t.transactionDate BETWEEN :startDate AND :endDate " +
+           "ORDER BY t.transactionDate DESC")
+    List<Transaction> findByFamilyIdAndDateRange(
+            @Param("familyId") UUID familyId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate);
+
+    Optional<Transaction> findByIdAndFamilyId(UUID id, UUID familyId);
+
+    // Find all accessible transactions (user's personal + family transactions)
+    @Query("SELECT t FROM Transaction t WHERE t.user.id = :userId OR t.family.id IN :familyIds ORDER BY t.transactionDate DESC")
+    Page<Transaction> findAccessibleTransactions(@Param("userId") UUID userId, @Param("familyIds") List<UUID> familyIds, Pageable pageable);
+
+    @Query("SELECT t.type, SUM(t.amount) FROM Transaction t " +
+           "WHERE t.family.id = :familyId AND t.transactionDate BETWEEN :startDate AND :endDate " +
+           "GROUP BY t.type")
+    List<Object[]> sumByTypeAndDateRangeForFamily(
+            @Param("familyId") UUID familyId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate);
+
+    @Query("SELECT t.category.id, t.category.name, SUM(t.amount) FROM Transaction t " +
+           "WHERE t.family.id = :familyId AND t.type = :type " +
+           "AND t.transactionDate BETWEEN :startDate AND :endDate " +
+           "GROUP BY t.category.id, t.category.name")
+    List<Object[]> sumByCategoryAndDateRangeForFamily(
+            @Param("familyId") UUID familyId,
+            @Param("type") TransactionType type,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate);
 }

@@ -23,6 +23,10 @@ public class TransactionResponse {
     private UUID categoryId;
     private String categoryName;
     private String categoryIcon;
+    private UUID familyId;
+    private String familyName;
+    private UUID createdByUserId;
+    private String createdByUserName;
     private TransactionType type;
     private BigDecimal amount;
     private String currency;

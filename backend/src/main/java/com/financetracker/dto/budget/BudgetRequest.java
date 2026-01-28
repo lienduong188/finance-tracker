@@ -23,6 +23,8 @@ public class BudgetRequest {
 
     private UUID categoryId;
 
+    private UUID familyId;  // If set, this is a family budget
+
     @NotNull(message = "Amount is required")
     @Positive(message = "Amount must be positive")
     @DecimalMax(value = "999999999999.99", message = "Amount must not exceed 999,999,999,999.99")

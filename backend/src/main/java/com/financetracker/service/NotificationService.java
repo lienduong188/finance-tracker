@@ -93,6 +93,21 @@ public class NotificationService {
         );
     }
 
+    // Invitation accepted - notify inviter
+    public void notifyInvitationAccepted(User inviter, String inviteeName, String familyName) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("inviteeName", inviteeName);
+        data.put("familyName", familyName);
+
+        createNotification(
+                inviter,
+                NotificationType.INVITATION_ACCEPTED,
+                "Lời mời được chấp nhận",
+                String.format("%s đã chấp nhận lời mời tham gia nhóm \"%s\"", inviteeName, familyName),
+                data
+        );
+    }
+
     // Recurring transaction due soon
     public void notifyRecurringDueSoon(User user, String transactionName, int daysUntilDue) {
         Map<String, Object> data = new HashMap<>();
@@ -136,6 +151,21 @@ public class NotificationService {
                 NotificationType.BUDGET_WARNING,
                 "Cảnh báo ngân sách",
                 String.format("Ngân sách cho \"%s\" đã đạt %d%%", categoryName, percentage),
+                data
+        );
+    }
+
+    // Budget exceeded (100%+)
+    public void notifyBudgetExceeded(User user, String categoryName, int percentage) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("categoryName", categoryName);
+        data.put("percentage", percentage);
+
+        createNotification(
+                user,
+                NotificationType.BUDGET_EXCEEDED,
+                "Vượt ngân sách",
+                String.format("Ngân sách cho \"%s\" đã vượt %d%%!", categoryName, percentage),
                 data
         );
     }
@@ -193,6 +223,22 @@ public class NotificationService {
                 NotificationType.SAVINGS_CONTRIBUTION,
                 "Đóng góp tiết kiệm mới",
                 String.format("%s đã đóng góp %s %s vào mục tiêu \"%s\"", contributorName, amount, currency, goalName),
+                data
+        );
+    }
+
+    // Savings goal reached
+    public void notifySavingsGoalReached(User user, String goalName, BigDecimal targetAmount, String currency) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("goalName", goalName);
+        data.put("targetAmount", targetAmount);
+        data.put("currency", currency);
+
+        createNotification(
+                user,
+                NotificationType.SAVINGS_GOAL_REACHED,
+                "Đạt mục tiêu tiết kiệm!",
+                String.format("Chúc mừng! Mục tiêu \"%s\" đã đạt %s %s", goalName, targetAmount, currency),
                 data
         );
     }

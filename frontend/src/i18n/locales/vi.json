@@ -518,5 +518,30 @@
     "base": "Đơn vị",
     "noData": "Không có dữ liệu tỷ giá",
     "converter": "Quy đổi nhanh"
+  },
+  "notifications": {
+    "title": "Thông báo",
+    "invitations": "Lời mời",
+    "noNotifications": "Không có thông báo mới",
+    "noInvitations": "Không có lời mời",
+    "markAllRead": "Đánh dấu tất cả đã đọc",
+    "accept": "Chấp nhận",
+    "decline": "Từ chối",
+    "invitedBy": "Được mời bởi",
+    "types": {
+      "INVITATION_RECEIVED": "Lời mời tham gia nhóm",
+      "INVITATION_ACCEPTED": "Lời mời được chấp nhận",
+      "RECURRING_DUE_SOON": "Giao dịch định kỳ sắp đến hạn",
+      "DEBT_DUE_SOON": "Khoản vay/nợ sắp đến hạn",
+      "BUDGET_WARNING": "Cảnh báo ngân sách",
+      "BUDGET_EXCEEDED": "Vượt ngân sách",
+      "ACCOUNT_LOW_BALANCE": "Tài khoản sắp hết tiền",
+      "ACCOUNT_EMPTY": "Tài khoản hết tiền",
+      "EXCHANGE_RATE_ALERT": "Cảnh báo tỷ giá",
+      "SAVINGS_CONTRIBUTION": "Đóng góp tiết kiệm",
+      "SAVINGS_GOAL_REACHED": "Đạt mục tiêu tiết kiệm",
+      "MEMBER_JOINED": "Thành viên mới",
+      "MEMBER_LEFT": "Thành viên rời nhóm"
+    }
   }
 }

@@ -21,6 +21,7 @@ public class FamilyService {
     private final FamilyRepository familyRepository;
     private final FamilyMemberRepository familyMemberRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     @Transactional
     public FamilyResponse createFamily(UUID userId, FamilyRequest request) {
@@ -188,7 +189,18 @@ public class FamilyService {
             throw new ApiException("Admin không thể xóa Admin khác", HttpStatus.FORBIDDEN);
         }
 
+        // Get info before deleting
+        String removedMemberName = targetMember.getUser().getFullName();
+        String familyName = targetMember.getFamily().getName();
+        UUID familyIdForNotify = targetMember.getFamily().getId();
+
         familyMemberRepository.delete(targetMember);
+
+        // Notify remaining members
+        List<FamilyMember> remainingMembers = familyMemberRepository.findByFamilyId(familyIdForNotify);
+        for (FamilyMember member : remainingMembers) {
+            notificationService.notifyMemberLeft(member.getUser(), removedMemberName, familyName);
+        }
     }
 
     @Transactional
@@ -200,7 +212,17 @@ public class FamilyService {
             throw new ApiException("Owner không thể rời gia đình. Hãy chuyển quyền Owner trước.", HttpStatus.FORBIDDEN);
         }
 
+        // Get info before deleting
+        String leavingMemberName = member.getUser().getFullName();
+        String familyName = member.getFamily().getName();
+
         familyMemberRepository.delete(member);
+
+        // Notify remaining members
+        List<FamilyMember> remainingMembers = familyMemberRepository.findByFamilyId(familyId);
+        for (FamilyMember remainingMember : remainingMembers) {
+            notificationService.notifyMemberLeft(remainingMember.getUser(), leavingMemberName, familyName);
+        }
     }
 
     private FamilyResponse toFamilyResponse(Family family, FamilyRole myRole) {

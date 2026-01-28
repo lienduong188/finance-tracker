@@ -143,6 +143,26 @@ public class InvitationService {
         invitation.setRespondedAt(OffsetDateTime.now());
         invitation.setInvitee(user);
         invitationRepository.save(invitation);
+
+        // Notify the inviter that invitation was accepted
+        notificationService.notifyInvitationAccepted(
+                invitation.getInviter(),
+                user.getFullName(),
+                invitation.getFamily().getName()
+        );
+
+        // Notify all existing members that a new member joined
+        List<FamilyMember> existingMembers = familyMemberRepository.findByFamilyId(invitation.getFamily().getId());
+        String familyName = invitation.getFamily().getName();
+        String newMemberName = user.getFullName();
+
+        for (FamilyMember member : existingMembers) {
+            // Don't notify the user who just joined or the inviter (already notified above)
+            if (!member.getUser().getId().equals(userId) &&
+                !member.getUser().getId().equals(invitation.getInviter().getId())) {
+                notificationService.notifyMemberJoined(member.getUser(), newMemberName, familyName);
+            }
+        }
     }
 
     @Transactional

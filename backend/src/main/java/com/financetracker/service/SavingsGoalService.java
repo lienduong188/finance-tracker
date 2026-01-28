@@ -176,8 +176,11 @@ public class SavingsGoalService {
         contribution = savingsContributionRepository.save(contribution);
 
         // Update goal current amount
+        boolean wasNotCompleted = goal.getStatus() != SavingsGoalStatus.COMPLETED;
         goal.setCurrentAmount(goal.getCurrentAmount().add(request.getAmount()));
-        if (goal.isCompleted()) {
+        boolean justCompleted = wasNotCompleted && goal.isCompleted();
+
+        if (justCompleted) {
             goal.setStatus(SavingsGoalStatus.COMPLETED);
         }
         savingsGoalRepository.save(goal);
@@ -197,6 +200,26 @@ public class SavingsGoalService {
                     );
                 }
             }
+
+            // Notify all members when goal is reached
+            if (justCompleted) {
+                for (FamilyMember member : members) {
+                    notificationService.notifySavingsGoalReached(
+                            member.getUser(),
+                            goal.getName(),
+                            goal.getTargetAmount(),
+                            goal.getCurrency()
+                    );
+                }
+            }
+        } else if (justCompleted) {
+            // Notify the user for personal goal
+            notificationService.notifySavingsGoalReached(
+                    user,
+                    goal.getName(),
+                    goal.getTargetAmount(),
+                    goal.getCurrency()
+            );
         }
 
         return toSavingsContributionResponse(contribution);

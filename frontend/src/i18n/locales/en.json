@@ -518,5 +518,30 @@
     "base": "Base",
     "noData": "No exchange rate data",
     "converter": "Quick Convert"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "invitations": "Invitations",
+    "noNotifications": "No new notifications",
+    "noInvitations": "No invitations",
+    "markAllRead": "Mark all as read",
+    "accept": "Accept",
+    "decline": "Decline",
+    "invitedBy": "Invited by",
+    "types": {
+      "INVITATION_RECEIVED": "Group invitation received",
+      "INVITATION_ACCEPTED": "Invitation accepted",
+      "RECURRING_DUE_SOON": "Recurring transaction due soon",
+      "DEBT_DUE_SOON": "Debt/Loan due soon",
+      "BUDGET_WARNING": "Budget warning",
+      "BUDGET_EXCEEDED": "Budget exceeded",
+      "ACCOUNT_LOW_BALANCE": "Account low balance",
+      "ACCOUNT_EMPTY": "Account empty",
+      "EXCHANGE_RATE_ALERT": "Exchange rate alert",
+      "SAVINGS_CONTRIBUTION": "Savings contribution",
+      "SAVINGS_GOAL_REACHED": "Savings goal reached",
+      "MEMBER_JOINED": "New member joined",
+      "MEMBER_LEFT": "Member left group"
+    }
   }
 }
