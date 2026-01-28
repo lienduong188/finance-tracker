@@ -11,8 +11,9 @@ import { BudgetsPage } from "./pages/budgets"
 import { RecurringTransactionsPage } from "./pages/recurring"
 import { DebtsPage } from "./pages/debts"
 import { SettingsPage } from "./pages/settings"
-import { FamilyPage, FamilyDetailPage, InvitationsPage } from "./pages/family"
+import { FamilyPage, FamilyDetailPage } from "./pages/family"
 import { SavingsPage, SavingsDetailPage } from "./pages/savings"
+import NotificationsPage from "./pages/notifications/NotificationsPage"
 import { AdminDashboardPage, AdminUsersPage, AdminCategoriesPage, AdminTokenUsagePage } from "./pages/admin"
 
 const queryClient = new QueryClient({
@@ -50,7 +51,7 @@ function App() {
               <Route path="/debts" element={<DebtsPage />} />
               <Route path="/family" element={<FamilyPage />} />
               <Route path="/family/:id" element={<FamilyDetailPage />} />
-              <Route path="/invitations" element={<InvitationsPage />} />
+              <Route path="/invitations" element={<NotificationsPage />} />
               <Route path="/savings" element={<SavingsPage />} />
               <Route path="/savings/:id" element={<SavingsDetailPage />} />
               <Route path="/settings" element={<SettingsPage />} />

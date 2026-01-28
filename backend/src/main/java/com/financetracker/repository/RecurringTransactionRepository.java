@@ -43,4 +43,11 @@ public interface RecurringTransactionRepository extends JpaRepository<RecurringT
             @Param("untilDate") LocalDate untilDate);
 
     long countByUserIdAndStatus(UUID userId, RecurringStatus status);
+
+    @Query("SELECT r FROM RecurringTransaction r " +
+           "WHERE r.status = 'ACTIVE' " +
+           "AND r.nextExecutionDate BETWEEN :startDate AND :endDate")
+    List<RecurringTransaction> findByIsActiveTrueAndNextExecutionDateBetween(
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate);
 }

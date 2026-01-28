@@ -39,4 +39,10 @@ public interface DebtRepository extends JpaRepository<Debt, UUID> {
 
     @Query("SELECT COUNT(d) FROM Debt d WHERE d.user.id = :userId AND d.status IN ('ACTIVE', 'PARTIALLY_PAID')")
     long countActiveDebts(@Param("userId") UUID userId);
+
+    @Query("SELECT d FROM Debt d WHERE d.dueDate BETWEEN :startDate AND :endDate AND d.status = :status")
+    List<Debt> findByDueDateBetweenAndStatus(
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
+            @Param("status") DebtStatus status);
 }

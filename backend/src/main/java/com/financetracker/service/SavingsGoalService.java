@@ -29,6 +29,7 @@ public class SavingsGoalService {
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
     private final CategoryRepository categoryRepository;
+    private final NotificationService notificationService;
 
     @Transactional
     public SavingsGoalResponse createGoal(UUID userId, SavingsGoalRequest request) {
@@ -180,6 +181,23 @@ public class SavingsGoalService {
             goal.setStatus(SavingsGoalStatus.COMPLETED);
         }
         savingsGoalRepository.save(goal);
+
+        // Notify other family members about the contribution (if family goal)
+        if (goal.getFamily() != null) {
+            List<FamilyMember> members = familyMemberRepository.findByFamilyId(goal.getFamily().getId());
+            for (FamilyMember member : members) {
+                // Don't notify the contributor themselves
+                if (!member.getUser().getId().equals(userId)) {
+                    notificationService.notifySavingsContribution(
+                            member.getUser(),
+                            goal.getName(),
+                            user.getFullName(),
+                            request.getAmount(),
+                            goal.getCurrency()
+                    );
+                }
+            }
+        }
 
         return toSavingsContributionResponse(contribution);
     }

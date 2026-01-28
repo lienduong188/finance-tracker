@@ -31,4 +31,13 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
 
     @Query("SELECT a FROM Account a WHERE a.type = 'CREDIT_CARD' AND a.isActive = true AND a.billingDay = :day AND a.linkedAccount IS NOT NULL")
     List<Account> findCreditCardsDueForPayment(@Param("day") int day);
+
+    @Query("SELECT a FROM Account a WHERE a.isActive = true AND a.currentBalance <= :threshold")
+    List<Account> findByCurrentBalanceLessThanEqual(@Param("threshold") BigDecimal threshold);
+
+    List<Account> findByCurrencyAndIsActiveTrue(String currency);
+
+    default List<Account> findByCurrency(String currency) {
+        return findByCurrencyAndIsActiveTrue(currency);
+    }
 }

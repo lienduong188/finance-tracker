@@ -24,6 +24,7 @@ public class InvitationService {
     private final FamilyRepository familyRepository;
     private final FamilyMemberRepository familyMemberRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     private static final int INVITATION_EXPIRY_DAYS = 7;
 
@@ -75,6 +76,10 @@ public class InvitationService {
                 .build();
 
         invitation = invitationRepository.save(invitation);
+
+        // Send notification to invitee
+        notificationService.notifyInvitationReceived(invitee, family.getName(), inviter.getFullName());
+
         return toInvitationResponse(invitation);
     }
 
