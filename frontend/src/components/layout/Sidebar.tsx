@@ -1,5 +1,6 @@
 import { NavLink, Link } from "react-router-dom"
 import { useTranslation } from "react-i18next"
+import { useQuery } from "@tanstack/react-query"
 import {
   LayoutDashboard,
   Wallet,
@@ -14,10 +15,12 @@ import {
   Shield,
   X,
   MessageCircle,
+  Bell,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/context/AuthContext"
 import { LanguageSwitch } from "@/components/LanguageSwitch"
+import { invitationsApi } from "@/api"
 
 const navItems = [
   { to: "/", icon: LayoutDashboard, labelKey: "nav.dashboard" },
@@ -39,6 +42,12 @@ interface SidebarProps {
 export function Sidebar({ isOpen = true, onClose, onOpenChat }: SidebarProps) {
   const { user, isAdmin, logout } = useAuth()
   const { t } = useTranslation()
+
+  const { data: pendingCount = 0 } = useQuery({
+    queryKey: ["pending-invitations-count"],
+    queryFn: invitationsApi.countPending,
+    refetchInterval: 30000,
+  })
 
   const handleNavClick = () => {
     // Close sidebar on mobile/tablet after navigation
@@ -99,6 +108,37 @@ export function Sidebar({ isOpen = true, onClose, onOpenChat }: SidebarProps) {
                 {t(item.labelKey)}
               </NavLink>
             ))}
+
+            {/* Notifications / Invitations */}
+            <NavLink
+              to="/invitations"
+              onClick={handleNavClick}
+              className={({ isActive }) =>
+                cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                  isActive
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                )
+              }
+            >
+              <div className="relative">
+                <Bell className="h-5 w-5" />
+                {pendingCount > 0 && (
+                  <span className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground">
+                    {pendingCount > 9 ? "9+" : pendingCount}
+                  </span>
+                )}
+              </div>
+              <span className="flex items-center gap-2">
+                {t("nav.notifications", "Thông báo")}
+                {pendingCount > 0 && (
+                  <span className="rounded-full bg-destructive px-2 py-0.5 text-xs text-destructive-foreground">
+                    {pendingCount}
+                  </span>
+                )}
+              </span>
+            </NavLink>
 
             {/* AI Assistant - only show on mobile/tablet */}
             <button

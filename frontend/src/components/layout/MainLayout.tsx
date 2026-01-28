@@ -4,6 +4,7 @@ import { Menu } from "lucide-react"
 import { useAuth } from "@/context/AuthContext"
 import { Sidebar } from "./Sidebar"
 import { ChatWidget } from "@/components/chat/ChatWidget"
+import { NotificationBell } from "@/components/NotificationBell"
 
 export function MainLayout() {
   const { isAuthenticated, isLoading } = useAuth()
@@ -25,15 +26,18 @@ export function MainLayout() {
   return (
     <div className="min-h-screen w-full overflow-x-hidden bg-background">
       {/* Mobile/Tablet header with hamburger */}
-      <header className="fixed left-0 right-0 top-0 z-20 flex h-14 items-center border-b bg-card px-4 lg:hidden">
-        <button
-          onClick={() => setSidebarOpen(true)}
-          className="rounded-lg p-2 hover:bg-accent"
-          aria-label="Open menu"
-        >
-          <Menu className="h-6 w-6" />
-        </button>
-        <h1 className="ml-3 text-lg font-bold text-primary">Finance Tracker</h1>
+      <header className="fixed left-0 right-0 top-0 z-20 flex h-14 items-center justify-between border-b bg-card px-4 lg:hidden">
+        <div className="flex items-center">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="rounded-lg p-2 hover:bg-accent"
+            aria-label="Open menu"
+          >
+            <Menu className="h-6 w-6" />
+          </button>
+          <h1 className="ml-3 text-lg font-bold text-primary">Finance Tracker</h1>
+        </div>
+        <NotificationBell />
       </header>
 
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} onOpenChat={() => setChatOpen(true)} />
