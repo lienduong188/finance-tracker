@@ -17,8 +17,17 @@ import java.util.List;
 public class Account extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id")
     private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "family_id")
+    private Family family;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    @Builder.Default
+    private AccountVisibility visibility = AccountVisibility.PRIVATE;
 
     @Column(nullable = false)
     private String name;
@@ -66,4 +75,16 @@ public class Account extends BaseEntity {
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
     @Builder.Default
     private List<Transaction> transactions = new ArrayList<>();
+
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<AccountPermission> permissions = new ArrayList<>();
+
+    public boolean isPersonalAccount() {
+        return user != null && family == null;
+    }
+
+    public boolean isFamilyAccount() {
+        return family != null && user == null;
+    }
 }

@@ -472,3 +472,145 @@ export interface ModelUsage {
   tokens: number
   requests: number
 }
+
+// Family types
+export type FamilyRole = "OWNER" | "ADMIN" | "MEMBER"
+export type InvitationStatus = "PENDING" | "ACCEPTED" | "DECLINED" | "EXPIRED" | "CANCELLED"
+export type AccountVisibility = "PRIVATE" | "FAMILY_VISIBLE" | "SPECIFIC_MEMBERS"
+export type SavingsGoalStatus = "ACTIVE" | "COMPLETED" | "CANCELLED"
+
+export interface Family {
+  id: string
+  name: string
+  description: string | null
+  currency: string
+  createdById: string
+  createdByName: string
+  memberCount: number
+  myRole: FamilyRole
+  createdAt: string
+}
+
+export interface FamilyRequest {
+  name: string
+  description?: string
+  currency?: string
+}
+
+export interface FamilyMember {
+  id: string
+  userId: string
+  email: string
+  fullName: string
+  role: FamilyRole
+  joinedAt: string
+}
+
+export interface UpdateMemberRoleRequest {
+  role: FamilyRole
+}
+
+// Invitation types
+export interface Invitation {
+  id: string
+  familyId: string
+  familyName: string
+  inviterEmail: string
+  inviterName: string
+  inviteeEmail: string
+  role: FamilyRole
+  status: InvitationStatus
+  token: string
+  message: string | null
+  expiresAt: string
+  createdAt: string
+}
+
+export interface InvitationRequest {
+  familyId: string
+  email: string
+  role?: FamilyRole
+  message?: string
+}
+
+// Savings Goal types
+export interface SavingsGoal {
+  id: string
+  name: string
+  description: string | null
+  targetAmount: number
+  currentAmount: number
+  currency: string
+  icon: string | null
+  color: string | null
+  targetDate: string | null
+  status: SavingsGoalStatus
+  familyId: string | null
+  familyName: string | null
+  userId: string | null
+  userName: string | null
+  progressPercentage: number
+  contributorsCount: number
+  createdAt: string
+}
+
+export interface SavingsGoalRequest {
+  name: string
+  description?: string
+  targetAmount: number
+  currency?: string
+  icon?: string
+  color?: string
+  targetDate?: string
+  familyId?: string
+}
+
+export interface SavingsContribution {
+  id: string
+  goalId: string
+  userId: string
+  userName: string
+  accountId: string
+  accountName: string
+  transactionId: string | null
+  amount: number
+  note: string | null
+  contributionDate: string
+  createdAt: string
+}
+
+export interface SavingsContributionRequest {
+  amount: number
+  accountId: string
+  note?: string
+  contributionDate?: string
+}
+
+export interface ContributorSummary {
+  userId: string
+  userName: string
+  totalAmount: number
+  percentage: number
+}
+
+// Account Permission types
+export interface AccountPermission {
+  id: string
+  userId: string
+  userEmail: string
+  userName: string
+  canView: boolean
+  canTransact: boolean
+}
+
+export interface AccountVisibilityRequest {
+  visibility: AccountVisibility
+  familyId?: string
+  permissions?: AccountPermissionRequest[]
+}
+
+export interface AccountPermissionRequest {
+  userId: string
+  canView?: boolean
+  canTransact?: boolean
+}

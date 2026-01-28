@@ -7,6 +7,8 @@ import {
   PiggyBank,
   Repeat,
   HandCoins,
+  Users,
+  Target,
   Settings,
   LogOut,
   Shield,
@@ -24,6 +26,8 @@ const navItems = [
   { to: "/budgets", icon: PiggyBank, labelKey: "nav.budgets" },
   { to: "/recurring", icon: Repeat, labelKey: "nav.recurring" },
   { to: "/debts", icon: HandCoins, labelKey: "nav.debts" },
+  { to: "/family", icon: Users, labelKey: "nav.family" },
+  { to: "/savings", icon: Target, labelKey: "nav.savings" },
 ]
 
 interface SidebarProps {

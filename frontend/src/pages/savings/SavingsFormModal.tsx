@@ -1,0 +1,215 @@
+import { useEffect } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { z } from "zod"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { savingsGoalsApi, familiesApi } from "@/api"
+import type { SavingsGoal } from "@/types"
+import { Button, Input, Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui"
+
+const savingsSchema = z.object({
+  name: z.string().min(1, "Tên mục tiêu là bắt buộc").max(100),
+  description: z.string().optional(),
+  targetAmount: z.number().positive("Số tiền phải lớn hơn 0"),
+  currency: z.string().length(3).optional(),
+  icon: z.string().optional(),
+  color: z.string().optional(),
+  targetDate: z.string().optional(),
+  familyId: z.string().optional(),
+})
+
+type SavingsForm = z.infer<typeof savingsSchema>
+
+interface SavingsFormModalProps {
+  isOpen: boolean
+  onClose: () => void
+  goal: SavingsGoal | null
+}
+
+const iconOptions = ["🎯", "✈️", "🎂", "🏠", "🚗", "💻", "📱", "🎓", "💍", "🏥"]
+
+export default function SavingsFormModal({ isOpen, onClose, goal }: SavingsFormModalProps) {
+  const queryClient = useQueryClient()
+  const isEditing = !!goal
+
+  const { data: families } = useQuery({
+    queryKey: ["families"],
+    queryFn: familiesApi.getAll,
+  })
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<SavingsForm>({
+    resolver: zodResolver(savingsSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      targetAmount: 0,
+      currency: "VND",
+      icon: "🎯",
+      targetDate: "",
+      familyId: "",
+    },
+  })
+
+  const selectedIcon = watch("icon")
+
+  useEffect(() => {
+    if (goal) {
+      reset({
+        name: goal.name,
+        description: goal.description || "",
+        targetAmount: goal.targetAmount,
+        currency: goal.currency,
+        icon: goal.icon || "🎯",
+        color: goal.color || "",
+        targetDate: goal.targetDate || "",
+        familyId: goal.familyId || "",
+      })
+    } else {
+      reset({
+        name: "",
+        description: "",
+        targetAmount: 0,
+        currency: "VND",
+        icon: "🎯",
+        targetDate: "",
+        familyId: "",
+      })
+    }
+  }, [goal, reset])
+
+  const createMutation = useMutation({
+    mutationFn: savingsGoalsApi.create,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["savings-goals"] })
+      onClose()
+    },
+  })
+
+  const updateMutation = useMutation({
+    mutationFn: (data: SavingsForm) =>
+      savingsGoalsApi.update(goal!.id, {
+        ...data,
+        familyId: data.familyId || undefined,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["savings-goals"] })
+      onClose()
+    },
+  })
+
+  const onSubmit = (data: SavingsForm) => {
+    const payload = {
+      ...data,
+      familyId: data.familyId || undefined,
+    }
+    if (isEditing) {
+      updateMutation.mutate(data)
+    } else {
+      createMutation.mutate(payload)
+    }
+  }
+
+  const isLoading = createMutation.isPending || updateMutation.isPending
+
+  return (
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>{isEditing ? "Chỉnh sửa mục tiêu" : "Tạo mục tiêu mới"}</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Icon</label>
+            <div className="flex gap-2 flex-wrap">
+              {iconOptions.map((icon) => (
+                <button
+                  key={icon}
+                  type="button"
+                  className={`text-2xl p-2 rounded-lg border ${
+                    selectedIcon === icon ? "border-primary bg-primary/10" : "border-muted"
+                  }`}
+                  onClick={() => setValue("icon", icon)}
+                >
+                  {icon}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Tên mục tiêu *</label>
+            <Input {...register("name")} placeholder="Ví dụ: Du lịch Đà Nẵng" />
+            {errors.name && (
+              <p className="text-sm text-destructive mt-1">{errors.name.message}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Mô tả</label>
+            <Input {...register("description")} placeholder="Mô tả về mục tiêu" />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Số tiền mục tiêu *</label>
+              <Input
+                {...register("targetAmount", { valueAsNumber: true })}
+                type="number"
+                placeholder="10,000,000"
+              />
+              {errors.targetAmount && (
+                <p className="text-sm text-destructive mt-1">{errors.targetAmount.message}</p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Tiền tệ</label>
+              <select {...register("currency")} className="w-full border rounded-md p-2">
+                <option value="VND">VND</option>
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Ngày mục tiêu</label>
+            <Input {...register("targetDate")} type="date" />
+          </div>
+
+          {!isEditing && families && families.length > 0 && (
+            <div>
+              <label className="block text-sm font-medium mb-1">Gia đình (tùy chọn)</label>
+              <select {...register("familyId")} className="w-full border rounded-md p-2">
+                <option value="">Mục tiêu cá nhân</option>
+                {families.map((family) => (
+                  <option key={family.id} value={family.id}>
+                    {family.name}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-muted-foreground mt-1">
+                Chọn gia đình nếu muốn tạo mục tiêu tiết kiệm chung
+              </p>
+            </div>
+          )}
+
+          <div className="flex justify-end gap-2 pt-4">
+            <Button type="button" variant="outline" onClick={onClose}>
+              Hủy
+            </Button>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? "Đang xử lý..." : isEditing ? "Cập nhật" : "Tạo"}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  )
+}
