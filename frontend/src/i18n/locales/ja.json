@@ -240,8 +240,8 @@
       "friday": "金曜日",
       "saturday": "土曜日"
     },
-    "upcoming": "今後の取引",
-    "noUpcoming": "今後の取引はありません"
+    "upcoming": "今後7日間の取引",
+    "noUpcoming": "今後7日間の取引はありません"
   },
   "debts": {
     "title": "貸借",

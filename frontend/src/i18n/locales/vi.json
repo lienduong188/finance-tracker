@@ -240,8 +240,8 @@
       "friday": "Thứ sáu",
       "saturday": "Thứ bảy"
     },
-    "upcoming": "Giao dịch sắp tới",
-    "noUpcoming": "Không có giao dịch sắp tới"
+    "upcoming": "Giao dịch trong 7 ngày tới",
+    "noUpcoming": "Không có giao dịch trong 7 ngày tới"
   },
   "debts": {
     "title": "Cho vay / Nợ",

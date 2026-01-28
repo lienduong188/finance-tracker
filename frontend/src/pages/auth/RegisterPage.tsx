@@ -48,7 +48,7 @@ export function RegisterPage() {
   } = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      defaultCurrency: "VND",
+      defaultCurrency: "USD",
     },
   })
 
@@ -257,8 +257,9 @@ export function RegisterPage() {
             <div className="space-y-2">
               <Label htmlFor="defaultCurrency">{t("auth.defaultCurrency")}</Label>
               <Select id="defaultCurrency" {...register("defaultCurrency")}>
-                <option value="VND">{t("currencies.VND")}</option>
+                <option value="USD">{t("currencies.USD")}</option>
                 <option value="JPY">{t("currencies.JPY")}</option>
+                <option value="VND">{t("currencies.VND")}</option>
               </Select>
             </div>
           </CardContent>

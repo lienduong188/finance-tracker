@@ -240,8 +240,8 @@
       "friday": "Friday",
       "saturday": "Saturday"
     },
-    "upcoming": "Upcoming Transactions",
-    "noUpcoming": "No upcoming transactions"
+    "upcoming": "Next 7 Days",
+    "noUpcoming": "No transactions in the next 7 days"
   },
   "debts": {
     "title": "Debts",

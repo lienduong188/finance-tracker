@@ -11,7 +11,7 @@ interface ExchangeRateCardProps {
 
 const CURRENCIES = ["VND", "JPY", "USD", "EUR"]
 
-export function ExchangeRateCard({ baseCurrency = "VND" }: ExchangeRateCardProps) {
+export function ExchangeRateCard({ baseCurrency = "USD" }: ExchangeRateCardProps) {
   const { t } = useTranslation()
   const { data, isLoading, refetch, isFetching } = useAllExchangeRates(baseCurrency)
 
