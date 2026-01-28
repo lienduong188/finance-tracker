@@ -25,9 +25,8 @@ public class NotificationScheduler {
     private final BudgetRepository budgetRepository;
     private final AccountRepository accountRepository;
     private final ExchangeRateRepository exchangeRateRepository;
-    private final UserRepository userRepository;
 
-    // Run every hour
+    // Run every hour - check recurring transactions due soon
     @Scheduled(fixedRate = 3600000)
     @Transactional
     public void checkRecurringTransactionsDueSoon() {
@@ -40,23 +39,19 @@ public class NotificationScheduler {
                 .findByIsActiveTrueAndNextExecutionDateBetween(today, threeDaysLater);
 
         for (RecurringTransaction rt : dueSoon) {
-            // Check if we already sent notification in last 24 hours
             if (!notificationService.hasRecentNotification(
                     rt.getUser().getId(),
                     NotificationType.RECURRING_DUE_SOON,
                     24)) {
 
                 int daysUntil = (int) java.time.temporal.ChronoUnit.DAYS.between(today, rt.getNextExecutionDate());
-                notificationService.notifyRecurringDueSoon(
-                        rt.getUser(),
-                        rt.getName(),
-                        daysUntil
-                );
+                String name = rt.getDescription() != null ? rt.getDescription() : "Giao dịch định kỳ";
+                notificationService.notifyRecurringDueSoon(rt.getUser(), name, daysUntil);
             }
         }
     }
 
-    // Run every hour
+    // Run every hour - check debts due soon
     @Scheduled(fixedRate = 3600000)
     @Transactional
     public void checkDebtsDueSoon() {
@@ -74,30 +69,24 @@ public class NotificationScheduler {
                     24)) {
 
                 int daysUntil = (int) java.time.temporal.ChronoUnit.DAYS.between(today, debt.getDueDate());
-                notificationService.notifyDebtDueSoon(
-                        debt.getUser(),
-                        debt.getName(),
-                        daysUntil,
-                        debt.getRemainingAmount(),
-                        debt.getCurrency()
-                );
+                String name = debt.getPersonName() != null ? debt.getPersonName() : "Khoản vay/nợ";
+                BigDecimal remainingAmount = debt.getAmount().subtract(debt.getPaidAmount());
+                notificationService.notifyDebtDueSoon(debt.getUser(), name, daysUntil, remainingAmount, debt.getCurrency());
             }
         }
     }
 
-    // Run every 2 hours
+    // Run every 2 hours - check budget warnings
     @Scheduled(fixedRate = 7200000)
     @Transactional
     public void checkBudgetWarnings() {
         log.info("Checking budget warnings...");
 
-        LocalDate today = LocalDate.now();
-        int currentMonth = today.getMonthValue();
-        int currentYear = today.getYear();
-
-        List<Budget> budgets = budgetRepository.findByMonthAndYear(currentMonth, currentYear);
+        List<Budget> budgets = budgetRepository.findAll();
 
         for (Budget budget : budgets) {
+            if (!budget.getIsActive()) continue;
+
             BigDecimal spentAmount = budget.getSpentAmount();
             BigDecimal limitAmount = budget.getAmount();
 
@@ -123,13 +112,12 @@ public class NotificationScheduler {
         }
     }
 
-    // Run every hour
+    // Run every hour - check account balances
     @Scheduled(fixedRate = 3600000)
     @Transactional
     public void checkAccountBalances() {
         log.info("Checking account balances...");
 
-        // Find accounts with zero or negative balance
         List<Account> lowBalanceAccounts = accountRepository.findByCurrentBalanceLessThanEqual(BigDecimal.ZERO);
 
         for (Account account : lowBalanceAccounts) {
@@ -148,20 +136,15 @@ public class NotificationScheduler {
         }
     }
 
-    // Run every 30 minutes to check exchange rates
+    // Run every 30 minutes - check exchange rates for JPY/VND
     @Scheduled(fixedRate = 1800000)
     @Transactional
     public void checkExchangeRateAlerts() {
         log.info("Checking exchange rate alerts for JPY/VND...");
 
         // Get JPY to VND rate
-        ExchangeRate jpyRate = exchangeRateRepository.findByBaseCurrencyAndTargetCurrency("VND", "JPY")
-                .orElse(null);
-
-        if (jpyRate != null) {
-            BigDecimal rate = jpyRate.getRate();
-            // JPY to VND rate (1 JPY = X VND)
-            BigDecimal jpyToVnd = BigDecimal.ONE.divide(rate, 2, java.math.RoundingMode.HALF_UP);
+        exchangeRateRepository.findLatestRate("JPY", "VND").ifPresent(rate -> {
+            BigDecimal jpyToVnd = rate.getRate();
 
             // Check for target rates: 180, 190, 200
             BigDecimal[] targets = {
@@ -176,15 +159,14 @@ public class NotificationScheduler {
                 BigDecimal upperBound = target.multiply(BigDecimal.valueOf(1.01));
 
                 if (jpyToVnd.compareTo(lowerBound) >= 0 && jpyToVnd.compareTo(upperBound) <= 0) {
-                    // Notify all users who might be interested
-                    // For simplicity, we notify users with JPY accounts
+                    // Notify users with JPY accounts
                     List<Account> jpyAccounts = accountRepository.findByCurrency("JPY");
 
                     for (Account account : jpyAccounts) {
                         if (!notificationService.hasRecentNotification(
                                 account.getUser().getId(),
                                 NotificationType.EXCHANGE_RATE_ALERT,
-                                12)) { // Only once per 12 hours
+                                12)) {
 
                             notificationService.notifyExchangeRateAlert(
                                     account.getUser(),
@@ -194,10 +176,10 @@ public class NotificationScheduler {
                             );
                         }
                     }
-                    break; // Only notify for one target at a time
+                    break;
                 }
             }
-        }
+        });
     }
 
     // Cleanup old notifications - run daily at 3 AM
