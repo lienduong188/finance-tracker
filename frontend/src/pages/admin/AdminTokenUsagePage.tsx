@@ -7,11 +7,22 @@ import {
   MessageSquare,
   Cpu,
   Gauge,
+  Send,
 } from "lucide-react"
 import { adminApi } from "@/api"
 import { Card } from "@/components/ui"
 
-function QuotaProgressBar({ used, limit, label }: { used: number; limit: number; label: string }) {
+function QuotaProgressBar({
+  used,
+  limit,
+  label,
+  unit = "tokens"
+}: {
+  used: number
+  limit: number
+  label: string
+  unit?: string
+}) {
   const percentage = limit > 0 ? Math.min((used / limit) * 100, 100) : 0
   const remaining = Math.max(0, limit - used)
   const isWarning = percentage >= 80
@@ -34,7 +45,7 @@ function QuotaProgressBar({ used, limit, label }: { used: number; limit: number;
         />
       </div>
       <div className="flex justify-between text-xs text-muted-foreground">
-        <span>Còn lại: {remaining.toLocaleString()} tokens</span>
+        <span>Còn lại: {remaining.toLocaleString()} {unit}</span>
         <span>{percentage.toFixed(1)}%</span>
       </div>
     </div>
@@ -146,37 +157,68 @@ export function AdminTokenUsagePage() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold">Token Usage</h1>
-        <p className="text-muted-foreground">Thống kê sử dụng AI Chatbot</p>
+        <p className="text-muted-foreground">Thống kê sử dụng AI Chatbot (Groq Free Tier)</p>
       </div>
 
-      {/* Quota / Limits Section */}
+      {/* Request Quota - Primary (Groq Free Tier) */}
+      <Card className="p-4">
+        <div className="mb-4 flex items-center gap-2">
+          <Send className="h-5 w-5 text-primary" />
+          <h2 className="text-lg font-semibold">Hạn mức Requests (Groq Free Tier: 14,400/ngày)</h2>
+        </div>
+        <div className="grid gap-6 md:grid-cols-3">
+          <QuotaProgressBar
+            used={stats?.requestsToday ?? 0}
+            limit={stats?.dailyRequestLimit ?? 14400}
+            label="Hôm nay"
+            unit="requests"
+          />
+          <QuotaProgressBar
+            used={stats?.requestsThisWeek ?? 0}
+            limit={stats?.weeklyRequestLimit ?? 100800}
+            label="Tuần này"
+            unit="requests"
+          />
+          <QuotaProgressBar
+            used={stats?.requestsThisMonth ?? 0}
+            limit={stats?.monthlyRequestLimit ?? 432000}
+            label="Tháng này"
+            unit="requests"
+          />
+        </div>
+      </Card>
+
+      {/* Token Usage - Secondary (for monitoring) */}
       <Card className="p-4">
         <div className="mb-4 flex items-center gap-2">
           <Gauge className="h-5 w-5 text-primary" />
-          <h2 className="text-lg font-semibold">Hạn mức (Quota)</h2>
+          <h2 className="text-lg font-semibold">Token Usage (Monitoring)</h2>
         </div>
         <div className="grid gap-6 md:grid-cols-3">
           <QuotaProgressBar
             used={stats?.tokensToday ?? 0}
-            limit={stats?.dailyLimit ?? 100000}
+            limit={stats?.dailyTokenLimit ?? 500000}
             label="Hôm nay"
+            unit="tokens"
           />
           <QuotaProgressBar
             used={stats?.tokensThisWeek ?? 0}
-            limit={stats?.weeklyLimit ?? 500000}
+            limit={stats?.weeklyTokenLimit ?? 3500000}
             label="Tuần này"
+            unit="tokens"
           />
           <QuotaProgressBar
             used={stats?.tokensThisMonth ?? 0}
-            limit={stats?.monthlyLimit ?? 2000000}
+            limit={stats?.monthlyTokenLimit ?? 15000000}
             label="Tháng này"
+            unit="tokens"
           />
         </div>
       </Card>
 
       {/* Token Stats */}
       <div>
-        <h2 className="mb-4 text-lg font-semibold">Tổng quan Tokens</h2>
+        <h2 className="mb-4 text-lg font-semibold">Tổng quan</h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {tokenStats.map((stat) => (
             <Card key={stat.label} className="p-4">

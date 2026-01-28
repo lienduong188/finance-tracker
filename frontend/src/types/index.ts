@@ -448,16 +448,26 @@ export interface TokenUsageStats {
   topUsers: TopUserUsage[]
   dailyUsage: DailyTokenUsage[]
   modelUsage: ModelUsage[]
-  // Limits and quota
-  dailyLimit: number
-  weeklyLimit: number
-  monthlyLimit: number
+  // Request limits (Groq Free Tier: 14,400/day)
+  dailyRequestLimit: number
+  weeklyRequestLimit: number
+  monthlyRequestLimit: number
+  requestsToday: number
+  requestsThisWeek: number
+  requestsThisMonth: number
+  remainingRequestsToday: number
+  remainingRequestsThisWeek: number
+  remainingRequestsThisMonth: number
+  // Token limits (for monitoring)
+  dailyTokenLimit: number
+  weeklyTokenLimit: number
+  monthlyTokenLimit: number
   tokensToday: number
   tokensThisWeek: number
   tokensThisMonth: number
-  remainingToday: number
-  remainingThisWeek: number
-  remainingThisMonth: number
+  remainingTokensToday: number
+  remainingTokensThisWeek: number
+  remainingTokensThisMonth: number
 }
 
 export interface TopUserUsage {

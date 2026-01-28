@@ -27,16 +27,27 @@ public class TokenUsageStatsResponse {
     private List<DailyUsage> dailyUsage;
     private List<ModelUsage> modelUsage;
 
-    // Limits and remaining quota
-    private Long dailyLimit;
-    private Long weeklyLimit;
-    private Long monthlyLimit;
+    // Request limits (Groq Free Tier: 14,400/day)
+    private Long dailyRequestLimit;
+    private Long weeklyRequestLimit;
+    private Long monthlyRequestLimit;
+    private Long requestsToday;
+    private Long requestsThisWeek;
+    private Long requestsThisMonth;
+    private Long remainingRequestsToday;
+    private Long remainingRequestsThisWeek;
+    private Long remainingRequestsThisMonth;
+
+    // Token limits (for monitoring)
+    private Long dailyTokenLimit;
+    private Long weeklyTokenLimit;
+    private Long monthlyTokenLimit;
     private Long tokensToday;
     private Long tokensThisWeek;
     private Long tokensThisMonth;
-    private Long remainingToday;
-    private Long remainingThisWeek;
-    private Long remainingThisMonth;
+    private Long remainingTokensToday;
+    private Long remainingTokensThisWeek;
+    private Long remainingTokensThisMonth;
 
     @Data
     @Builder

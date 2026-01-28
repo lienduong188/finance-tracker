@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
-import { MessageCircle, X, Send, Trash2, Loader2 } from "lucide-react"
+import { MessageCircle, X, Send, Trash2, Loader2, AlertTriangle } from "lucide-react"
 import { Button, Input, Card } from "@/components/ui"
 import { chatApi } from "@/api"
 import { cn, formatRelativeTime } from "@/lib/utils"
-import type { ChatResponse } from "@/types"
+import type { ChatResponse, ApiError } from "@/types"
 
 interface ChatWidgetProps {
   isOpen?: boolean
@@ -29,6 +29,9 @@ export function ChatWidget({ isOpen: controlledIsOpen, onOpenChange }: ChatWidge
     }
   }
 
+  // Error state for displaying in chat
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+
   // Fetch chat history
   const { data: history, isLoading: historyLoading } = useQuery({
     queryKey: ["chat-history"],
@@ -42,10 +45,20 @@ export function ChatWidget({ isOpen: controlledIsOpen, onOpenChange }: ChatWidge
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["chat-history"] })
       setMessage("")
+      setErrorMessage(null)
     },
-    onError: (error: Error) => {
+    onError: (error: unknown) => {
       console.error("Chat error:", error)
-      alert(error.message || "Failed to send message")
+      // Extract error message from API response
+      const apiError = error as { response?: { data?: ApiError } }
+      const message = apiError?.response?.data?.message || (error as Error).message || t("chat.errorGeneric", "Có lỗi xảy ra")
+
+      // Check if it's a quota exceeded error
+      if (message.includes("quota") || message.includes("hạn mức") || message.includes("limit")) {
+        setErrorMessage(t("chat.quotaExceeded", "Đã hết hạn mức AI cho hôm nay. Vui lòng thử lại sau."))
+      } else {
+        setErrorMessage(message)
+      }
     },
   })
 
@@ -181,6 +194,22 @@ export function ChatWidget({ isOpen: controlledIsOpen, onOpenChange }: ChatWidge
                       <span className="text-sm text-muted-foreground">
                         {t("chat.thinking", "Đang suy nghĩ...")}
                       </span>
+                    </div>
+                  </div>
+                )}
+                {errorMessage && (
+                  <div className="flex justify-start">
+                    <div className="flex items-start gap-2 rounded-2xl bg-red-100 px-3 py-2 text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                      <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+                      <div>
+                        <p className="text-sm font-medium">{errorMessage}</p>
+                        <button
+                          onClick={() => setErrorMessage(null)}
+                          className="mt-1 text-xs underline hover:no-underline"
+                        >
+                          {t("chat.dismissError", "Đóng")}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}
