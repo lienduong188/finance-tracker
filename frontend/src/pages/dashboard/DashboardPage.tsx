@@ -263,7 +263,7 @@ export function DashboardPage() {
       {/* Exchange Rates & Upcoming Transactions */}
       <div className="grid gap-4 md:gap-6 lg:grid-cols-3">
         {/* Exchange Rates */}
-        <ExchangeRateCard baseCurrency={currency} />
+        <ExchangeRateCard baseCurrency="USD" />
 
         {/* Upcoming Recurring Transactions */}
         <Card className="lg:col-span-2">
