@@ -10,6 +10,7 @@ interface ExchangeRateCardProps {
 }
 
 const CURRENCIES = ["VND", "JPY", "USD", "EUR"]
+const DISPLAY_CURRENCIES = ["VND", "JPY", "EUR"] // Order for rate list display
 
 export function ExchangeRateCard({ baseCurrency = "USD" }: ExchangeRateCardProps) {
   const { t } = useTranslation()
@@ -118,19 +119,23 @@ export function ExchangeRateCard({ baseCurrency = "USD" }: ExchangeRateCardProps
               <div key={i} className="h-10 animate-pulse rounded-lg bg-muted" />
             ))}
           </div>
-        ) : data && Object.keys(data.rates).length > 0 ? (
+        ) : data ? (
           <div className="space-y-2">
-            {Object.entries(data.rates).map(([currency, rate]) => (
-              <div
-                key={currency}
-                className="flex items-center justify-between rounded-lg border p-2.5"
-              >
-                <span className="font-medium">{currency}</span>
-                <span className="font-mono text-sm">
-                  {formatRate(rate, currency)}
-                </span>
-              </div>
-            ))}
+            {DISPLAY_CURRENCIES.map((currency) => {
+              const rate = data.rates[currency]
+              if (rate === undefined) return null
+              return (
+                <div
+                  key={currency}
+                  className="flex items-center justify-between rounded-lg border p-2.5"
+                >
+                  <span className="font-medium">{currency}</span>
+                  <span className="font-mono text-sm">
+                    {formatRate(rate, currency)}
+                  </span>
+                </div>
+              )
+            })}
             <p className="text-xs text-muted-foreground">
               {t("exchangeRates.base")}: 1 {baseCurrency}
             </p>
