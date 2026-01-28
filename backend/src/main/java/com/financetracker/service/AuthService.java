@@ -270,6 +270,7 @@ public class AuthService {
 
         User user = verificationToken.getUser();
         user.setEmailVerified(true);
+        user.setEnabled(true);  // Activate user after email verification
         userRepository.save(user);
 
         verificationToken.setUsed(true);

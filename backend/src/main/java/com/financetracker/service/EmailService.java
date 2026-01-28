@@ -1,6 +1,7 @@
 package com.financetracker.service;
 
 import com.financetracker.entity.User;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,21 +25,31 @@ public class EmailService {
     @Autowired(required = false)
     public EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
+    }
+
+    @PostConstruct
+    public void init() {
         if (mailSender == null) {
-            log.warn("JavaMailSender not configured. Email sending will be disabled.");
+            log.warn("=== EMAIL SERVICE: JavaMailSender NOT configured. Emails will NOT be sent! ===");
+        } else {
+            log.info("=== EMAIL SERVICE: JavaMailSender configured successfully. From: {} ===", fromEmail);
         }
     }
 
     @Async
     public void sendVerificationEmail(User user, String token) {
+        log.info("Attempting to send verification email to: {}", user.getEmail());
+
         if (mailSender == null) {
-            log.warn("Cannot send verification email - JavaMailSender not configured. Token for {}: {}",
-                user.getEmail(), token);
+            log.warn("Cannot send verification email - JavaMailSender not configured.");
+            log.warn("Verification token for {}: {}", user.getEmail(), token);
+            log.warn("Manual verification link: {}?token={}", verificationBaseUrl, token);
             return;
         }
 
         try {
             String verificationLink = verificationBaseUrl + "?token=" + token;
+            log.info("Verification link: {}", verificationLink);
 
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom(fromEmail);
@@ -55,10 +66,12 @@ public class EmailService {
                 "Finance Tracker Team"
             );
 
+            log.info("Sending email from {} to {}", fromEmail, user.getEmail());
             mailSender.send(message);
-            log.info("Verification email sent to: {}", user.getEmail());
+            log.info("=== Verification email sent successfully to: {} ===", user.getEmail());
         } catch (Exception e) {
-            log.error("Failed to send verification email to: {}", user.getEmail(), e);
+            log.error("=== FAILED to send verification email to: {} ===", user.getEmail());
+            log.error("Error details: {}", e.getMessage(), e);
         }
     }
 }

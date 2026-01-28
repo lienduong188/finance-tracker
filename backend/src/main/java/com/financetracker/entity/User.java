@@ -36,7 +36,7 @@ public class User extends BaseEntity {
 
     @Column
     @Builder.Default
-    private Boolean enabled = true;
+    private Boolean enabled = false;  // Inactive until email verified
 
     @Column(name = "email_verified")
     @Builder.Default
