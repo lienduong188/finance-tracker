@@ -19,7 +19,6 @@ public class MailConfig {
     @Bean
     @ConditionalOnProperty(name = "spring.mail.host", matchIfMissing = false)
     public JavaMailSender javaMailSender(MailProperties mailProperties) {
-        // Check if SMTP is properly configured
         String host = mailProperties.getHost();
         String username = mailProperties.getUsername();
 
@@ -33,24 +32,43 @@ public class MailConfig {
             return null;
         }
 
+        int port = mailProperties.getPort();
+        boolean useSSL = (port == 465);
+
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
         mailSender.setHost(host);
-        mailSender.setPort(mailProperties.getPort());
+        mailSender.setPort(port);
         mailSender.setUsername(username);
         mailSender.setPassword(mailProperties.getPassword());
 
         Properties props = mailSender.getJavaMailProperties();
-        props.put("mail.transport.protocol", "smtp");
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.smtp.starttls.required", "true");
-        props.put("mail.smtp.connectiontimeout", "5000");
-        props.put("mail.smtp.timeout", "5000");
-        props.put("mail.smtp.writetimeout", "5000");
-        props.put("mail.debug", "true");  // Enable debug for troubleshooting
 
-        log.info("JavaMailSender configured - Host: {}, Port: {}, User: {}",
-            host, mailProperties.getPort(), username);
+        if (useSSL) {
+            // Port 465 - Use SMTPS (SSL)
+            props.put("mail.transport.protocol", "smtps");
+            props.put("mail.smtps.auth", "true");
+            props.put("mail.smtps.ssl.enable", "true");
+            props.put("mail.smtps.ssl.trust", host);
+            props.put("mail.smtps.connectiontimeout", "10000");
+            props.put("mail.smtps.timeout", "10000");
+            props.put("mail.smtps.writetimeout", "10000");
+            log.info("Using SMTPS (SSL) for port 465");
+        } else {
+            // Port 587 - Use SMTP with STARTTLS
+            props.put("mail.transport.protocol", "smtp");
+            props.put("mail.smtp.auth", "true");
+            props.put("mail.smtp.starttls.enable", "true");
+            props.put("mail.smtp.starttls.required", "true");
+            props.put("mail.smtp.connectiontimeout", "10000");
+            props.put("mail.smtp.timeout", "10000");
+            props.put("mail.smtp.writetimeout", "10000");
+            log.info("Using SMTP with STARTTLS for port {}", port);
+        }
+
+        props.put("mail.debug", "true");
+
+        log.info("JavaMailSender configured - Host: {}, Port: {}, User: {}, SSL: {}",
+            host, port, username, useSSL);
         return mailSender;
     }
 }
