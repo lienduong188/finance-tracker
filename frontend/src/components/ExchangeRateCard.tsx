@@ -1,8 +1,8 @@
 import { useState, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { RefreshCw, ArrowUpDown } from "lucide-react"
+import { ArrowUpDown } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, Input, Select } from "@/components/ui"
-import { useAllExchangeRates, useExchangeRate } from "@/hooks/useExchangeRates"
+import { useExchangeRate } from "@/hooks/useExchangeRates"
 import { formatCurrency } from "@/lib/utils"
 
 interface ExchangeRateCardProps {
@@ -12,9 +12,21 @@ interface ExchangeRateCardProps {
 const CURRENCIES = ["VND", "JPY", "USD", "EUR"]
 const DISPLAY_CURRENCIES = ["VND", "JPY", "EUR"] // Order for rate list display
 
+// Component to display a single rate item
+function RateItem({ from, to, formatRate }: { from: string; to: string; formatRate: (rate: number, currency: string) => string }) {
+  const { data, isLoading } = useExchangeRate(from, to)
+  if (isLoading) return <div className="h-10 animate-pulse rounded-lg bg-muted" />
+  if (!data) return null
+  return (
+    <div className="flex items-center justify-between rounded-lg border p-2.5">
+      <span className="font-medium">{to}</span>
+      <span className="font-mono text-sm">{formatRate(data.rate, to)}</span>
+    </div>
+  )
+}
+
 export function ExchangeRateCard({ baseCurrency = "USD" }: ExchangeRateCardProps) {
   const { t } = useTranslation()
-  const { data, isLoading, refetch, isFetching } = useAllExchangeRates(baseCurrency)
 
   // Converter state
   const [amount, setAmount] = useState<string>("1")
@@ -45,14 +57,6 @@ export function ExchangeRateCard({ baseCurrency = "USD" }: ExchangeRateCardProps
     <Card>
       <CardHeader className="flex flex-row items-center justify-between p-4">
         <CardTitle className="text-base">{t("exchangeRates.title")}</CardTitle>
-        <button
-          onClick={() => refetch()}
-          disabled={isFetching}
-          className="text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
-          title={t("exchangeRates.refresh")}
-        >
-          <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
-        </button>
       </CardHeader>
       <CardContent className="space-y-4 p-4 pt-0">
         {/* Quick Converter */}
@@ -113,34 +117,19 @@ export function ExchangeRateCard({ baseCurrency = "USD" }: ExchangeRateCardProps
         </div>
 
         {/* Rate List */}
-        {isLoading ? (
-          <div className="space-y-2">
-            {[1, 2].map((i) => (
-              <div key={i} className="h-10 animate-pulse rounded-lg bg-muted" />
-            ))}
-          </div>
-        ) : data ? (
-          <div className="space-y-2">
-            {DISPLAY_CURRENCIES.map((currency) => {
-              const rate = data.rates[currency]
-              if (rate === undefined) return null
-              return (
-                <div
-                  key={currency}
-                  className="flex items-center justify-between rounded-lg border p-2.5"
-                >
-                  <span className="font-medium">{currency}</span>
-                  <span className="font-mono text-sm">
-                    {formatRate(rate, currency)}
-                  </span>
-                </div>
-              )
-            })}
-            <p className="text-xs text-muted-foreground">
-              {t("exchangeRates.base")}: 1 {baseCurrency}
-            </p>
-          </div>
-        ) : null}
+        <div className="space-y-2">
+          {DISPLAY_CURRENCIES.map((currency) => (
+            <RateItem
+              key={currency}
+              from={baseCurrency}
+              to={currency}
+              formatRate={formatRate}
+            />
+          ))}
+          <p className="text-xs text-muted-foreground">
+            {t("exchangeRates.base")}: 1 {baseCurrency}
+          </p>
+        </div>
       </CardContent>
     </Card>
   )
