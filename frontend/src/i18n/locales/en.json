@@ -24,6 +24,7 @@
     "password": "Password",
     "confirmPassword": "Confirm password",
     "fullName": "Full name",
+    "fullNamePlaceholder": "John Doe",
     "forgotPassword": "Forgot password?",
     "noAccount": "Don't have an account?",
     "hasAccount": "Already have an account?",
@@ -65,7 +66,8 @@
     "copied": "Copied!",
     "passwordRequirements": "At least 8 characters, including uppercase, lowercase, and number",
     "showPassword": "Show password",
-    "hidePassword": "Hide password"
+    "hidePassword": "Hide password",
+    "verificationEmailSent": "Verification email sent!"
   },
   "validation": {
     "required": "This field is required",

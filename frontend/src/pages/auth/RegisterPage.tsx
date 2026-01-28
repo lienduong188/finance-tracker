@@ -100,8 +100,8 @@ export function RegisterPage() {
     setResendLoading(true)
     setResendMessage(null)
     try {
-      const response = await authApi.resendVerification(registeredEmail)
-      setResendMessage(response.message)
+      await authApi.resendVerification(registeredEmail)
+      setResendMessage(t("auth.verificationEmailSent"))
     } catch {
       setResendMessage(t("auth.registerFailed"))
     } finally {
@@ -177,7 +177,7 @@ export function RegisterPage() {
               <Label htmlFor="fullName" required>{t("auth.fullName")}</Label>
               <Input
                 id="fullName"
-                placeholder="Nguyen Van A"
+                placeholder={t("auth.fullNamePlaceholder")}
                 error={errors.fullName?.message}
                 {...register("fullName")}
               />

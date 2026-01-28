@@ -24,6 +24,7 @@
     "password": "Mật khẩu",
     "confirmPassword": "Xác nhận mật khẩu",
     "fullName": "Họ và tên",
+    "fullNamePlaceholder": "Nguyễn Văn A",
     "forgotPassword": "Quên mật khẩu?",
     "noAccount": "Chưa có tài khoản?",
     "hasAccount": "Đã có tài khoản?",
@@ -65,7 +66,8 @@
     "copied": "Đã sao chép!",
     "passwordRequirements": "Ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường và số",
     "showPassword": "Hiện mật khẩu",
-    "hidePassword": "Ẩn mật khẩu"
+    "hidePassword": "Ẩn mật khẩu",
+    "verificationEmailSent": "Đã gửi email xác nhận!"
   },
   "validation": {
     "required": "Trường này là bắt buộc",
