@@ -43,24 +43,30 @@ public class InvitationService {
             throw new ApiException("Chỉ Owner hoặc Admin mới có thể mời thành viên", HttpStatus.FORBIDDEN);
         }
 
-        // Check if email is already a member
-        Optional<User> inviteeOpt = userRepository.findByEmail(request.getEmail());
-        if (inviteeOpt.isPresent()) {
-            if (familyMemberRepository.existsByFamilyIdAndUserId(family.getId(), inviteeOpt.get().getId())) {
-                throw new ApiException("Người dùng đã là thành viên của gia đình", HttpStatus.BAD_REQUEST);
-            }
+        // Check if email exists in system - user must be registered
+        User invitee = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new ApiException("Không tìm thấy người dùng với email này. Người được mời phải đăng ký tài khoản trước.", HttpStatus.NOT_FOUND));
+
+        // Cannot invite yourself
+        if (invitee.getId().equals(userId)) {
+            throw new ApiException("Bạn không thể mời chính mình", HttpStatus.BAD_REQUEST);
+        }
+
+        // Check if already a member
+        if (familyMemberRepository.existsByFamilyIdAndUserId(family.getId(), invitee.getId())) {
+            throw new ApiException("Người dùng đã là thành viên của nhóm", HttpStatus.BAD_REQUEST);
         }
 
         // Check if there's already a pending invitation
         if (invitationRepository.existsByFamilyIdAndInviteeEmailAndStatus(family.getId(), request.getEmail(), InvitationStatus.PENDING)) {
-            throw new ApiException("Đã có lời mời đang chờ cho email này", HttpStatus.BAD_REQUEST);
+            throw new ApiException("Đã có lời mời đang chờ cho người dùng này", HttpStatus.BAD_REQUEST);
         }
 
         Invitation invitation = Invitation.builder()
                 .family(family)
                 .inviter(inviter)
                 .inviteeEmail(request.getEmail())
-                .invitee(inviteeOpt.orElse(null))
+                .invitee(invitee)
                 .role(request.getRole() != null ? request.getRole() : FamilyRole.MEMBER)
                 .status(InvitationStatus.PENDING)
                 .token(UUID.randomUUID().toString())

@@ -67,7 +67,7 @@ export default function InviteMemberModal({ isOpen, onClose, familyId }: InviteM
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Email *</label>
+            <label className="block text-sm font-medium mb-1">Email người dùng *</label>
             <Input
               {...register("email")}
               type="email"
@@ -76,6 +76,9 @@ export default function InviteMemberModal({ isOpen, onClose, familyId }: InviteM
             {errors.email && (
               <p className="text-sm text-destructive mt-1">{errors.email.message}</p>
             )}
+            <p className="text-xs text-muted-foreground mt-1">
+              Người được mời phải đã có tài khoản trong ứng dụng
+            </p>
           </div>
 
           <div>
