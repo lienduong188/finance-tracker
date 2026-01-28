@@ -27,6 +27,17 @@ public class TokenUsageStatsResponse {
     private List<DailyUsage> dailyUsage;
     private List<ModelUsage> modelUsage;
 
+    // Limits and remaining quota
+    private Long dailyLimit;
+    private Long weeklyLimit;
+    private Long monthlyLimit;
+    private Long tokensToday;
+    private Long tokensThisWeek;
+    private Long tokensThisMonth;
+    private Long remainingToday;
+    private Long remainingThisWeek;
+    private Long remainingThisMonth;
+
     @Data
     @Builder
     @NoArgsConstructor

@@ -448,6 +448,16 @@ export interface TokenUsageStats {
   topUsers: TopUserUsage[]
   dailyUsage: DailyTokenUsage[]
   modelUsage: ModelUsage[]
+  // Limits and quota
+  dailyLimit: number
+  weeklyLimit: number
+  monthlyLimit: number
+  tokensToday: number
+  tokensThisWeek: number
+  tokensThisMonth: number
+  remainingToday: number
+  remainingThisWeek: number
+  remainingThisMonth: number
 }
 
 export interface TopUserUsage {

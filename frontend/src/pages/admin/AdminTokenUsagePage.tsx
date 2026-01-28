@@ -6,9 +6,40 @@ import {
   Calendar,
   MessageSquare,
   Cpu,
+  Gauge,
 } from "lucide-react"
 import { adminApi } from "@/api"
 import { Card } from "@/components/ui"
+
+function QuotaProgressBar({ used, limit, label }: { used: number; limit: number; label: string }) {
+  const percentage = limit > 0 ? Math.min((used / limit) * 100, 100) : 0
+  const remaining = Math.max(0, limit - used)
+  const isWarning = percentage >= 80
+  const isDanger = percentage >= 95
+
+  return (
+    <div className="space-y-2">
+      <div className="flex justify-between text-sm">
+        <span className="font-medium">{label}</span>
+        <span className={isDanger ? "text-red-600" : isWarning ? "text-yellow-600" : "text-muted-foreground"}>
+          {used.toLocaleString()} / {limit.toLocaleString()}
+        </span>
+      </div>
+      <div className="h-3 w-full overflow-hidden rounded-full bg-muted">
+        <div
+          className={`h-full transition-all ${
+            isDanger ? "bg-red-500" : isWarning ? "bg-yellow-500" : "bg-green-500"
+          }`}
+          style={{ width: `${percentage}%` }}
+        />
+      </div>
+      <div className="flex justify-between text-xs text-muted-foreground">
+        <span>Còn lại: {remaining.toLocaleString()} tokens</span>
+        <span>{percentage.toFixed(1)}%</span>
+      </div>
+    </div>
+  )
+}
 
 export function AdminTokenUsagePage() {
   const { data: stats, isLoading } = useQuery({
@@ -117,6 +148,31 @@ export function AdminTokenUsagePage() {
         <h1 className="text-2xl font-bold">Token Usage</h1>
         <p className="text-muted-foreground">Thống kê sử dụng AI Chatbot</p>
       </div>
+
+      {/* Quota / Limits Section */}
+      <Card className="p-4">
+        <div className="mb-4 flex items-center gap-2">
+          <Gauge className="h-5 w-5 text-primary" />
+          <h2 className="text-lg font-semibold">Hạn mức (Quota)</h2>
+        </div>
+        <div className="grid gap-6 md:grid-cols-3">
+          <QuotaProgressBar
+            used={stats?.tokensToday ?? 0}
+            limit={stats?.dailyLimit ?? 100000}
+            label="Hôm nay"
+          />
+          <QuotaProgressBar
+            used={stats?.tokensThisWeek ?? 0}
+            limit={stats?.weeklyLimit ?? 500000}
+            label="Tuần này"
+          />
+          <QuotaProgressBar
+            used={stats?.tokensThisMonth ?? 0}
+            limit={stats?.monthlyLimit ?? 2000000}
+            label="Tháng này"
+          />
+        </div>
+      </Card>
 
       {/* Token Stats */}
       <div>

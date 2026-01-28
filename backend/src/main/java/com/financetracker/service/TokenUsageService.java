@@ -6,11 +6,16 @@ import com.financetracker.entity.User;
 import com.financetracker.repository.TokenUsageRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.temporal.TemporalAdjusters;
+import java.time.DayOfWeek;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -21,6 +26,15 @@ import java.util.stream.Collectors;
 public class TokenUsageService {
 
     private final TokenUsageRepository tokenUsageRepository;
+
+    @Value("${ai.token-limits.daily:100000}")
+    private Long dailyLimit;
+
+    @Value("${ai.token-limits.weekly:500000}")
+    private Long weeklyLimit;
+
+    @Value("${ai.token-limits.monthly:2000000}")
+    private Long monthlyLimit;
 
     @Transactional
     public TokenUsage trackUsage(User user, Integer inputTokens, Integer outputTokens,
@@ -44,6 +58,53 @@ public class TokenUsageService {
     public Long getUserTotalTokens(UUID userId) {
         Long total = tokenUsageRepository.sumTotalTokensByUserId(userId);
         return total != null ? total : 0L;
+    }
+
+    /**
+     * Check if global quota allows the request
+     */
+    public boolean hasQuotaAvailable() {
+        Long tokensToday = getTokensToday();
+        Long tokensThisWeek = getTokensThisWeek();
+        Long tokensThisMonth = getTokensThisMonth();
+
+        return tokensToday < dailyLimit &&
+               tokensThisWeek < weeklyLimit &&
+               tokensThisMonth < monthlyLimit;
+    }
+
+    public Long getTokensToday() {
+        OffsetDateTime startOfDay = LocalDate.now().atStartOfDay().atOffset(ZoneOffset.UTC);
+        Long tokens = tokenUsageRepository.sumAllTotalTokensSince(startOfDay);
+        return tokens != null ? tokens : 0L;
+    }
+
+    public Long getTokensThisWeek() {
+        LocalDate today = LocalDate.now();
+        LocalDate startOfWeek = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        OffsetDateTime startOfWeekTime = startOfWeek.atStartOfDay().atOffset(ZoneOffset.UTC);
+        Long tokens = tokenUsageRepository.sumAllTotalTokensSince(startOfWeekTime);
+        return tokens != null ? tokens : 0L;
+    }
+
+    public Long getTokensThisMonth() {
+        LocalDate today = LocalDate.now();
+        LocalDate startOfMonth = today.withDayOfMonth(1);
+        OffsetDateTime startOfMonthTime = startOfMonth.atStartOfDay().atOffset(ZoneOffset.UTC);
+        Long tokens = tokenUsageRepository.sumAllTotalTokensSince(startOfMonthTime);
+        return tokens != null ? tokens : 0L;
+    }
+
+    public Long getRemainingToday() {
+        return Math.max(0, dailyLimit - getTokensToday());
+    }
+
+    public Long getRemainingThisWeek() {
+        return Math.max(0, weeklyLimit - getTokensThisWeek());
+    }
+
+    public Long getRemainingThisMonth() {
+        return Math.max(0, monthlyLimit - getTokensThisMonth());
     }
 
     public TokenUsageStatsResponse getAdminStats() {
@@ -98,6 +159,11 @@ public class TokenUsageService {
                         .build())
                 .collect(Collectors.toList());
 
+        // Current period usage
+        Long tokensToday = getTokensToday();
+        Long tokensThisWeek = getTokensThisWeek();
+        Long tokensThisMonth = getTokensThisMonth();
+
         return TokenUsageStatsResponse.builder()
                 .totalTokens(totalTokens != null ? totalTokens : 0L)
                 .totalInputTokens(totalInputTokens != null ? totalInputTokens : 0L)
@@ -113,6 +179,18 @@ public class TokenUsageService {
                 .topUsers(topUsers)
                 .dailyUsage(dailyUsage)
                 .modelUsage(modelUsage)
+                // Limits
+                .dailyLimit(dailyLimit)
+                .weeklyLimit(weeklyLimit)
+                .monthlyLimit(monthlyLimit)
+                // Current usage
+                .tokensToday(tokensToday)
+                .tokensThisWeek(tokensThisWeek)
+                .tokensThisMonth(tokensThisMonth)
+                // Remaining
+                .remainingToday(Math.max(0, dailyLimit - tokensToday))
+                .remainingThisWeek(Math.max(0, weeklyLimit - tokensThisWeek))
+                .remainingThisMonth(Math.max(0, monthlyLimit - tokensThisMonth))
                 .build();
     }
 }

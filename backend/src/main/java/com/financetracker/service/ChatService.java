@@ -49,6 +49,12 @@ public class ChatService {
             throw ApiException.badRequest("Groq API key is not configured");
         }
 
+        // Check global quota before processing
+        if (!tokenUsageService.hasQuotaAvailable()) {
+            String language = request.getLanguage() != null ? request.getLanguage() : "vi";
+            throw ApiException.badRequest(getQuotaExceededMessage(language));
+        }
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> ApiException.notFound("User"));
 
@@ -291,6 +297,14 @@ public class ChatService {
             case "en" -> "🔧 AI Assistant is currently under maintenance. We'll be back soon! Thank you for your patience.";
             case "ja" -> "🔧 AIアシスタントは現在メンテナンス中です。まもなく復旧いたします。ご理解のほどよろしくお願いいたします。";
             default -> "🔧 Trợ lý AI đang được bảo trì. Chúng tôi sẽ sớm hoạt động trở lại! Cảm ơn bạn đã kiên nhẫn.";
+        };
+    }
+
+    private String getQuotaExceededMessage(String language) {
+        return switch (language) {
+            case "en" -> "AI quota has been exceeded. Please try again later.";
+            case "ja" -> "AIの利用制限に達しました。後でもう一度お試しください。";
+            default -> "Đã hết hạn mức AI. Vui lòng thử lại sau.";
         };
     }
 

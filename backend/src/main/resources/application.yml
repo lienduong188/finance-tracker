@@ -55,6 +55,13 @@ groq:
   api-url: https://api.groq.com/openai/v1/chat/completions
   model: llama-3.3-70b-versatile
 
+# AI Token Limits (global)
+ai:
+  token-limits:
+    daily: ${AI_DAILY_LIMIT:100000}
+    weekly: ${AI_WEEKLY_LIMIT:500000}
+    monthly: ${AI_MONTHLY_LIMIT:2000000}
+
 # Exchange Rate Configuration
 exchange-rate:
   api-url: https://api.frankfurter.app
