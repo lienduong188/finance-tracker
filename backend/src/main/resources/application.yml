@@ -72,6 +72,7 @@ spring.mail:
 # App Configuration
 app:
   mail:
-    from: ${MAIL_FROM:noreply@financetracker.com}
+    from: ${MAIL_FROM:noreply@resend.dev}
+    resend-api-key: ${RESEND_API_KEY:}
     verification-url: ${APP_URL:http://localhost:5173}/verify-email
     verification-token-expiry-hours: 24
