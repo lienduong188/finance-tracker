@@ -126,6 +126,7 @@ public class BudgetService {
         budget.setName(request.getName());
         budget.setCategory(category);
         budget.setAmount(request.getAmount());
+        budget.setCurrency(request.getCurrency());
         budget.setPeriod(request.getPeriod());
         budget.setStartDate(request.getStartDate());
         budget.setEndDate(request.getEndDate());
