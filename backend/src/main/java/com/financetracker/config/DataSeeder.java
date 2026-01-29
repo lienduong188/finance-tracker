@@ -43,9 +43,14 @@ public class DataSeeder implements CommandLineRunner {
         // Seed recurring transactions for existing demo users if not already seeded
         seedRecurringForExistingUsers();
 
-        // Check if demo user already exists
-        if (userRepository.findByEmail("demo@example.com").isPresent()) {
-            log.info("Demo data already exists, skipping seeding");
+        // Check if demo user already exists - update password if needed
+        var existingDemo = userRepository.findByEmail("demo@example.com");
+        if (existingDemo.isPresent()) {
+            User demo = existingDemo.get();
+            demo.setPasswordHash(passwordEncoder.encode("demo1234"));
+            userRepository.save(demo);
+            log.info("Updated demo user password: demo@example.com / demo1234");
+            seedJapaneseUser(); // Still need to check/update Japanese user
             return;
         }
 
@@ -54,12 +59,12 @@ public class DataSeeder implements CommandLineRunner {
         // Create demo user
         User demoUser = User.builder()
                 .email("demo@example.com")
-                .passwordHash(passwordEncoder.encode("demo123"))
+                .passwordHash(passwordEncoder.encode("demo1234"))
                 .fullName("Demo User")
                 .defaultCurrency("VND")
                 .build();
         demoUser = userRepository.save(demoUser);
-        log.info("Created demo user: demo@example.com / demo123");
+        log.info("Created demo user: demo@example.com / demo1234");
 
         // Create accounts
         Account cashAccount = Account.builder()
@@ -312,14 +317,20 @@ public class DataSeeder implements CommandLineRunner {
         recurringTransactionRepository.save(dailyTransport);
 
         log.info("Demo data seeding completed!");
-        log.info("Demo account credentials: demo@example.com / demo123");
+        log.info("Demo account credentials: demo@example.com / demo1234");
 
         // Create Japanese demo user with JPY
         seedJapaneseUser();
     }
 
     private void seedJapaneseUser() {
-        if (userRepository.findByEmail("demo.jp@example.com").isPresent()) {
+        // Check if Japanese demo user already exists - update password if needed
+        var existingJpDemo = userRepository.findByEmail("demo.jp@example.com");
+        if (existingJpDemo.isPresent()) {
+            User jpDemo = existingJpDemo.get();
+            jpDemo.setPasswordHash(passwordEncoder.encode("demo1234"));
+            userRepository.save(jpDemo);
+            log.info("Updated Japanese demo user password: demo.jp@example.com / demo1234");
             return;
         }
 
@@ -328,12 +339,12 @@ public class DataSeeder implements CommandLineRunner {
         // Create Japanese demo user
         User jpUser = User.builder()
                 .email("demo.jp@example.com")
-                .passwordHash(passwordEncoder.encode("demo123"))
+                .passwordHash(passwordEncoder.encode("demo1234"))
                 .fullName("田中太郎")
                 .defaultCurrency("JPY")
                 .build();
         jpUser = userRepository.save(jpUser);
-        log.info("Created Japanese demo user: demo.jp@example.com / demo123");
+        log.info("Created Japanese demo user: demo.jp@example.com / demo1234");
 
         // Create JPY accounts
         Account jpCash = Account.builder()
@@ -709,7 +720,7 @@ public class DataSeeder implements CommandLineRunner {
         recurringTransactionRepository.save(spotifyCron);
 
         log.info("Japanese demo user seeding completed!");
-        log.info("Japanese demo credentials: demo.jp@example.com / demo123");
+        log.info("Japanese demo credentials: demo.jp@example.com / demo1234");
     }
 
     private void cleanupDuplicateCategories() {
