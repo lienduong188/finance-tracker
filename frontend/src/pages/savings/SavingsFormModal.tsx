@@ -3,14 +3,15 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useTranslation } from "react-i18next"
 import { savingsGoalsApi, familiesApi } from "@/api"
 import type { SavingsGoal } from "@/types"
 import { Button, Input, Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui"
 
-const savingsSchema = z.object({
-  name: z.string().min(1, "Tên mục tiêu là bắt buộc").max(100),
+const createSavingsSchema = (t: (key: string) => string) => z.object({
+  name: z.string().min(1, t("savings.validation.nameRequired")).max(100),
   description: z.string().optional(),
-  targetAmount: z.number().positive("Số tiền phải lớn hơn 0"),
+  targetAmount: z.number().positive(t("savings.validation.amountPositive")),
   currency: z.string().length(3).optional(),
   icon: z.string().optional(),
   color: z.string().optional(),
@@ -18,7 +19,7 @@ const savingsSchema = z.object({
   familyId: z.string().optional(),
 })
 
-type SavingsForm = z.infer<typeof savingsSchema>
+type SavingsForm = z.infer<ReturnType<typeof createSavingsSchema>>
 
 interface SavingsFormModalProps {
   isOpen: boolean
@@ -29,6 +30,7 @@ interface SavingsFormModalProps {
 const iconOptions = ["🎯", "✈️", "🎂", "🏠", "🚗", "💻", "📱", "🎓", "💍", "🏥"]
 
 export default function SavingsFormModal({ isOpen, onClose, goal }: SavingsFormModalProps) {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const isEditing = !!goal
 
@@ -36,6 +38,8 @@ export default function SavingsFormModal({ isOpen, onClose, goal }: SavingsFormM
     queryKey: ["families"],
     queryFn: familiesApi.getAll,
   })
+
+  const savingsSchema = createSavingsSchema(t)
 
   const {
     register,
@@ -122,7 +126,7 @@ export default function SavingsFormModal({ isOpen, onClose, goal }: SavingsFormM
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>{isEditing ? "Chỉnh sửa mục tiêu" : "Tạo mục tiêu mới"}</DialogTitle>
+          <DialogTitle>{isEditing ? t("savings.editGoal") : t("savings.newGoal")}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
@@ -144,21 +148,21 @@ export default function SavingsFormModal({ isOpen, onClose, goal }: SavingsFormM
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Tên mục tiêu *</label>
-            <Input {...register("name")} placeholder="Ví dụ: Du lịch Đà Nẵng" />
+            <label className="block text-sm font-medium mb-1">{t("savings.goalName")} *</label>
+            <Input {...register("name")} placeholder={t("savings.goalNamePlaceholder")} />
             {errors.name && (
               <p className="text-sm text-destructive mt-1">{errors.name.message}</p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Mô tả</label>
-            <Input {...register("description")} placeholder="Mô tả về mục tiêu" />
+            <label className="block text-sm font-medium mb-1">{t("savings.goalDescription")}</label>
+            <Input {...register("description")} placeholder={t("savings.goalDescriptionPlaceholder")} />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Số tiền mục tiêu *</label>
+              <label className="block text-sm font-medium mb-1">{t("savings.targetAmount")} *</label>
               <Input
                 {...register("targetAmount", { valueAsNumber: true })}
                 type="number"
@@ -169,7 +173,7 @@ export default function SavingsFormModal({ isOpen, onClose, goal }: SavingsFormM
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Tiền tệ</label>
+              <label className="block text-sm font-medium mb-1">{t("accounts.currency")}</label>
               <select {...register("currency")} className="w-full border rounded-md p-2">
                 <option value="VND">VND</option>
                 <option value="USD">USD</option>
@@ -179,15 +183,15 @@ export default function SavingsFormModal({ isOpen, onClose, goal }: SavingsFormM
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Ngày mục tiêu</label>
+            <label className="block text-sm font-medium mb-1">{t("savings.targetDate")}</label>
             <Input {...register("targetDate")} type="date" />
           </div>
 
           {!isEditing && families && families.length > 0 && (
             <div>
-              <label className="block text-sm font-medium mb-1">Nhóm (tùy chọn)</label>
+              <label className="block text-sm font-medium mb-1">{t("savings.group")}</label>
               <select {...register("familyId")} className="w-full border rounded-md p-2">
-                <option value="">Mục tiêu cá nhân</option>
+                <option value="">{t("savings.personalGoal")}</option>
                 {families.map((family) => (
                   <option key={family.id} value={family.id}>
                     {family.name}
@@ -195,17 +199,17 @@ export default function SavingsFormModal({ isOpen, onClose, goal }: SavingsFormM
                 ))}
               </select>
               <p className="text-xs text-muted-foreground mt-1">
-                Chọn nhóm nếu muốn tạo mục tiêu tiết kiệm chung
+                {t("savings.groupGoalHint")}
               </p>
             </div>
           )}
 
           <div className="flex justify-end gap-2 pt-4">
             <Button type="button" variant="outline" onClick={onClose}>
-              Hủy
+              {t("common.cancel")}
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Đang xử lý..." : isEditing ? "Cập nhật" : "Tạo"}
+              {isLoading ? t("common.loading") : isEditing ? t("common.update") : t("common.add")}
             </Button>
           </div>
         </form>

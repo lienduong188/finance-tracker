@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { useTranslation } from "react-i18next"
 import {
   ArrowLeft,
   Crown,
@@ -23,13 +24,8 @@ const roleIcons: Record<FamilyRole, React.ReactNode> = {
   MEMBER: <User className="w-4 h-4 text-gray-500" />,
 }
 
-const roleLabels: Record<FamilyRole, string> = {
-  OWNER: "Chủ sở hữu",
-  ADMIN: "Quản trị viên",
-  MEMBER: "Thành viên",
-}
-
 export default function FamilyDetailPage() {
+  const { t } = useTranslation()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -86,19 +82,19 @@ export default function FamilyDetailPage() {
   })
 
   const handleChangeRole = (member: FamilyMember, newRole: FamilyRole) => {
-    if (confirm(`Đổi role của ${member.fullName} thành ${roleLabels[newRole]}?`)) {
+    if (confirm(t("family.confirmChangeRole", { name: member.fullName, role: t(`family.roles.${newRole}`) }))) {
       updateRoleMutation.mutate({ memberId: member.id, role: newRole })
     }
   }
 
   const handleRemoveMember = (member: FamilyMember) => {
-    if (confirm(`Xóa ${member.fullName} khỏi nhóm?`)) {
+    if (confirm(t("family.confirmRemoveMember", { name: member.fullName }))) {
       removeMemberMutation.mutate(member.id)
     }
   }
 
   const handleLeave = () => {
-    if (confirm("Bạn có chắc muốn rời khỏi nhóm này?")) {
+    if (confirm(t("family.confirmLeave"))) {
       leaveMutation.mutate()
     }
   }
@@ -112,7 +108,7 @@ export default function FamilyDetailPage() {
   }
 
   if (!family) {
-    return <div>Không tìm thấy nhóm</div>
+    return <div>{t("family.notFound")}</div>
   }
 
   const canManageMembers = family.myRole === "OWNER" || family.myRole === "ADMIN"
@@ -126,12 +122,12 @@ export default function FamilyDetailPage() {
         </Button>
         <div className="flex-1">
           <h1 className="text-2xl font-bold">{family.name}</h1>
-          <p className="text-muted-foreground">{family.description || "Chưa có mô tả"}</p>
+          <p className="text-muted-foreground">{family.description || t("family.noDescription")}</p>
         </div>
         {family.myRole !== "OWNER" && (
           <Button variant="outline" onClick={handleLeave}>
             <LogOut className="w-4 h-4 mr-2" />
-            Rời nhóm
+            {t("family.leaveGroup")}
           </Button>
         )}
       </div>
@@ -139,11 +135,11 @@ export default function FamilyDetailPage() {
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-lg">Thành viên ({members?.length || 0})</CardTitle>
+            <CardTitle className="text-lg">{t("family.membersCount")} ({members?.length || 0})</CardTitle>
             {canManageMembers && (
               <Button size="sm" onClick={() => setIsInviteModalOpen(true)}>
                 <UserPlus className="w-4 h-4 mr-2" />
-                Mời
+                {t("family.invite")}
               </Button>
             )}
           </CardHeader>
@@ -162,16 +158,16 @@ export default function FamilyDetailPage() {
                       <p className="font-medium">
                         {member.fullName}
                         {member.userId === user?.id && (
-                          <span className="text-muted-foreground ml-1">(Bạn)</span>
+                          <span className="text-muted-foreground ml-1">({t("family.you")})</span>
                         )}
                       </p>
                       <p className="text-sm text-muted-foreground">{member.email}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1" title={roleLabels[member.role]}>
+                    <div className="flex items-center gap-1" title={t(`family.roles.${member.role}`)}>
                       {roleIcons[member.role]}
-                      <span className="text-sm">{roleLabels[member.role]}</span>
+                      <span className="text-sm">{t(`family.roles.${member.role}`)}</span>
                     </div>
                     {canManageMembers && member.userId !== user?.id && member.role !== "OWNER" && (
                       <div className="relative group">
@@ -186,7 +182,7 @@ export default function FamilyDetailPage() {
                                   className="w-full px-3 py-2 text-left text-sm hover:bg-muted"
                                   onClick={() => handleChangeRole(member, "ADMIN")}
                                 >
-                                  Thăng Admin
+                                  {t("family.promoteAdmin")}
                                 </button>
                               )}
                               {member.role === "ADMIN" && (
@@ -194,7 +190,7 @@ export default function FamilyDetailPage() {
                                   className="w-full px-3 py-2 text-left text-sm hover:bg-muted"
                                   onClick={() => handleChangeRole(member, "MEMBER")}
                                 >
-                                  Hạ Member
+                                  {t("family.demoteMember")}
                                 </button>
                               )}
                             </>
@@ -203,7 +199,7 @@ export default function FamilyDetailPage() {
                             className="w-full px-3 py-2 text-left text-sm text-destructive hover:bg-muted"
                             onClick={() => handleRemoveMember(member)}
                           >
-                            Xóa khỏi nhóm
+                            {t("family.removeFromGroup")}
                           </button>
                         </div>
                       </div>
@@ -218,7 +214,7 @@ export default function FamilyDetailPage() {
         {canManageMembers && pendingInvitations.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Lời mời đang chờ ({pendingInvitations.length})</CardTitle>
+              <CardTitle className="text-lg">{t("family.pendingInvitations")} ({pendingInvitations.length})</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -230,7 +226,7 @@ export default function FamilyDetailPage() {
                     <div>
                       <p className="font-medium">{invitation.inviteeEmail}</p>
                       <p className="text-sm text-muted-foreground">
-                        Role: {roleLabels[invitation.role]}
+                        Role: {t(`family.roles.${invitation.role}`)}
                       </p>
                     </div>
                     <Button

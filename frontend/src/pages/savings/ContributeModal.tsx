@@ -2,17 +2,18 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useTranslation } from "react-i18next"
 import { savingsGoalsApi, accountsApi } from "@/api"
 import { Button, Input, Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui"
 
-const contributeSchema = z.object({
-  amount: z.number().positive("Số tiền phải lớn hơn 0"),
-  accountId: z.string().min(1, "Chọn tài khoản nguồn"),
+const createContributeSchema = (t: (key: string) => string) => z.object({
+  amount: z.number().positive(t("savings.validation.amountPositive")),
+  accountId: z.string().min(1, t("savings.validation.accountRequired")),
   note: z.string().optional(),
   contributionDate: z.string().optional(),
 })
 
-type ContributeForm = z.infer<typeof contributeSchema>
+type ContributeForm = z.infer<ReturnType<typeof createContributeSchema>>
 
 interface ContributeModalProps {
   isOpen: boolean
@@ -37,6 +38,7 @@ export default function ContributeModal({
   goalName,
   currency,
 }: ContributeModalProps) {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
 
   const { data: accounts } = useQuery({
@@ -47,6 +49,8 @@ export default function ContributeModal({
   const filteredAccounts = accounts?.filter(
     (a) => a.isActive && a.currency === currency
   )
+
+  const contributeSchema = createContributeSchema(t)
 
   const {
     register,
@@ -85,7 +89,7 @@ export default function ContributeModal({
       onClose()
     },
     onError: (error: any) => {
-      alert(error.response?.data?.message || "Có lỗi xảy ra")
+      alert(error.response?.data?.message || t("errors.system.internal"))
     },
   })
 
@@ -97,16 +101,16 @@ export default function ContributeModal({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Đóng góp vào "{goalName}"</DialogTitle>
+          <DialogTitle>{t("savings.contributeTo", { name: goalName })}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Tài khoản nguồn *</label>
+            <label className="block text-sm font-medium mb-1">{t("savings.sourceAccount")} *</label>
             <select
               {...register("accountId")}
               className="w-full border rounded-md p-2"
             >
-              <option value="">Chọn tài khoản</option>
+              <option value="">{t("savings.selectAccount")}</option>
               {filteredAccounts?.map((account) => (
                 <option key={account.id} value={account.id}>
                   {account.name} - {formatCurrency(account.currentBalance, account.currency)}
@@ -118,13 +122,13 @@ export default function ContributeModal({
             )}
             {selectedAccount && (
               <p className="text-sm text-muted-foreground mt-1">
-                Số dư hiện tại: {formatCurrency(selectedAccount.currentBalance, selectedAccount.currency)}
+                {t("savings.currentBalance")}: {formatCurrency(selectedAccount.currentBalance, selectedAccount.currency)}
               </p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Số tiền đóng góp *</label>
+            <label className="block text-sm font-medium mb-1">{t("savings.contributeAmount")} *</label>
             <Input
               {...register("amount", { valueAsNumber: true })}
               type="number"
@@ -136,27 +140,27 @@ export default function ContributeModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Ngày đóng góp</label>
+            <label className="block text-sm font-medium mb-1">{t("savings.contributeDate")}</label>
             <Input {...register("contributionDate")} type="date" />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Ghi chú</label>
-            <Input {...register("note")} placeholder="Ghi chú (tùy chọn)" />
+            <label className="block text-sm font-medium mb-1">{t("transactions.description")}</label>
+            <Input {...register("note")} placeholder={t("savings.contributeNote")} />
           </div>
 
           <div className="bg-muted p-3 rounded-lg text-sm">
             <p className="text-muted-foreground">
-              Số tiền sẽ được trừ từ tài khoản nguồn và thêm vào mục tiêu tiết kiệm
+              {t("savings.contributeHint")}
             </p>
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
             <Button type="button" variant="outline" onClick={onClose}>
-              Hủy
+              {t("common.cancel")}
             </Button>
             <Button type="submit" disabled={contributeMutation.isPending}>
-              {contributeMutation.isPending ? "Đang xử lý..." : "Đóng góp"}
+              {contributeMutation.isPending ? t("common.loading") : t("savings.contribute")}
             </Button>
           </div>
         </form>

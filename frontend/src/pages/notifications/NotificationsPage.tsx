@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { useTranslation } from "react-i18next"
 import {
   Bell,
   Check,
@@ -15,8 +16,15 @@ import {
 import { notificationsApi, invitationsApi } from "@/api"
 import type { Notification } from "@/api/notifications"
 import { Button, Card, CardContent } from "@/components/ui"
-import { formatDistanceToNow } from "date-fns"
-import { vi } from "date-fns/locale"
+import { formatDistanceToNow, type Locale } from "date-fns"
+import { vi, enUS, ja } from "date-fns/locale"
+import i18n from "@/i18n"
+
+const localeMap: Record<string, Locale> = {
+  vi: vi,
+  en: enUS,
+  ja: ja,
+}
 
 const typeIcons: Record<string, React.ReactNode> = {
   INVITATION_RECEIVED: <UserPlus className="w-5 h-5 text-blue-500" />,
@@ -35,6 +43,7 @@ const typeIcons: Record<string, React.ReactNode> = {
 }
 
 export default function NotificationsPage() {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
 
   const { data: notificationsPage, isLoading } = useQuery({
@@ -71,7 +80,7 @@ export default function NotificationsPage() {
       queryClient.invalidateQueries({ queryKey: ["pending-invitations-count"] })
     },
     onError: (error: Error & { response?: { data?: { message?: string } } }) => {
-      alert(error.response?.data?.message || "Có lỗi xảy ra")
+      alert(error.response?.data?.message || t("errors.system.internal"))
     },
   })
 
@@ -98,8 +107,8 @@ export default function NotificationsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Thông báo</h1>
-          <p className="text-muted-foreground">Tất cả thông báo và lời mời của bạn</p>
+          <h1 className="text-2xl font-bold">{t("notifications.title")}</h1>
+          <p className="text-muted-foreground">{t("notifications.subtitle")}</p>
         </div>
         {hasUnread && (
           <Button
@@ -109,7 +118,7 @@ export default function NotificationsPage() {
             disabled={markAllAsReadMutation.isPending}
           >
             <CheckCheck className="w-4 h-4 mr-2" />
-            Đánh dấu tất cả đã đọc
+            {t("notifications.markAllRead")}
           </Button>
         )}
       </div>
@@ -119,7 +128,7 @@ export default function NotificationsPage() {
         <div className="space-y-3">
           <h2 className="text-lg font-semibold flex items-center gap-2">
             <Users className="w-5 h-5" />
-            Lời mời đang chờ ({pendingInvitations.length})
+            {t("notifications.pendingInvitations")} ({pendingInvitations.length})
           </h2>
           {pendingInvitations.map((invitation) => (
             <Card key={invitation.id} className="border-primary/50">
@@ -132,7 +141,7 @@ export default function NotificationsPage() {
                     <div>
                       <p className="font-medium">{invitation.familyName}</p>
                       <p className="text-sm text-muted-foreground">
-                        {invitation.inviterName} đã mời bạn tham gia
+                        {invitation.inviterName} {t("notifications.invitedToJoin")}
                       </p>
                       {invitation.message && (
                         <p className="mt-1 text-sm bg-muted p-2 rounded">"{invitation.message}"</p>
@@ -146,14 +155,14 @@ export default function NotificationsPage() {
                       onClick={() => declineInvitationMutation.mutate(invitation.token)}
                       disabled={declineInvitationMutation.isPending}
                     >
-                      Từ chối
+                      {t("notifications.decline")}
                     </Button>
                     <Button
                       size="sm"
                       onClick={() => acceptInvitationMutation.mutate(invitation.token)}
                       disabled={acceptInvitationMutation.isPending}
                     >
-                      Chấp nhận
+                      {t("notifications.accept")}
                     </Button>
                   </div>
                 </div>
@@ -167,16 +176,16 @@ export default function NotificationsPage() {
       <div className="space-y-3">
         <h2 className="text-lg font-semibold flex items-center gap-2">
           <Bell className="w-5 h-5" />
-          Tất cả thông báo
+          {t("notifications.allNotifications")}
         </h2>
 
         {notifications.length === 0 ? (
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12">
               <Bell className="w-12 h-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium mb-2">Không có thông báo</h3>
+              <h3 className="text-lg font-medium mb-2">{t("notifications.noNotifications")}</h3>
               <p className="text-muted-foreground text-center">
-                Bạn sẽ nhận được thông báo khi có hoạt động mới
+                {t("notifications.noNotificationsHint")}
               </p>
             </CardContent>
           </Card>
@@ -203,7 +212,9 @@ function NotificationItem({
   notification: Notification
   onMarkAsRead: () => void
 }) {
+  const { t } = useTranslation()
   const icon = typeIcons[notification.type] || <Bell className="w-5 h-5" />
+  const currentLocale = localeMap[i18n.language] || vi
 
   return (
     <Card className={notification.isRead ? "opacity-60" : ""}>
@@ -219,7 +230,7 @@ function NotificationItem({
                 <p className="text-sm text-muted-foreground">{notification.message}</p>
               </div>
               {!notification.isRead && (
-                <Button variant="ghost" size="sm" onClick={onMarkAsRead} title="Đánh dấu đã đọc">
+                <Button variant="ghost" size="sm" onClick={onMarkAsRead} title={t("notifications.markAsRead")}>
                   <Check className="w-4 h-4" />
                 </Button>
               )}
@@ -227,7 +238,7 @@ function NotificationItem({
             <p className="text-xs text-muted-foreground mt-1">
               {formatDistanceToNow(new Date(notification.createdAt), {
                 addSuffix: true,
-                locale: vi,
+                locale: currentLocale,
               })}
             </p>
           </div>

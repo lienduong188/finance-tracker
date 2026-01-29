@@ -1,17 +1,12 @@
 import { useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
+import { useTranslation } from "react-i18next"
 import { ArrowLeft, Plus, Users, User, TrendingUp } from "lucide-react"
 import { savingsGoalsApi } from "@/api"
 import type { SavingsGoalStatus } from "@/types"
 import { Button, Card, CardContent, CardHeader, CardTitle } from "@/components/ui"
 import ContributeModal from "./ContributeModal"
-
-const statusLabels: Record<SavingsGoalStatus, string> = {
-  ACTIVE: "Đang thực hiện",
-  COMPLETED: "Hoàn thành",
-  CANCELLED: "Đã hủy",
-}
 
 const statusColors: Record<SavingsGoalStatus, string> = {
   ACTIVE: "bg-blue-100 text-blue-800",
@@ -28,6 +23,7 @@ function formatCurrency(amount: number, currency: string) {
 }
 
 export default function SavingsDetailPage() {
+  const { t } = useTranslation()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [isContributeModalOpen, setIsContributeModalOpen] = useState(false)
@@ -59,7 +55,7 @@ export default function SavingsDetailPage() {
   }
 
   if (!goal) {
-    return <div>Không tìm thấy mục tiêu</div>
+    return <div>{t("savings.notFound")}</div>
   }
 
   return (
@@ -73,15 +69,15 @@ export default function SavingsDetailPage() {
             <span className="text-3xl">{goal.icon || "🎯"}</span>
             <h1 className="text-2xl font-bold">{goal.name}</h1>
             <span className={`text-xs px-2 py-1 rounded-full ${statusColors[goal.status]}`}>
-              {statusLabels[goal.status]}
+              {t(`savings.statuses.${goal.status}`)}
             </span>
           </div>
-          <p className="text-muted-foreground mt-1">{goal.description || "Chưa có mô tả"}</p>
+          <p className="text-muted-foreground mt-1">{goal.description || t("savings.noDescription")}</p>
         </div>
         {goal.status === "ACTIVE" && (
           <Button onClick={() => setIsContributeModalOpen(true)}>
             <Plus className="w-4 h-4 mr-2" />
-            Đóng góp
+            {t("savings.contribute")}
           </Button>
         )}
       </div>
@@ -91,13 +87,13 @@ export default function SavingsDetailPage() {
         <CardContent className="py-6">
           <div className="flex justify-between items-end mb-4">
             <div>
-              <p className="text-sm text-muted-foreground">Đã tiết kiệm</p>
+              <p className="text-sm text-muted-foreground">{t("savings.saved")}</p>
               <p className="text-3xl font-bold">
                 {formatCurrency(goal.currentAmount, goal.currency)}
               </p>
             </div>
             <div className="text-right">
-              <p className="text-sm text-muted-foreground">Mục tiêu</p>
+              <p className="text-sm text-muted-foreground">{t("savings.target")}</p>
               <p className="text-xl font-semibold">
                 {formatCurrency(goal.targetAmount, goal.currency)}
               </p>
@@ -110,9 +106,9 @@ export default function SavingsDetailPage() {
             />
           </div>
           <div className="flex justify-between mt-2 text-sm text-muted-foreground">
-            <span>{goal.progressPercentage.toFixed(1)}% hoàn thành</span>
+            <span>{goal.progressPercentage.toFixed(1)}% {t("savings.completed")}</span>
             <span>
-              Còn thiếu {formatCurrency(goal.targetAmount - goal.currentAmount, goal.currency)}
+              {t("savings.remaining")} {formatCurrency(goal.targetAmount - goal.currentAmount, goal.currency)}
             </span>
           </div>
         </CardContent>
@@ -125,7 +121,7 @@ export default function SavingsDetailPage() {
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <Users className="w-5 h-5" />
-                Người đóng góp ({contributors.length})
+                {t("savings.contributors")} ({contributors.length})
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -161,7 +157,7 @@ export default function SavingsDetailPage() {
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <TrendingUp className="w-5 h-5" />
-              Lịch sử đóng góp
+              {t("savings.contributionHistory")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -187,7 +183,7 @@ export default function SavingsDetailPage() {
               </div>
             ) : (
               <p className="text-muted-foreground text-center py-4">
-                Chưa có đóng góp nào
+                {t("savings.noContributions")}
               </p>
             )}
           </CardContent>
@@ -199,7 +195,7 @@ export default function SavingsDetailPage() {
         <CardContent className="py-4">
           <div className="flex flex-wrap gap-6 text-sm">
             <div>
-              <span className="text-muted-foreground">Loại: </span>
+              <span className="text-muted-foreground">{t("savings.type")}: </span>
               {goal.familyId ? (
                 <span className="flex items-center gap-1 inline-flex">
                   <Users className="w-4 h-4" />
@@ -208,18 +204,18 @@ export default function SavingsDetailPage() {
               ) : (
                 <span className="flex items-center gap-1 inline-flex">
                   <User className="w-4 h-4" />
-                  Cá nhân
+                  {t("savings.personal")}
                 </span>
               )}
             </div>
             {goal.targetDate && (
               <div>
-                <span className="text-muted-foreground">Ngày mục tiêu: </span>
+                <span className="text-muted-foreground">{t("savings.targetDate")}: </span>
                 {new Date(goal.targetDate).toLocaleDateString("vi-VN")}
               </div>
             )}
             <div>
-              <span className="text-muted-foreground">Ngày tạo: </span>
+              <span className="text-muted-foreground">{t("savings.createdDate")}: </span>
               {new Date(goal.createdAt).toLocaleDateString("vi-VN")}
             </div>
           </div>

@@ -1,17 +1,12 @@
 import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "react-router-dom"
+import { useTranslation } from "react-i18next"
 import { Plus, Target, Users, User, Trash2 } from "lucide-react"
 import { savingsGoalsApi } from "@/api"
 import type { SavingsGoal, SavingsGoalStatus } from "@/types"
 import { Button, Card, CardContent, CardHeader, CardTitle } from "@/components/ui"
 import SavingsFormModal from "./SavingsFormModal"
-
-const statusLabels: Record<SavingsGoalStatus, string> = {
-  ACTIVE: "Đang thực hiện",
-  COMPLETED: "Hoàn thành",
-  CANCELLED: "Đã hủy",
-}
 
 const statusColors: Record<SavingsGoalStatus, string> = {
   ACTIVE: "bg-blue-100 text-blue-800",
@@ -28,6 +23,7 @@ function formatCurrency(amount: number, currency: string) {
 }
 
 export default function SavingsPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -52,7 +48,7 @@ export default function SavingsPage() {
   }
 
   const handleDelete = (goal: SavingsGoal) => {
-    if (confirm(`Bạn có chắc muốn xóa mục tiêu "${goal.name}"?`)) {
+    if (confirm(t("savings.confirmDelete", { name: goal.name }))) {
       deleteMutation.mutate(goal.id)
     }
   }
@@ -78,12 +74,12 @@ export default function SavingsPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold">Mục tiêu tiết kiệm</h1>
-          <p className="text-muted-foreground">Theo dõi tiến độ tiết kiệm của bạn</p>
+          <h1 className="text-2xl font-bold">{t("savings.title")}</h1>
+          <p className="text-muted-foreground">{t("savings.subtitle")}</p>
         </div>
         <Button onClick={() => setIsModalOpen(true)}>
           <Plus className="w-4 h-4 mr-2" />
-          Tạo mục tiêu
+          {t("savings.addGoal")}
         </Button>
       </div>
 
@@ -93,21 +89,21 @@ export default function SavingsPage() {
           size="sm"
           onClick={() => setStatusFilter("ALL")}
         >
-          Tất cả
+          {t("common.all")}
         </Button>
         <Button
           variant={statusFilter === "ACTIVE" ? "default" : "outline"}
           size="sm"
           onClick={() => setStatusFilter("ACTIVE")}
         >
-          Đang thực hiện
+          {t("savings.statuses.ACTIVE")}
         </Button>
         <Button
           variant={statusFilter === "COMPLETED" ? "default" : "outline"}
           size="sm"
           onClick={() => setStatusFilter("COMPLETED")}
         >
-          Hoàn thành
+          {t("savings.statuses.COMPLETED")}
         </Button>
       </div>
 
@@ -115,13 +111,13 @@ export default function SavingsPage() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Target className="w-12 h-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">Chưa có mục tiêu nào</h3>
+            <h3 className="text-lg font-medium mb-2">{t("savings.noGoals")}</h3>
             <p className="text-muted-foreground text-center mb-4">
-              Tạo mục tiêu tiết kiệm để theo dõi tiến độ
+              {t("savings.noGoalsHint")}
             </p>
             <Button onClick={() => setIsModalOpen(true)}>
               <Plus className="w-4 h-4 mr-2" />
-              Tạo mục tiêu đầu tiên
+              {t("savings.createFirst")}
             </Button>
           </CardContent>
         </Card>
@@ -140,7 +136,7 @@ export default function SavingsPage() {
                     <CardTitle className="text-lg">{goal.name}</CardTitle>
                   </div>
                   <span className={`text-xs px-2 py-1 rounded-full ${statusColors[goal.status]}`}>
-                    {statusLabels[goal.status]}
+                    {t(`savings.statuses.${goal.status}`)}
                   </span>
                 </div>
               </CardHeader>
@@ -173,20 +169,20 @@ export default function SavingsPage() {
                     ) : (
                       <>
                         <User className="w-4 h-4" />
-                        Cá nhân
+                        {t("savings.personal")}
                       </>
                     )}
                   </span>
                   {goal.targetDate && (
                     <span>
-                      Hạn: {new Date(goal.targetDate).toLocaleDateString("vi-VN")}
+                      {t("savings.deadline")}: {new Date(goal.targetDate).toLocaleDateString("vi-VN")}
                     </span>
                   )}
                 </div>
 
                 <div className="flex gap-2 mt-4" onClick={(e) => e.stopPropagation()}>
                   <Button variant="outline" size="sm" onClick={() => handleEdit(goal)}>
-                    Sửa
+                    {t("common.edit")}
                   </Button>
                   <Button
                     variant="outline"

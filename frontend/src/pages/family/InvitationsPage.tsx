@@ -1,16 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { useTranslation } from "react-i18next"
 import { Mail, Check, X, Users } from "lucide-react"
 import { invitationsApi } from "@/api"
-import type { FamilyRole } from "@/types"
 import { Button, Card, CardContent } from "@/components/ui"
 
-const roleLabels: Record<FamilyRole, string> = {
-  OWNER: "Chủ sở hữu",
-  ADMIN: "Quản trị viên",
-  MEMBER: "Thành viên",
-}
-
 export default function InvitationsPage() {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
 
   const { data: invitations, isLoading } = useQuery({
@@ -25,7 +20,7 @@ export default function InvitationsPage() {
       queryClient.invalidateQueries({ queryKey: ["families"] })
     },
     onError: (error: any) => {
-      alert(error.response?.data?.message || "Có lỗi xảy ra")
+      alert(error.response?.data?.message || t("errors.system.internal"))
     },
   })
 
@@ -47,17 +42,17 @@ export default function InvitationsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Lời mời nhóm</h1>
-        <p className="text-muted-foreground">Các lời mời tham gia nhóm đang chờ xử lý</p>
+        <h1 className="text-2xl font-bold">{t("family.invitationsTitle")}</h1>
+        <p className="text-muted-foreground">{t("family.invitationsSubtitle")}</p>
       </div>
 
       {!invitations || invitations.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Mail className="w-12 h-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">Không có lời mời nào</h3>
+            <h3 className="text-lg font-medium mb-2">{t("family.noInvitations")}</h3>
             <p className="text-muted-foreground text-center">
-              Khi có ai đó mời bạn tham gia nhóm, lời mời sẽ xuất hiện ở đây
+              {t("family.noInvitationsHint")}
             </p>
           </CardContent>
         </Card>
@@ -74,10 +69,10 @@ export default function InvitationsPage() {
                     <div>
                       <h3 className="font-semibold text-lg">{invitation.familyName}</h3>
                       <p className="text-muted-foreground">
-                        Được mời bởi {invitation.inviterName} ({invitation.inviterEmail})
+                        {t("family.invitedBy")} {invitation.inviterName} ({invitation.inviterEmail})
                       </p>
                       <p className="text-sm text-muted-foreground mt-1">
-                        Role: {roleLabels[invitation.role]}
+                        Role: {t(`family.roles.${invitation.role}`)}
                       </p>
                       {invitation.message && (
                         <p className="mt-2 text-sm bg-muted p-2 rounded">
@@ -85,7 +80,7 @@ export default function InvitationsPage() {
                         </p>
                       )}
                       <p className="text-xs text-muted-foreground mt-2">
-                        Hết hạn: {new Date(invitation.expiresAt).toLocaleDateString("vi-VN")}
+                        {t("family.expiresAt")}: {new Date(invitation.expiresAt).toLocaleDateString("vi-VN")}
                       </p>
                     </div>
                   </div>
@@ -96,14 +91,14 @@ export default function InvitationsPage() {
                       disabled={declineMutation.isPending}
                     >
                       <X className="w-4 h-4 mr-1" />
-                      Từ chối
+                      {t("family.decline")}
                     </Button>
                     <Button
                       onClick={() => acceptMutation.mutate(invitation.token)}
                       disabled={acceptMutation.isPending}
                     >
                       <Check className="w-4 h-4 mr-1" />
-                      Chấp nhận
+                      {t("family.accept")}
                     </Button>
                   </div>
                 </div>

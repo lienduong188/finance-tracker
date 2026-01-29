@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { useTranslation } from "react-i18next"
 import { Plus, Users, Crown, Shield, User, Settings, Home, Briefcase, HelpCircle } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { familiesApi } from "@/api"
@@ -13,12 +14,6 @@ const roleIcons: Record<FamilyRole, React.ReactNode> = {
   MEMBER: <User className="w-4 h-4 text-gray-500" />,
 }
 
-const roleLabels: Record<FamilyRole, string> = {
-  OWNER: "Chủ sở hữu",
-  ADMIN: "Quản trị viên",
-  MEMBER: "Thành viên",
-}
-
 const groupTypeIcons: Record<GroupType, React.ReactNode> = {
   FAMILY: <Home className="w-4 h-4" />,
   FRIENDS: <Users className="w-4 h-4" />,
@@ -26,14 +21,8 @@ const groupTypeIcons: Record<GroupType, React.ReactNode> = {
   OTHER: <HelpCircle className="w-4 h-4" />,
 }
 
-const groupTypeLabels: Record<GroupType, string> = {
-  FAMILY: "Gia đình",
-  FRIENDS: "Bạn bè",
-  WORK: "Công việc",
-  OTHER: "Khác",
-}
-
 export default function FamilyPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -58,10 +47,10 @@ export default function FamilyPage() {
 
   const handleDelete = (family: Family) => {
     if (family.myRole !== "OWNER") {
-      alert("Chỉ chủ sở hữu mới có thể xóa nhóm")
+      alert(t("family.ownerOnly"))
       return
     }
-    if (confirm(`Bạn có chắc muốn xóa nhóm "${family.name}"?`)) {
+    if (confirm(t("family.confirmDelete", { name: family.name }))) {
       deleteMutation.mutate(family.id)
     }
   }
@@ -83,12 +72,12 @@ export default function FamilyPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold">Nhóm</h1>
-          <p className="text-muted-foreground">Quản lý tài chính chung với gia đình, bạn bè</p>
+          <h1 className="text-2xl font-bold">{t("family.title")}</h1>
+          <p className="text-muted-foreground">{t("family.subtitle")}</p>
         </div>
         <Button onClick={() => setIsModalOpen(true)}>
           <Plus className="w-4 h-4 mr-2" />
-          Tạo nhóm
+          {t("family.addGroup")}
         </Button>
       </div>
 
@@ -96,13 +85,13 @@ export default function FamilyPage() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Users className="w-12 h-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">Chưa có nhóm nào</h3>
+            <h3 className="text-lg font-medium mb-2">{t("family.noGroups")}</h3>
             <p className="text-muted-foreground text-center mb-4">
-              Tạo nhóm để quản lý tài chính chung với gia đình hoặc bạn bè
+              {t("family.noGroupsHint")}
             </p>
             <Button onClick={() => setIsModalOpen(true)}>
               <Plus className="w-4 h-4 mr-2" />
-              Tạo nhóm đầu tiên
+              {t("family.createFirst")}
             </Button>
           </CardContent>
         </Card>
@@ -117,25 +106,25 @@ export default function FamilyPage() {
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-2">
-                    <span className="text-muted-foreground" title={groupTypeLabels[family.type]}>
+                    <span className="text-muted-foreground" title={t(`family.types.${family.type}`)}>
                       {groupTypeIcons[family.type]}
                     </span>
                     <CardTitle className="text-lg">{family.name}</CardTitle>
                   </div>
-                  <div className="flex items-center gap-1" title={roleLabels[family.myRole]}>
+                  <div className="flex items-center gap-1" title={t(`family.roles.${family.myRole}`)}>
                     {roleIcons[family.myRole]}
                   </div>
                 </div>
-                <span className="text-xs text-muted-foreground">{groupTypeLabels[family.type]}</span>
+                <span className="text-xs text-muted-foreground">{t(`family.types.${family.type}`)}</span>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                  {family.description || "Chưa có mô tả"}
+                  {family.description || t("family.noDescription")}
                 </p>
                 <div className="flex justify-between items-center text-sm">
                   <span className="flex items-center gap-1">
                     <Users className="w-4 h-4" />
-                    {family.memberCount} thành viên
+                    {family.memberCount} {t("family.members")}
                   </span>
                   <span className="text-muted-foreground">{family.currency}</span>
                 </div>
@@ -152,7 +141,7 @@ export default function FamilyPage() {
                       className="text-destructive"
                       onClick={() => handleDelete(family)}
                     >
-                      Xóa
+                      {t("common.delete")}
                     </Button>
                   )}
                 </div>

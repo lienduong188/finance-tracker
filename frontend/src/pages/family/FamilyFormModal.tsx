@@ -3,25 +3,21 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useTranslation } from "react-i18next"
 import { familiesApi } from "@/api"
 import type { Family, GroupType } from "@/types"
 import { Button, Input, Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui"
 
-const familySchema = z.object({
-  name: z.string().min(1, "Tên nhóm là bắt buộc").max(100),
+const createFamilySchema = (t: (key: string) => string) => z.object({
+  name: z.string().min(1, t("family.validation.nameRequired")).max(100),
   type: z.enum(["FAMILY", "FRIENDS", "WORK", "OTHER"]),
   description: z.string().optional(),
-  currency: z.string().length(3, "Mã tiền tệ phải đúng 3 ký tự").optional(),
+  currency: z.string().length(3, t("family.validation.currencyLength")).optional(),
 })
 
-type FamilyForm = z.infer<typeof familySchema>
+type FamilyForm = z.infer<ReturnType<typeof createFamilySchema>>
 
-const groupTypeOptions: { value: GroupType; label: string }[] = [
-  { value: "FAMILY", label: "Gia đình" },
-  { value: "FRIENDS", label: "Bạn bè" },
-  { value: "WORK", label: "Công việc" },
-  { value: "OTHER", label: "Khác" },
-]
+const groupTypeKeys: GroupType[] = ["FAMILY", "FRIENDS", "WORK", "OTHER"]
 
 interface FamilyFormModalProps {
   isOpen: boolean
@@ -30,8 +26,11 @@ interface FamilyFormModalProps {
 }
 
 export default function FamilyFormModal({ isOpen, onClose, family }: FamilyFormModalProps) {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const isEditing = !!family
+
+  const familySchema = createFamilySchema(t)
 
   const {
     register,
@@ -96,23 +95,23 @@ export default function FamilyFormModal({ isOpen, onClose, family }: FamilyFormM
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{isEditing ? "Chỉnh sửa nhóm" : "Tạo nhóm mới"}</DialogTitle>
+          <DialogTitle>{isEditing ? t("family.editGroup") : t("family.newGroup")}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Tên nhóm *</label>
-            <Input {...register("name")} placeholder="Ví dụ: Gia đình Nguyễn, Hội bạn thân..." />
+            <label className="block text-sm font-medium mb-1">{t("family.groupName")} *</label>
+            <Input {...register("name")} placeholder={t("family.groupNamePlaceholder")} />
             {errors.name && (
               <p className="text-sm text-destructive mt-1">{errors.name.message}</p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Loại nhóm *</label>
+            <label className="block text-sm font-medium mb-1">{t("family.groupType")} *</label>
             <select {...register("type")} className="w-full border rounded-md p-2">
-              {groupTypeOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
+              {groupTypeKeys.map((type) => (
+                <option key={type} value={type}>
+                  {t(`family.types.${type}`)}
                 </option>
               ))}
             </select>
@@ -122,26 +121,26 @@ export default function FamilyFormModal({ isOpen, onClose, family }: FamilyFormM
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Mô tả</label>
-            <Input {...register("description")} placeholder="Mô tả về nhóm" />
+            <label className="block text-sm font-medium mb-1">{t("family.groupDescription")}</label>
+            <Input {...register("description")} placeholder={t("family.groupDescriptionPlaceholder")} />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Tiền tệ mặc định</label>
+            <label className="block text-sm font-medium mb-1">{t("family.defaultCurrency")}</label>
             <select {...register("currency")} className="w-full border rounded-md p-2">
-              <option value="VND">VND - Việt Nam Đồng</option>
+              <option value="VND">{t("currencies.VND")}</option>
               <option value="USD">USD - US Dollar</option>
               <option value="EUR">EUR - Euro</option>
-              <option value="JPY">JPY - Japanese Yen</option>
+              <option value="JPY">{t("currencies.JPY")}</option>
             </select>
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
             <Button type="button" variant="outline" onClick={onClose}>
-              Hủy
+              {t("common.cancel")}
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Đang xử lý..." : isEditing ? "Cập nhật" : "Tạo"}
+              {isLoading ? t("common.loading") : isEditing ? t("common.update") : t("common.add")}
             </Button>
           </div>
         </form>
