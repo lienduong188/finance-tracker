@@ -62,9 +62,10 @@ export function AdminCategoryFormModal({
   useEffect(() => {
     if (!isOpen) return
 
+    console.log("Edit category data:", category)
     setErrorMessage(null)
     if (category) {
-      reset({
+      const formData = {
         name: category.name,
         nameVi: category.nameVi || "",
         nameEn: category.nameEn || "",
@@ -72,7 +73,9 @@ export function AdminCategoryFormModal({
         type: category.type,
         icon: category.icon || "",
         color: category.color || "#3b82f6",
-      })
+      }
+      console.log("Reset form with:", formData)
+      reset(formData)
     } else {
       reset({
         name: "",
