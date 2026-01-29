@@ -53,31 +53,15 @@ public class EmailService {
             String verificationLink = verificationBaseUrl + "?token=" + token;
             log.info("Verification link: {}", verificationLink);
 
-            String htmlContent = String.format("""
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                    <h2 style="color: #333;">Xin chào %s,</h2>
-                    <p>Cảm ơn bạn đã đăng ký tài khoản Finance Tracker.</p>
-                    <p>Vui lòng click vào nút bên dưới để xác nhận email:</p>
-                    <p style="text-align: center; margin: 30px 0;">
-                        <a href="%s" style="background-color: #4F46E5; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">
-                            Xác nhận Email
-                        </a>
-                    </p>
-                    <p style="color: #666; font-size: 14px;">Hoặc copy link sau vào trình duyệt:</p>
-                    <p style="word-break: break-all; color: #4F46E5;">%s</p>
-                    <p style="color: #666; font-size: 14px;">Link này sẽ hết hạn sau 24 giờ.</p>
-                    <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
-                    <p style="color: #999; font-size: 12px;">Nếu bạn không đăng ký tài khoản này, vui lòng bỏ qua email này.</p>
-                    <p style="color: #999; font-size: 12px;">Finance Tracker Team</p>
-                </div>
-                """, user.getFullName(), verificationLink, verificationLink);
+            String locale = user.getLocale() != null ? user.getLocale() : "vi";
+            EmailContent content = getEmailContent(locale, user.getFullName(), verificationLink);
 
             // Build request body
             Map<String, Object> requestBody = new HashMap<>();
             requestBody.put("from", fromEmail);
             requestBody.put("to", List.of(user.getEmail()));
-            requestBody.put("subject", "Xác nhận email - Finance Tracker");
-            requestBody.put("html", htmlContent);
+            requestBody.put("subject", content.subject);
+            requestBody.put("html", content.html);
 
             // Build headers
             HttpHeaders headers = new HttpHeaders();
@@ -86,7 +70,7 @@ public class EmailService {
 
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
 
-            log.info("Sending email via Resend API from {} to {}", fromEmail, user.getEmail());
+            log.info("Sending email via Resend API from {} to {} (locale: {})", fromEmail, user.getEmail(), locale);
             ResponseEntity<String> response = restTemplate.exchange(
                 RESEND_API_URL,
                 HttpMethod.POST,
@@ -104,5 +88,84 @@ public class EmailService {
             log.error("=== FAILED to send verification email to: {} ===", user.getEmail());
             log.error("Error details: {}", e.getMessage(), e);
         }
+    }
+
+    private record EmailContent(String subject, String html) {}
+
+    private EmailContent getEmailContent(String locale, String fullName, String verificationLink) {
+        return switch (locale) {
+            case "ja" -> getJapaneseEmailContent(fullName, verificationLink);
+            case "en" -> getEnglishEmailContent(fullName, verificationLink);
+            default -> getVietnameseEmailContent(fullName, verificationLink);
+        };
+    }
+
+    private EmailContent getVietnameseEmailContent(String fullName, String verificationLink) {
+        String subject = "Xác nhận email - Finance Tracker";
+        String html = String.format("""
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #333;">Xin chào %s,</h2>
+                <p>Cảm ơn bạn đã đăng ký tài khoản Finance Tracker.</p>
+                <p>Vui lòng click vào nút bên dưới để xác nhận email:</p>
+                <p style="text-align: center; margin: 30px 0;">
+                    <a href="%s" style="background-color: #4F46E5; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                        Xác nhận Email
+                    </a>
+                </p>
+                <p style="color: #666; font-size: 14px;">Hoặc copy link sau vào trình duyệt:</p>
+                <p style="word-break: break-all; color: #4F46E5;">%s</p>
+                <p style="color: #666; font-size: 14px;">Link này sẽ hết hạn sau 24 giờ.</p>
+                <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+                <p style="color: #999; font-size: 12px;">Nếu bạn không đăng ký tài khoản này, vui lòng bỏ qua email này.</p>
+                <p style="color: #999; font-size: 12px;">Finance Tracker Team</p>
+            </div>
+            """, fullName, verificationLink, verificationLink);
+        return new EmailContent(subject, html);
+    }
+
+    private EmailContent getEnglishEmailContent(String fullName, String verificationLink) {
+        String subject = "Verify your email - Finance Tracker";
+        String html = String.format("""
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #333;">Hello %s,</h2>
+                <p>Thank you for registering for a Finance Tracker account.</p>
+                <p>Please click the button below to verify your email:</p>
+                <p style="text-align: center; margin: 30px 0;">
+                    <a href="%s" style="background-color: #4F46E5; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                        Verify Email
+                    </a>
+                </p>
+                <p style="color: #666; font-size: 14px;">Or copy the following link into your browser:</p>
+                <p style="word-break: break-all; color: #4F46E5;">%s</p>
+                <p style="color: #666; font-size: 14px;">This link will expire in 24 hours.</p>
+                <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+                <p style="color: #999; font-size: 12px;">If you did not register for this account, please ignore this email.</p>
+                <p style="color: #999; font-size: 12px;">Finance Tracker Team</p>
+            </div>
+            """, fullName, verificationLink, verificationLink);
+        return new EmailContent(subject, html);
+    }
+
+    private EmailContent getJapaneseEmailContent(String fullName, String verificationLink) {
+        String subject = "メール認証 - Finance Tracker";
+        String html = String.format("""
+            <div style="font-family: 'Hiragino Sans', 'Meiryo', Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #333;">%s 様</h2>
+                <p>Finance Trackerへのご登録ありがとうございます。</p>
+                <p>下のボタンをクリックして、メールアドレスを認証してください：</p>
+                <p style="text-align: center; margin: 30px 0;">
+                    <a href="%s" style="background-color: #4F46E5; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                        メールを認証する
+                    </a>
+                </p>
+                <p style="color: #666; font-size: 14px;">または、以下のリンクをブラウザにコピーしてください：</p>
+                <p style="word-break: break-all; color: #4F46E5;">%s</p>
+                <p style="color: #666; font-size: 14px;">このリンクは24時間後に有効期限が切れます。</p>
+                <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+                <p style="color: #999; font-size: 12px;">このアカウントを登録していない場合は、このメールを無視してください。</p>
+                <p style="color: #999; font-size: 12px;">Finance Tracker チーム</p>
+            </div>
+            """, fullName, verificationLink, verificationLink);
+        return new EmailContent(subject, html);
     }
 }

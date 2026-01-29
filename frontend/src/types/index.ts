@@ -22,6 +22,7 @@ export interface RegisterRequest {
   password: string
   fullName: string
   defaultCurrency?: string
+  locale?: string
 }
 
 export interface AuthResponse {

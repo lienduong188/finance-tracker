@@ -62,6 +62,7 @@ public class AuthService {
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .fullName(request.getFullName())
                 .defaultCurrency(request.getDefaultCurrency() != null ? request.getDefaultCurrency() : "VND")
+                .locale(request.getLocale() != null ? request.getLocale() : "vi")
                 .emailVerified(false)
                 .build();
 

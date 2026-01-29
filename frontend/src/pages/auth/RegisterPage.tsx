@@ -12,7 +12,7 @@ import { VALIDATION, PASSWORD_REGEX } from "@/lib/validation"
 import { generateSecurePassword, copyToClipboard } from "@/lib/password-generator"
 
 export function RegisterPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { register: registerUser, isAuthenticated } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -79,6 +79,7 @@ export function RegisterPage() {
         password: data.password,
         fullName: data.fullName,
         defaultCurrency: data.defaultCurrency,
+        locale: i18n.language,
       })
       setRegisteredEmail(data.email)
       setRegistrationSuccess(true)

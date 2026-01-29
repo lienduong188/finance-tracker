@@ -29,6 +29,10 @@ public class User extends BaseEntity {
     @Builder.Default
     private String defaultCurrency = "VND";
 
+    @Column(length = 10)
+    @Builder.Default
+    private String locale = "vi";
+
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
     @Builder.Default

@@ -29,4 +29,7 @@ public class RegisterRequest {
 
     @Size(min = 3, max = 3, message = "Currency must be 3 characters")
     private String defaultCurrency = "VND";
+
+    @Size(max = 10, message = "Locale must not exceed 10 characters")
+    private String locale = "vi";
 }
