@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react"
+import { useState, useRef, useEffect, type ReactNode } from "react"
 import { Info } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -20,6 +20,26 @@ export function Tooltip({
   showIcon = true,
 }: TooltipProps) {
   const [isVisible, setIsVisible] = useState(false)
+  const tooltipRef = useRef<HTMLDivElement>(null)
+
+  // Close tooltip when clicking outside (for mobile)
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+      if (tooltipRef.current && !tooltipRef.current.contains(event.target as Node)) {
+        setIsVisible(false)
+      }
+    }
+
+    if (isVisible) {
+      document.addEventListener("mousedown", handleClickOutside)
+      document.addEventListener("touchstart", handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+      document.removeEventListener("touchstart", handleClickOutside)
+    }
+  }, [isVisible])
 
   const positionClasses = {
     top: "bottom-full left-1/2 -translate-x-1/2 mb-2",
@@ -37,9 +57,11 @@ export function Tooltip({
 
   return (
     <div
+      ref={tooltipRef}
       className={cn("relative inline-flex items-center", className)}
       onMouseEnter={() => setIsVisible(true)}
       onMouseLeave={() => setIsVisible(false)}
+      onClick={() => setIsVisible(!isVisible)}
     >
       {children}
       {showIcon && (
