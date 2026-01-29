@@ -420,6 +420,7 @@ public class SavingsGoalService {
                 .accountName(contribution.getAccount().getName())
                 .transactionId(contribution.getTransaction() != null ? contribution.getTransaction().getId() : null)
                 .amount(contribution.getAmount())
+                .currency(contribution.getAccount().getCurrency())
                 .note(contribution.getNote())
                 .contributionDate(contribution.getContributionDate())
                 .createdAt(contribution.getCreatedAt())

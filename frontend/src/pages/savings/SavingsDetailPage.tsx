@@ -206,7 +206,7 @@ export default function SavingsDetailPage() {
                     </div>
                     <div className="flex items-center gap-2">
                       <p className="font-semibold text-green-600">
-                        +{formatCurrency(contribution.amount, goal.currency)}
+                        +{formatCurrency(contribution.amount, contribution.currency)}
                       </p>
                       <button
                         onClick={() => handleDeleteClick(contribution)}

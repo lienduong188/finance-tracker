@@ -582,6 +582,7 @@ export interface SavingsContribution {
   accountName: string
   transactionId: string | null
   amount: number
+  currency: string
   note: string | null
   contributionDate: string
   createdAt: string

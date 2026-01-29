@@ -23,6 +23,7 @@ public class SavingsContributionResponse {
     private String accountName;
     private UUID transactionId;
     private BigDecimal amount;
+    private String currency;
     private String note;
     private LocalDate contributionDate;
     private OffsetDateTime createdAt;
