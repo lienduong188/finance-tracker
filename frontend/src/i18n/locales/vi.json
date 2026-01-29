@@ -641,6 +641,9 @@
       "COMPLETED": "Hoàn thành",
       "CANCELLED": "Đã hủy"
     },
+    "editContribution": "Chỉnh sửa đóng góp",
+    "deleteContribution": "Xóa đóng góp",
+    "deleteContributionConfirm": "Bạn có chắc muốn xóa khoản đóng góp {{amount}}? Số tiền sẽ được hoàn lại vào tài khoản nguồn.",
     "validation": {
       "nameRequired": "Tên mục tiêu là bắt buộc",
       "amountPositive": "Số tiền phải lớn hơn 0",

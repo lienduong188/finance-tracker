@@ -90,4 +90,24 @@ public class SavingsGoalController {
             @PathVariable UUID id) {
         return ResponseEntity.ok(savingsGoalService.getContributorsSummary(userDetails.getId(), id));
     }
+
+    @PutMapping("/{goalId}/contributions/{contributionId}")
+    @Operation(summary = "Cập nhật đóng góp")
+    public ResponseEntity<SavingsContributionResponse> updateContribution(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable UUID goalId,
+            @PathVariable UUID contributionId,
+            @Valid @RequestBody SavingsContributionUpdateRequest request) {
+        return ResponseEntity.ok(savingsGoalService.updateContribution(userDetails.getId(), goalId, contributionId, request));
+    }
+
+    @DeleteMapping("/{goalId}/contributions/{contributionId}")
+    @Operation(summary = "Xóa đóng góp")
+    public ResponseEntity<Void> deleteContribution(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable UUID goalId,
+            @PathVariable UUID contributionId) {
+        savingsGoalService.deleteContribution(userDetails.getId(), goalId, contributionId);
+        return ResponseEntity.noContent().build();
+    }
 }

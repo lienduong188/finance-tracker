@@ -641,6 +641,9 @@
       "COMPLETED": "達成",
       "CANCELLED": "キャンセル"
     },
+    "editContribution": "入金を編集",
+    "deleteContribution": "入金を削除",
+    "deleteContributionConfirm": "{{amount}}の入金を削除してもよろしいですか？金額は引き落とし口座に返金されます。",
     "validation": {
       "nameRequired": "目標名は必須です",
       "amountPositive": "金額は正の数である必要があります",

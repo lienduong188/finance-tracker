@@ -594,6 +594,11 @@ export interface SavingsContributionRequest {
   contributionDate?: string
 }
 
+export interface SavingsContributionUpdateRequest {
+  note?: string
+  contributionDate?: string
+}
+
 export interface ContributorSummary {
   userId: string
   userName: string

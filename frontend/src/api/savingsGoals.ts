@@ -4,6 +4,7 @@ import type {
   SavingsGoalRequest,
   SavingsContribution,
   SavingsContributionRequest,
+  SavingsContributionUpdateRequest,
   ContributorSummary,
 } from "@/types"
 
@@ -45,5 +46,14 @@ export const savingsGoalsApi = {
   getContributors: async (id: string): Promise<ContributorSummary[]> => {
     const response = await apiClient.get<ContributorSummary[]>(`/savings-goals/${id}/contributors`)
     return response.data
+  },
+
+  updateContribution: async (goalId: string, contributionId: string, data: SavingsContributionUpdateRequest): Promise<SavingsContribution> => {
+    const response = await apiClient.put<SavingsContribution>(`/savings-goals/${goalId}/contributions/${contributionId}`, data)
+    return response.data
+  },
+
+  deleteContribution: async (goalId: string, contributionId: string): Promise<void> => {
+    await apiClient.delete(`/savings-goals/${goalId}/contributions/${contributionId}`)
   },
 }

@@ -1,12 +1,13 @@
 import { useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
-import { ArrowLeft, Plus, Users, User, TrendingUp } from "lucide-react"
+import { ArrowLeft, Plus, Users, User, TrendingUp, Pencil, Trash2 } from "lucide-react"
 import { savingsGoalsApi } from "@/api"
-import type { SavingsGoalStatus } from "@/types"
-import { Button, Card, CardContent, CardHeader, CardTitle } from "@/components/ui"
+import type { SavingsGoalStatus, SavingsContribution } from "@/types"
+import { Button, Card, CardContent, CardHeader, CardTitle, ConfirmDialog } from "@/components/ui"
 import ContributeModal from "./ContributeModal"
+import EditContributionModal from "./EditContributionModal"
 
 const statusColors: Record<SavingsGoalStatus, string> = {
   ACTIVE: "bg-blue-100 text-blue-800",
@@ -26,7 +27,12 @@ export default function SavingsDetailPage() {
   const { t } = useTranslation()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
+
   const [isContributeModalOpen, setIsContributeModalOpen] = useState(false)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [selectedContribution, setSelectedContribution] = useState<SavingsContribution | null>(null)
 
   const { data: goal, isLoading: goalLoading } = useQuery({
     queryKey: ["savings-goal", id],
@@ -45,6 +51,36 @@ export default function SavingsDetailPage() {
     queryFn: () => savingsGoalsApi.getContributors(id!),
     enabled: !!id,
   })
+
+  const deleteMutation = useMutation({
+    mutationFn: () => savingsGoalsApi.deleteContribution(id!, selectedContribution!.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["savings-goal", id] })
+      queryClient.invalidateQueries({ queryKey: ["savings-contributions", id] })
+      queryClient.invalidateQueries({ queryKey: ["savings-contributors", id] })
+      queryClient.invalidateQueries({ queryKey: ["savings-goals"] })
+      queryClient.invalidateQueries({ queryKey: ["accounts"] })
+      setIsDeleteDialogOpen(false)
+      setSelectedContribution(null)
+    },
+    onError: (error: any) => {
+      alert(error.response?.data?.message || t("errors.system.internal"))
+    },
+  })
+
+  const handleEditClick = (contribution: SavingsContribution) => {
+    setSelectedContribution(contribution)
+    setIsEditModalOpen(true)
+  }
+
+  const handleDeleteClick = (contribution: SavingsContribution) => {
+    setSelectedContribution(contribution)
+    setIsDeleteDialogOpen(true)
+  }
+
+  const handleConfirmDelete = () => {
+    deleteMutation.mutate()
+  }
 
   if (goalLoading) {
     return (
@@ -166,18 +202,36 @@ export default function SavingsDetailPage() {
                 {contributions.map((contribution) => (
                   <div
                     key={contribution.id}
-                    className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
+                    className="flex items-center justify-between p-3 bg-muted/50 rounded-lg group"
                   >
-                    <div>
+                    <div className="flex-1">
                       <p className="font-medium">{contribution.userName}</p>
                       <p className="text-sm text-muted-foreground">
                         {new Date(contribution.contributionDate).toLocaleDateString("vi-VN")}
                         {contribution.note && ` • ${contribution.note}`}
                       </p>
                     </div>
-                    <p className="font-semibold text-green-600">
-                      +{formatCurrency(contribution.amount, goal.currency)}
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold text-green-600">
+                        +{formatCurrency(contribution.amount, goal.currency)}
+                      </p>
+                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={() => handleEditClick(contribution)}
+                          className="p-1 hover:bg-muted rounded"
+                          title={t("common.edit")}
+                        >
+                          <Pencil className="w-4 h-4 text-muted-foreground hover:text-foreground" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteClick(contribution)}
+                          className="p-1 hover:bg-muted rounded"
+                          title={t("common.delete")}
+                        >
+                          <Trash2 className="w-4 h-4 text-muted-foreground hover:text-destructive" />
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -228,6 +282,33 @@ export default function SavingsDetailPage() {
         goalId={id!}
         goalName={goal.name}
         currency={goal.currency}
+      />
+
+      <EditContributionModal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false)
+          setSelectedContribution(null)
+        }}
+        contribution={selectedContribution}
+        goalId={id!}
+        currency={goal.currency}
+      />
+
+      <ConfirmDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => {
+          setIsDeleteDialogOpen(false)
+          setSelectedContribution(null)
+        }}
+        onConfirm={handleConfirmDelete}
+        title={t("savings.deleteContribution")}
+        message={t("savings.deleteContributionConfirm", {
+          amount: selectedContribution ? formatCurrency(selectedContribution.amount, goal.currency) : ""
+        })}
+        confirmText={t("common.delete")}
+        isLoading={deleteMutation.isPending}
+        variant="danger"
       />
     </div>
   )

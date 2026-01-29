@@ -266,6 +266,82 @@ public class SavingsGoalService {
         return summaries;
     }
 
+    @Transactional
+    public SavingsContributionResponse updateContribution(UUID userId, UUID goalId, UUID contributionId, SavingsContributionUpdateRequest request) {
+        SavingsGoal goal = savingsGoalRepository.findById(goalId)
+                .orElseThrow(() -> new ApiException("Không tìm thấy mục tiêu", HttpStatus.NOT_FOUND));
+
+        validateGoalAccess(goal, userId);
+
+        SavingsContribution contribution = savingsContributionRepository.findById(contributionId)
+                .orElseThrow(() -> new ApiException("Không tìm thấy đóng góp", HttpStatus.NOT_FOUND));
+
+        if (!contribution.getGoal().getId().equals(goalId)) {
+            throw new ApiException("Đóng góp không thuộc mục tiêu này", HttpStatus.BAD_REQUEST);
+        }
+
+        // Only allow user to update their own contribution (or admin for family goal)
+        if (!contribution.getUser().getId().equals(userId)) {
+            validateGoalOwnership(goal, userId);
+        }
+
+        // Update fields
+        if (request.getNote() != null) {
+            contribution.setNote(request.getNote());
+        }
+        if (request.getContributionDate() != null) {
+            contribution.setContributionDate(request.getContributionDate());
+            // Also update the linked transaction date
+            if (contribution.getTransaction() != null) {
+                contribution.getTransaction().setTransactionDate(request.getContributionDate());
+                transactionRepository.save(contribution.getTransaction());
+            }
+        }
+
+        contribution = savingsContributionRepository.save(contribution);
+        return toSavingsContributionResponse(contribution);
+    }
+
+    @Transactional
+    public void deleteContribution(UUID userId, UUID goalId, UUID contributionId) {
+        SavingsGoal goal = savingsGoalRepository.findById(goalId)
+                .orElseThrow(() -> new ApiException("Không tìm thấy mục tiêu", HttpStatus.NOT_FOUND));
+
+        validateGoalAccess(goal, userId);
+
+        SavingsContribution contribution = savingsContributionRepository.findById(contributionId)
+                .orElseThrow(() -> new ApiException("Không tìm thấy đóng góp", HttpStatus.NOT_FOUND));
+
+        if (!contribution.getGoal().getId().equals(goalId)) {
+            throw new ApiException("Đóng góp không thuộc mục tiêu này", HttpStatus.BAD_REQUEST);
+        }
+
+        // Only allow user to delete their own contribution (or admin for family goal)
+        if (!contribution.getUser().getId().equals(userId)) {
+            validateGoalOwnership(goal, userId);
+        }
+
+        // Refund the account
+        Account account = contribution.getAccount();
+        account.setCurrentBalance(account.getCurrentBalance().add(contribution.getAmount()));
+        accountRepository.save(account);
+
+        // Delete the linked transaction
+        if (contribution.getTransaction() != null) {
+            transactionRepository.delete(contribution.getTransaction());
+        }
+
+        // Update goal current amount
+        goal.setCurrentAmount(goal.getCurrentAmount().subtract(contribution.getAmount()));
+        if (goal.getStatus() == SavingsGoalStatus.COMPLETED && !goal.isCompleted()) {
+            goal.setStatus(SavingsGoalStatus.ACTIVE);
+        }
+        savingsGoalRepository.save(goal);
+
+        // Delete contribution
+        savingsContributionRepository.delete(contribution);
+    }
+
     private void validateGoalAccess(SavingsGoal goal, UUID userId) {
         if (goal.getUser() != null && goal.getUser().getId().equals(userId)) {
             return; // Personal goal, user is owner

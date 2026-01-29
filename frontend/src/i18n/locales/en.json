@@ -641,6 +641,9 @@
       "COMPLETED": "Completed",
       "CANCELLED": "Cancelled"
     },
+    "editContribution": "Edit Contribution",
+    "deleteContribution": "Delete Contribution",
+    "deleteContributionConfirm": "Are you sure you want to delete this {{amount}} contribution? The amount will be refunded to the source account.",
     "validation": {
       "nameRequired": "Goal name is required",
       "amountPositive": "Amount must be positive",
