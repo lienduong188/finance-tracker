@@ -1,5 +1,6 @@
 package com.financetracker.dto.transaction;
 
+import com.financetracker.entity.PaymentType;
 import com.financetracker.entity.TransactionType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -35,5 +36,7 @@ public class TransactionResponse {
     private UUID toAccountId;
     private String toAccountName;
     private BigDecimal exchangeRate;
+    private PaymentType paymentType;
+    private UUID paymentPlanId;
     private OffsetDateTime createdAt;
 }

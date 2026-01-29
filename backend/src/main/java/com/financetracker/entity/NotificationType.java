@@ -11,6 +11,10 @@ public enum NotificationType {
     // Debts
     DEBT_DUE_SOON,             // 3 days before due
 
+    // Credit card payments
+    CREDIT_CARD_PAYMENT_DUE,   // Payment due soon
+    CREDIT_CARD_PAYMENT_OVERDUE, // Payment overdue
+
     // Budgets
     BUDGET_WARNING,            // 80% reached
     BUDGET_EXCEEDED,           // 100% exceeded

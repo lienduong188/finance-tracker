@@ -10,6 +10,7 @@ import { AccountsPage } from "./pages/accounts"
 import { TransactionsPage } from "./pages/transactions"
 import { BudgetsPage } from "./pages/budgets"
 import { RecurringTransactionsPage } from "./pages/recurring"
+import { CreditCardPlansPage } from "./pages/creditCardPlans"
 import { DebtsPage } from "./pages/debts"
 import { SettingsPage } from "./pages/settings"
 import { FamilyPage, FamilyDetailPage } from "./pages/family"
@@ -50,6 +51,7 @@ function App() {
               <Route path="/transactions" element={<TransactionsPage />} />
               <Route path="/budgets" element={<BudgetsPage />} />
               <Route path="/recurring" element={<RecurringTransactionsPage />} />
+              <Route path="/credit-card-plans" element={<CreditCardPlansPage />} />
               <Route path="/debts" element={<DebtsPage />} />
               <Route path="/family" element={<FamilyPage />} />
               <Route path="/family/:id" element={<FamilyDetailPage />} />

@@ -112,6 +112,7 @@ export interface CategoryRequest {
 
 // Transaction types
 export type TransactionType = "INCOME" | "EXPENSE" | "TRANSFER"
+export type PaymentType = "ONE_TIME" | "INSTALLMENT" | "REVOLVING"
 
 export interface Transaction {
   id: string
@@ -128,6 +129,8 @@ export interface Transaction {
   toAccountId: string | null
   toAccountName: string | null
   exchangeRate: number | null
+  paymentType: PaymentType | null
+  paymentPlanId: string | null
   createdAt: string
 }
 
@@ -627,4 +630,70 @@ export interface AccountPermissionRequest {
   userId: string
   canView?: boolean
   canTransact?: boolean
+}
+
+// Credit Card Payment Plan types
+export type PaymentPlanStatus = "ACTIVE" | "COMPLETED" | "CANCELLED"
+export type PaymentStatus = "PENDING" | "PAID" | "OVERDUE"
+
+export interface CreditCardPaymentPlan {
+  id: string
+  transactionId: string
+  transactionDescription: string | null
+  transactionDate: string
+  accountId: string
+  accountName: string
+  paymentType: PaymentType
+  originalAmount: number
+  totalAmountWithFee: number
+  remainingAmount: number
+  currency: string
+  startDate: string
+  nextPaymentDate: string | null
+  totalInstallments: number | null
+  completedInstallments: number | null
+  installmentAmount: number | null
+  installmentFeeRate: number | null
+  monthlyPayment: number | null
+  interestRate: number | null
+  status: PaymentPlanStatus
+  payments?: CreditCardPayment[]
+  createdAt: string
+}
+
+export interface CreditCardPayment {
+  id: string
+  paymentNumber: number
+  principalAmount: number
+  feeAmount: number
+  interestAmount: number
+  totalAmount: number
+  remainingAfter: number
+  dueDate: string
+  paymentDate: string | null
+  status: PaymentStatus
+}
+
+export interface CreditCardPaymentPlanRequest {
+  transactionId: string
+  paymentType: PaymentType
+  totalInstallments?: number
+  installmentFeeRate?: number
+  monthlyPayment?: number
+  interestRate?: number
+  startDate?: string
+}
+
+export interface UpcomingPayment {
+  paymentId: string
+  planId: string
+  paymentType: PaymentType
+  accountName: string
+  transactionDescription: string | null
+  paymentNumber: number
+  totalInstallments: number | null
+  totalAmount: number
+  currency: string
+  dueDate: string
+  status: PaymentStatus
 }

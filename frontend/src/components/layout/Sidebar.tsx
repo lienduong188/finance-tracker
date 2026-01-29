@@ -18,6 +18,7 @@ import {
   Bell,
   Banknote,
   ClipboardList,
+  CreditCard,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/context/AuthContext"
@@ -117,6 +118,7 @@ export function Sidebar({ isOpen = true, onClose, onOpenChat }: SidebarProps) {
                 { to: "/accounts", icon: Wallet, label: t("nav.accounts") },
                 { to: "/transactions", icon: ArrowLeftRight, label: t("nav.transactions") },
                 { to: "/recurring", icon: Repeat, label: t("nav.recurring") },
+                { to: "/credit-card-plans", icon: CreditCard, label: t("nav.creditCardPlans") },
               ]}
             />
 

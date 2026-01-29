@@ -285,6 +285,8 @@ public class TransactionService {
                 .toAccountId(transaction.getToAccount() != null ? transaction.getToAccount().getId() : null)
                 .toAccountName(transaction.getToAccount() != null ? transaction.getToAccount().getName() : null)
                 .exchangeRate(transaction.getExchangeRate())
+                .paymentType(transaction.getPaymentType())
+                .paymentPlanId(transaction.getPaymentPlan() != null ? transaction.getPaymentPlan().getId() : null)
                 .createdAt(transaction.getCreatedAt())
                 .build();
     }
