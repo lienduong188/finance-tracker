@@ -195,7 +195,7 @@ export default function SavingsFormModal({ isOpen, onClose, goal }: SavingsFormM
             <Input {...register("targetDate")} type="date" />
           </div>
 
-          {!isEditing && families && families.length > 0 && (
+          {families && families.length > 0 && (
             <div>
               <label className="block text-sm font-medium mb-1">{t("savings.group")}</label>
               <select {...register("familyId")} className="w-full border rounded-md p-2">

@@ -97,6 +97,9 @@ public class SavingsGoalService {
 
     @Transactional
     public SavingsGoalResponse updateGoal(UUID userId, UUID goalId, SavingsGoalRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ApiException("Không tìm thấy người dùng", HttpStatus.NOT_FOUND));
+
         SavingsGoal goal = savingsGoalRepository.findById(goalId)
                 .orElseThrow(() -> new ApiException("Không tìm thấy mục tiêu", HttpStatus.NOT_FOUND));
 
@@ -111,6 +114,25 @@ public class SavingsGoalService {
         goal.setIcon(request.getIcon());
         goal.setColor(request.getColor());
         goal.setTargetDate(request.getTargetDate());
+
+        // Handle family change
+        if (request.getFamilyId() != null) {
+            // Change to family goal
+            Family family = familyRepository.findById(request.getFamilyId())
+                    .orElseThrow(() -> new ApiException("Không tìm thấy gia đình", HttpStatus.NOT_FOUND));
+
+            // Verify user is member of the new family
+            if (!familyMemberRepository.existsByFamilyIdAndUserId(family.getId(), userId)) {
+                throw new ApiException("Bạn không phải thành viên của gia đình", HttpStatus.FORBIDDEN);
+            }
+
+            goal.setFamily(family);
+            goal.setUser(null);
+        } else {
+            // Change to personal goal
+            goal.setFamily(null);
+            goal.setUser(user);
+        }
 
         goal = savingsGoalRepository.save(goal);
         return toSavingsGoalResponse(goal);
