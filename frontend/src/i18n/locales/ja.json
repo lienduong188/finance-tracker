@@ -88,7 +88,11 @@
     "savings": "貯金",
     "notifications": "通知",
     "categories": "カテゴリー",
-    "settings": "設定"
+    "settings": "設定",
+    "group": {
+      "money": "お金の管理",
+      "planning": "計画"
+    }
   },
   "dashboard": {
     "title": "ダッシュボード",

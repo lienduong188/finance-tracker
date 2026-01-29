@@ -16,22 +16,14 @@ import {
   X,
   MessageCircle,
   Bell,
+  Banknote,
+  ClipboardList,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/context/AuthContext"
 import { LanguageSwitch } from "@/components/LanguageSwitch"
 import { invitationsApi, notificationsApi } from "@/api"
-
-const navItems = [
-  { to: "/", icon: LayoutDashboard, labelKey: "nav.dashboard" },
-  { to: "/accounts", icon: Wallet, labelKey: "nav.accounts" },
-  { to: "/transactions", icon: ArrowLeftRight, labelKey: "nav.transactions" },
-  { to: "/budgets", icon: PiggyBank, labelKey: "nav.budgets" },
-  { to: "/recurring", icon: Repeat, labelKey: "nav.recurring" },
-  { to: "/debts", icon: HandCoins, labelKey: "nav.debts" },
-  { to: "/family", icon: Users, labelKey: "nav.family" },
-  { to: "/savings", icon: Target, labelKey: "nav.savings" },
-]
+import { CollapsibleNavGroup } from "./CollapsibleNavGroup"
 
 interface SidebarProps {
   isOpen?: boolean
@@ -97,25 +89,64 @@ export function Sidebar({ isOpen = true, onClose, onOpenChat }: SidebarProps) {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 space-y-1 p-4">
-            {navItems.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                onClick={handleNavClick}
-                className={({ isActive }) =>
-                  cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                    isActive
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                  )
-                }
-              >
-                <item.icon className="h-5 w-5" />
-                {t(item.labelKey)}
-              </NavLink>
-            ))}
+          <nav className="flex-1 space-y-1 overflow-y-auto p-4">
+            {/* Dashboard - always visible */}
+            <NavLink
+              to="/"
+              onClick={handleNavClick}
+              className={({ isActive }) =>
+                cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                  isActive
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                )
+              }
+            >
+              <LayoutDashboard className="h-5 w-5" />
+              {t("nav.dashboard")}
+            </NavLink>
+
+            {/* Money Management Group */}
+            <CollapsibleNavGroup
+              title={t("nav.group.money", "Quản lý tiền")}
+              icon={Banknote}
+              onNavClick={handleNavClick}
+              items={[
+                { to: "/accounts", icon: Wallet, label: t("nav.accounts") },
+                { to: "/transactions", icon: ArrowLeftRight, label: t("nav.transactions") },
+                { to: "/recurring", icon: Repeat, label: t("nav.recurring") },
+              ]}
+            />
+
+            {/* Planning Group */}
+            <CollapsibleNavGroup
+              title={t("nav.group.planning", "Kế hoạch")}
+              icon={ClipboardList}
+              onNavClick={handleNavClick}
+              items={[
+                { to: "/budgets", icon: PiggyBank, label: t("nav.budgets") },
+                { to: "/savings", icon: Target, label: t("nav.savings") },
+                { to: "/debts", icon: HandCoins, label: t("nav.debts") },
+              ]}
+            />
+
+            {/* Family - standalone */}
+            <NavLink
+              to="/family"
+              onClick={handleNavClick}
+              className={({ isActive }) =>
+                cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                  isActive
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                )
+              }
+            >
+              <Users className="h-5 w-5" />
+              {t("nav.family")}
+            </NavLink>
 
             {/* Notifications / Invitations */}
             <NavLink

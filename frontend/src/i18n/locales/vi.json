@@ -88,7 +88,11 @@
     "savings": "Tiết kiệm",
     "notifications": "Thông báo",
     "categories": "Danh mục",
-    "settings": "Cài đặt"
+    "settings": "Cài đặt",
+    "group": {
+      "money": "Quản lý tiền",
+      "planning": "Kế hoạch"
+    }
   },
   "dashboard": {
     "title": "Tổng quan",
