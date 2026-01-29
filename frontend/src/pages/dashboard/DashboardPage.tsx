@@ -23,7 +23,7 @@ import {
   Cell,
 } from "recharts"
 import { format, subDays } from "date-fns"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui"
+import { Card, CardContent, CardHeader, CardTitle, Tooltip } from "@/components/ui"
 import { dashboardApi, recurringApi } from "@/api"
 import { formatCurrency, formatShortDate, formatFullDate, cn } from "@/lib/utils"
 import { useAuth } from "@/context/AuthContext"
@@ -70,6 +70,7 @@ export function DashboardPage() {
   const summaryCards = [
     {
       titleKey: "dashboard.totalBalance",
+      tooltipKey: "dashboard.tooltips.totalBalance",
       value: summary?.totalBalance || 0,
       icon: Wallet,
       color: "text-primary",
@@ -77,6 +78,7 @@ export function DashboardPage() {
     },
     {
       titleKey: "dashboard.weeklyExpense",
+      tooltipKey: "dashboard.tooltips.weeklyExpense",
       value: summary?.weeklyExpense || 0,
       icon: TrendingDown,
       color: "text-expense",
@@ -84,6 +86,7 @@ export function DashboardPage() {
     },
     {
       titleKey: "dashboard.monthlyExpense",
+      tooltipKey: "dashboard.tooltips.monthlyExpense",
       value: summary?.totalExpense || 0,
       icon: TrendingDown,
       color: "text-expense",
@@ -91,6 +94,7 @@ export function DashboardPage() {
     },
     {
       titleKey: "dashboard.monthlyIncome",
+      tooltipKey: "dashboard.tooltips.monthlyIncome",
       value: summary?.totalIncome || 0,
       icon: TrendingUp,
       color: "text-income",
@@ -114,7 +118,9 @@ export function DashboardPage() {
             <CardContent className="p-3 md:p-6">
               <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                 <div className="min-w-0">
-                  <p className="truncate text-xs text-muted-foreground md:text-sm">{t(card.titleKey)}</p>
+                  <Tooltip content={t(card.tooltipKey)} position="bottom">
+                    <p className="truncate text-xs text-muted-foreground md:text-sm">{t(card.titleKey)}</p>
+                  </Tooltip>
                   <p className={`truncate text-lg font-bold md:text-2xl ${card.color}`}>
                     {formatCurrency(card.value, currency)}
                   </p>
@@ -148,7 +154,9 @@ export function DashboardPage() {
         {/* Cashflow Chart */}
         <Card>
           <CardHeader className="p-4 md:p-6">
-            <CardTitle className="text-base md:text-lg">{t("dashboard.cashflowChart")}</CardTitle>
+            <Tooltip content={t("dashboard.tooltips.cashflowChart")} position="bottom">
+              <CardTitle className="text-base md:text-lg">{t("dashboard.cashflowChart")}</CardTitle>
+            </Tooltip>
           </CardHeader>
           <CardContent className="p-2 md:p-6 md:pt-0">
             {cashflowLoading ? (
@@ -206,7 +214,9 @@ export function DashboardPage() {
         {/* Category Breakdown */}
         <Card>
           <CardHeader className="p-4 md:p-6">
-            <CardTitle className="text-base md:text-lg">{t("dashboard.categoryChart")}</CardTitle>
+            <Tooltip content={t("dashboard.tooltips.categoryChart")} position="bottom">
+              <CardTitle className="text-base md:text-lg">{t("dashboard.categoryChart")}</CardTitle>
+            </Tooltip>
           </CardHeader>
           <CardContent className="p-2 md:p-6 md:pt-0">
             {categoryReport && categoryReport.categories.length > 0 ? (

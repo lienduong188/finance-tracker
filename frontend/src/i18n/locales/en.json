@@ -101,7 +101,15 @@
     "budgetsOverLimit": "You have {{count}} budget(s) over the limit.",
     "cashflowChart": "Cashflow - Last 30 Days",
     "categoryChart": "Expenses by Category",
-    "noExpenseData": "No expense data yet"
+    "noExpenseData": "No expense data yet",
+    "tooltips": {
+      "totalBalance": "Total balance of all accounts (excluding credit cards)",
+      "weeklyExpense": "Total expenses from Monday to today",
+      "monthlyExpense": "Total expenses from the 1st to today this month",
+      "monthlyIncome": "Total income from the 1st to today this month",
+      "cashflowChart": "Income and expense trends over the last 30 days",
+      "categoryChart": "Expense breakdown by category"
+    }
   },
   "accounts": {
     "title": "Accounts",

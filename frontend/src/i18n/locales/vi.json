@@ -101,7 +101,15 @@
     "budgetsOverLimit": "Bạn có {{count}} ngân sách đã vượt hạn mức.",
     "cashflowChart": "Dòng tiền 30 ngày qua",
     "categoryChart": "Chi tiêu theo danh mục",
-    "noExpenseData": "Chưa có dữ liệu chi tiêu"
+    "noExpenseData": "Chưa có dữ liệu chi tiêu",
+    "tooltips": {
+      "totalBalance": "Tổng số dư của tất cả tài khoản (không bao gồm thẻ tín dụng)",
+      "weeklyExpense": "Tổng chi tiêu từ thứ Hai đến hôm nay",
+      "monthlyExpense": "Tổng chi tiêu từ ngày 1 đến hôm nay trong tháng",
+      "monthlyIncome": "Tổng thu nhập từ ngày 1 đến hôm nay trong tháng",
+      "cashflowChart": "Biểu đồ thu chi 30 ngày gần nhất",
+      "categoryChart": "Tỷ lệ chi tiêu theo từng danh mục"
+    }
   },
   "accounts": {
     "title": "Tài khoản",

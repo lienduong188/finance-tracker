@@ -101,7 +101,15 @@
     "budgetsOverLimit": "{{count}}件の予算が上限を超えています。",
     "cashflowChart": "過去30日間のキャッシュフロー",
     "categoryChart": "カテゴリー別支出",
-    "noExpenseData": "支出データがありません"
+    "noExpenseData": "支出データがありません",
+    "tooltips": {
+      "totalBalance": "すべての口座の合計残高（クレジットカードを除く）",
+      "weeklyExpense": "月曜日から今日までの支出合計",
+      "monthlyExpense": "今月1日から今日までの支出合計",
+      "monthlyIncome": "今月1日から今日までの収入合計",
+      "cashflowChart": "過去30日間の収入と支出の推移グラフ",
+      "categoryChart": "カテゴリー別の支出割合"
+    }
   },
   "accounts": {
     "title": "口座",
