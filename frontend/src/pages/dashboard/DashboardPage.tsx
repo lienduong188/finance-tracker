@@ -245,11 +245,11 @@ export function DashboardPage() {
                   </PieChart>
                 </ResponsiveContainer>
                 <div className="w-full space-y-2 md:flex-1">
-                  {categoryReport.categories.slice(0, 5).map((cat) => (
+                  {categoryReport.categories.slice(0, 5).map((cat, index) => (
                     <div key={cat.categoryId} className="flex items-center gap-2">
                       <div
                         className="h-3 w-3 shrink-0 rounded-full"
-                        style={{ backgroundColor: cat.color || "#888" }}
+                        style={{ backgroundColor: cat.color || `hsl(${index * 45}, 70%, 50%)` }}
                       />
                       <span className="flex-1 truncate text-xs md:text-sm">
                         {t(`categories.${cat.categoryName}`, cat.categoryName)}
