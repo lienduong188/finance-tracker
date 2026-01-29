@@ -40,8 +40,10 @@ public class DashboardService {
 
         BigDecimal totalBalance = balanceByCurrency.getOrDefault(primaryCurrency, BigDecimal.ZERO);
 
-        LocalDate startOfMonth = LocalDate.now().withDayOfMonth(1);
-        LocalDate endOfMonth = LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth());
+        LocalDate today = LocalDate.now();
+        LocalDate startOfMonth = today.withDayOfMonth(1);
+        LocalDate endOfMonth = today.withDayOfMonth(today.lengthOfMonth());
+        LocalDate startOfWeek = today.minusDays(today.getDayOfWeek().getValue() - 1); // Monday
 
         List<Object[]> sumByType = transactionRepository.sumByTypeAndDateRange(userId, startOfMonth, endOfMonth);
 
@@ -55,6 +57,17 @@ public class DashboardService {
                 totalIncome = sum;
             } else if (type == TransactionType.EXPENSE) {
                 totalExpense = sum;
+            }
+        }
+
+        // Calculate weekly expense
+        List<Object[]> weeklySum = transactionRepository.sumByTypeAndDateRange(userId, startOfWeek, today);
+        BigDecimal weeklyExpense = BigDecimal.ZERO;
+        for (Object[] row : weeklySum) {
+            TransactionType type = (TransactionType) row[0];
+            BigDecimal sum = (BigDecimal) row[1];
+            if (type == TransactionType.EXPENSE) {
+                weeklyExpense = sum;
             }
         }
 
@@ -75,6 +88,7 @@ public class DashboardService {
                 .balanceByCurrency(balanceByCurrency)
                 .totalIncome(totalIncome)
                 .totalExpense(totalExpense)
+                .weeklyExpense(weeklyExpense)
                 .netCashflow(totalIncome.subtract(totalExpense))
                 .accounts(accountSummaries)
                 .build();

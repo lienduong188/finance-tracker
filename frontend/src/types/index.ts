@@ -183,6 +183,7 @@ export interface DashboardSummary {
   totalBalance: number
   totalIncome: number
   totalExpense: number
+  weeklyExpense: number
   netCashflow: number
   currency: string
   accountsCount: number

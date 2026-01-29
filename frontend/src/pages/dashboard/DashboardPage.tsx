@@ -5,10 +5,10 @@ import {
   Wallet,
   TrendingUp,
   TrendingDown,
-  ArrowLeftRight,
   AlertTriangle,
   Calendar,
   Repeat,
+  ArrowLeftRight,
 } from "lucide-react"
 import {
   AreaChart,
@@ -76,11 +76,11 @@ export function DashboardPage() {
       bgColor: "bg-primary/10",
     },
     {
-      titleKey: "dashboard.monthlyIncome",
-      value: summary?.totalIncome || 0,
-      icon: TrendingUp,
-      color: "text-income",
-      bgColor: "bg-income/10",
+      titleKey: "dashboard.weeklyExpense",
+      value: summary?.weeklyExpense || 0,
+      icon: TrendingDown,
+      color: "text-expense",
+      bgColor: "bg-expense/10",
     },
     {
       titleKey: "dashboard.monthlyExpense",
@@ -90,11 +90,11 @@ export function DashboardPage() {
       bgColor: "bg-expense/10",
     },
     {
-      titleKey: "dashboard.netCashflow",
-      value: summary?.netCashflow || 0,
-      icon: ArrowLeftRight,
-      color: (summary?.netCashflow || 0) >= 0 ? "text-income" : "text-expense",
-      bgColor: (summary?.netCashflow || 0) >= 0 ? "bg-income/10" : "bg-expense/10",
+      titleKey: "dashboard.monthlyIncome",
+      value: summary?.totalIncome || 0,
+      icon: TrendingUp,
+      color: "text-income",
+      bgColor: "bg-income/10",
     },
   ]
 

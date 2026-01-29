@@ -20,6 +20,7 @@ public class DashboardSummary {
     private Map<String, BigDecimal> balanceByCurrency;
     private BigDecimal totalIncome;
     private BigDecimal totalExpense;
+    private BigDecimal weeklyExpense;
     private BigDecimal netCashflow;
     private List<AccountSummary> accounts;
 
