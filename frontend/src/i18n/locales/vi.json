@@ -332,6 +332,8 @@
       "en": "English",
       "ja": "日本語"
     },
+    "defaultName": "Tên mặc định",
+    "multiLanguageNames": "Tên đa ngôn ngữ (tùy chọn)",
     "profile": "Hồ sơ",
     "profileDescription": "Cập nhật thông tin cá nhân của bạn",
     "security": "Bảo mật",

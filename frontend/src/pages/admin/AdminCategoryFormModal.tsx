@@ -62,10 +62,9 @@ export function AdminCategoryFormModal({
   useEffect(() => {
     if (!isOpen) return
 
-    console.log("Edit category data:", category)
     setErrorMessage(null)
     if (category) {
-      const formData = {
+      reset({
         name: category.name,
         nameVi: category.nameVi || "",
         nameEn: category.nameEn || "",
@@ -73,9 +72,7 @@ export function AdminCategoryFormModal({
         type: category.type,
         icon: category.icon || "",
         color: category.color || "#3b82f6",
-      }
-      console.log("Reset form with:", formData)
-      reset(formData)
+      })
     } else {
       reset({
         name: "",
@@ -134,7 +131,7 @@ export function AdminCategoryFormModal({
         {/* Header */}
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold">
-            {isEditing ? "Chỉnh sửa Category" : "Thêm Category mới"}
+            {isEditing ? t("settings.editCategory") : t("settings.addCategory")}
           </h2>
           <button
             onClick={onClose}
@@ -154,11 +151,10 @@ export function AdminCategoryFormModal({
           )}
 
           <div>
-            <Label htmlFor="name">Tên mặc định</Label>
+            <Label htmlFor="name">{t("settings.defaultName")}</Label>
             <Input
               id="name"
               {...register("name")}
-              placeholder="Ví dụ: Ăn uống"
             />
             {errors.name && (
               <p className="mt-1 text-sm text-destructive">{errors.name.message}</p>
@@ -167,61 +163,58 @@ export function AdminCategoryFormModal({
 
           {/* Multi-language names */}
           <div className="rounded-lg border border-border p-3 space-y-3">
-            <p className="text-sm font-medium text-muted-foreground">Tên đa ngôn ngữ (tùy chọn)</p>
+            <p className="text-sm font-medium text-muted-foreground">{t("settings.multiLanguageNames")}</p>
 
             <div>
               <Label htmlFor="nameVi" className="flex items-center gap-2">
-                <span>Tiếng Việt</span>
+                <span>{t("settings.languages.vi")}</span>
               </Label>
               <Input
                 id="nameVi"
                 {...register("nameVi")}
-                placeholder="Ví dụ: Ăn uống"
               />
             </div>
 
             <div>
               <Label htmlFor="nameEn" className="flex items-center gap-2">
-                <span>English</span>
+                <span>{t("settings.languages.en")}</span>
               </Label>
               <Input
                 id="nameEn"
                 {...register("nameEn")}
-                placeholder="e.g. Food & Dining"
               />
             </div>
 
             <div>
               <Label htmlFor="nameJa" className="flex items-center gap-2">
-                <span>Japanese</span>
+                <span>{t("settings.languages.ja")}</span>
               </Label>
               <Input
                 id="nameJa"
                 {...register("nameJa")}
-                placeholder="例: 食費"
               />
             </div>
           </div>
 
           <div>
-            <Label htmlFor="type">Loại</Label>
+            <Label htmlFor="type">{t("settings.categoryType")}</Label>
             <Select id="type" {...register("type")}>
-              <option value="EXPENSE">Chi tiêu (Expense)</option>
-              <option value="INCOME">Thu nhập (Income)</option>
+              <option value="EXPENSE">{t("transactions.types.EXPENSE")}</option>
+              <option value="INCOME">{t("transactions.types.INCOME")}</option>
             </Select>
           </div>
 
           <div>
-            <Label htmlFor="icon">Icon (emoji)</Label>
+            <Label htmlFor="icon">{t("settings.categoryIcon")}</Label>
             <Input
               id="icon"
               {...register("icon")}
-              placeholder="Ví dụ: 🍜"
+              placeholder="🍜"
             />
           </div>
 
           <div>
-            <Label htmlFor="color">Màu sắc</Label>
+            <Label htmlFor="color">{t("settings.categoryColor")}</Label>
             <div className="flex gap-2">
               <Input
                 id="color"
@@ -240,17 +233,17 @@ export function AdminCategoryFormModal({
           {/* Actions */}
           <div className="flex justify-end gap-2 pt-4">
             <Button type="button" variant="outline" onClick={onClose}>
-              Hủy
+              {t("common.cancel")}
             </Button>
             <Button
               type="submit"
               disabled={createMutation.isPending || updateMutation.isPending}
             >
               {createMutation.isPending || updateMutation.isPending
-                ? "Đang lưu..."
+                ? t("common.loading")
                 : isEditing
-                ? "Cập nhật"
-                : "Thêm"}
+                ? t("common.update")
+                : t("common.add")}
             </Button>
           </div>
         </form>

@@ -332,6 +332,8 @@
       "en": "English",
       "ja": "日本語"
     },
+    "defaultName": "デフォルト名",
+    "multiLanguageNames": "多言語名（任意）",
     "profile": "プロフィール",
     "profileDescription": "個人情報を更新",
     "security": "セキュリティ",

@@ -332,6 +332,8 @@
       "en": "English",
       "ja": "日本語"
     },
+    "defaultName": "Default Name",
+    "multiLanguageNames": "Multi-language Names (optional)",
     "profile": "Profile",
     "profileDescription": "Update your personal information",
     "security": "Security",
