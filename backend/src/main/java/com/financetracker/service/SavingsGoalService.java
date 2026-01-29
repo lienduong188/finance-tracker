@@ -30,6 +30,7 @@ public class SavingsGoalService {
     private final TransactionRepository transactionRepository;
     private final CategoryRepository categoryRepository;
     private final NotificationService notificationService;
+    private final ExchangeRateService exchangeRateService;
 
     @Transactional
     public SavingsGoalResponse createGoal(UUID userId, SavingsGoalRequest request) {
@@ -175,9 +176,15 @@ public class SavingsGoalService {
 
         contribution = savingsContributionRepository.save(contribution);
 
-        // Update goal current amount
+        // Update goal current amount (convert currency if different)
+        BigDecimal amountInGoalCurrency = request.getAmount();
+        if (!account.getCurrency().equalsIgnoreCase(goal.getCurrency())) {
+            var convertResult = exchangeRateService.convert(request.getAmount(), account.getCurrency(), goal.getCurrency());
+            amountInGoalCurrency = convertResult.getToAmount();
+        }
+
         boolean wasNotCompleted = goal.getStatus() != SavingsGoalStatus.COMPLETED;
-        goal.setCurrentAmount(goal.getCurrentAmount().add(request.getAmount()));
+        goal.setCurrentAmount(goal.getCurrentAmount().add(amountInGoalCurrency));
         boolean justCompleted = wasNotCompleted && goal.isCompleted();
 
         if (justCompleted) {
@@ -195,7 +202,7 @@ public class SavingsGoalService {
                             member.getUser(),
                             goal.getName(),
                             user.getFullName(),
-                            request.getAmount(),
+                            amountInGoalCurrency,
                             goal.getCurrency()
                     );
                 }
@@ -331,8 +338,14 @@ public class SavingsGoalService {
             transactionRepository.delete(contribution.getTransaction());
         }
 
-        // Update goal current amount
-        goal.setCurrentAmount(goal.getCurrentAmount().subtract(contribution.getAmount()));
+        // Update goal current amount (convert currency if different)
+        BigDecimal amountInGoalCurrency = contribution.getAmount();
+        if (!account.getCurrency().equalsIgnoreCase(goal.getCurrency())) {
+            var convertResult = exchangeRateService.convert(contribution.getAmount(), account.getCurrency(), goal.getCurrency());
+            amountInGoalCurrency = convertResult.getToAmount();
+        }
+
+        goal.setCurrentAmount(goal.getCurrentAmount().subtract(amountInGoalCurrency));
         if (goal.getStatus() == SavingsGoalStatus.COMPLETED && !goal.isCompleted()) {
             goal.setStatus(SavingsGoalStatus.ACTIVE);
         }
