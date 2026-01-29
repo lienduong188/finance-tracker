@@ -137,14 +137,20 @@ export function TransactionsPage() {
     setEditingTransaction(null)
   }
 
-  // Group transactions by date
+  // Group transactions by date (sorted descending - newest first)
   const groupedByDate = useMemo(() => {
-    return transactions?.content?.reduce((groups, tx) => {
+    const groups = transactions?.content?.reduce((acc, tx) => {
       const date = tx.transactionDate
-      if (!groups[date]) groups[date] = []
-      groups[date].push(tx)
-      return groups
+      if (!acc[date]) acc[date] = []
+      acc[date].push(tx)
+      return acc
     }, {} as Record<string, Transaction[]>)
+
+    if (!groups) return undefined
+
+    // Sort by date descending
+    const sortedEntries = Object.entries(groups).sort(([a], [b]) => b.localeCompare(a))
+    return Object.fromEntries(sortedEntries)
   }, [transactions])
 
   // Group transactions by category
@@ -234,14 +240,20 @@ export function TransactionsPage() {
                       <div className="min-w-0 flex-1">
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0">
+                            {/* 説明 (Description) */}
                             <p className="truncate text-sm font-medium md:text-base">
-                              {transaction.categoryName
-                                ? t(`categories.${transaction.categoryName}`, transaction.categoryName)
-                                : t(`transactions.types.${transaction.type}`)}
+                              {transaction.description || t(`transactions.types.${transaction.type}`)}
                             </p>
+                            {/* 口座 (Account) */}
                             <p className="truncate text-xs text-muted-foreground md:text-sm">
                               {transaction.accountName}
                               {transaction.type === "TRANSFER" && ` → ${transaction.toAccountName}`}
+                            </p>
+                            {/* カテゴリー (Category) */}
+                            <p className="truncate text-xs text-muted-foreground">
+                              {transaction.categoryName
+                                ? t(`categories.${transaction.categoryName}`, transaction.categoryName)
+                                : t(`transactions.types.${transaction.type}`)}
                             </p>
                           </div>
                           <p className={cn("shrink-0 text-sm font-semibold md:text-lg", transactionTypeColors[transaction.type])}>
@@ -249,9 +261,6 @@ export function TransactionsPage() {
                             {formatCurrency(transaction.amount, transaction.currency)}
                           </p>
                         </div>
-                        {transaction.description && (
-                          <p className="mt-1 truncate text-xs text-muted-foreground">{transaction.description}</p>
-                        )}
                         <div className="mt-2 flex gap-1 md:mt-0 md:opacity-0 md:transition-opacity md:group-hover:opacity-100">
                           <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={() => handleEdit(transaction)}>
                             <Pencil className="mr-1 h-3 w-3" />
