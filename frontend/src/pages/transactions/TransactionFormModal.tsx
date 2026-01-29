@@ -8,7 +8,7 @@ import { X, AlertCircle } from "lucide-react"
 import { format } from "date-fns"
 import { Button, Input, Label, Select } from "@/components/ui"
 import { transactionsApi, accountsApi, categoriesApi } from "@/api"
-import { cn, getCategoryName } from "@/lib/utils"
+import { cn } from "@/lib/utils"
 import { VALIDATION } from "@/lib/validation"
 import type { Transaction, TransactionRequest, TransactionType } from "@/types"
 
@@ -293,7 +293,7 @@ export function TransactionFormModal({
                 <option value="">{t("common.all")}</option>
                 {categories?.map((category) => (
                   <option key={category.id} value={category.id}>
-                    {category.icon} {getCategoryName(category, i18n.language)}
+                    {category.icon} {t(`categories.${category.name}`, category.name)}
                   </option>
                 ))}
               </Select>
