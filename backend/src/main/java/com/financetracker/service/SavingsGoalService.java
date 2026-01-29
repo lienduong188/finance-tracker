@@ -249,14 +249,35 @@ public class SavingsGoalService {
 
         validateGoalAccess(goal, userId);
 
-        List<Object[]> results = savingsContributionRepository.sumAmountByGoalIdGroupByUser(goalId);
+        // Get all contributions and convert to goal currency
+        List<SavingsContribution> contributions = savingsContributionRepository.findByGoalIdOrderByContributionDateDesc(goalId);
+
+        // Group by user and sum converted amounts
+        java.util.Map<UUID, BigDecimal> userAmounts = new java.util.HashMap<>();
+        java.util.Map<UUID, String> userNames = new java.util.HashMap<>();
+
+        for (SavingsContribution contribution : contributions) {
+            UUID oderId = contribution.getUser().getId();
+            String contributorName = contribution.getUser().getFullName();
+            BigDecimal amount = contribution.getAmount();
+            String contributionCurrency = contribution.getAccount().getCurrency();
+
+            // Convert to goal currency if different
+            if (!contributionCurrency.equalsIgnoreCase(goal.getCurrency())) {
+                var convertResult = exchangeRateService.convert(amount, contributionCurrency, goal.getCurrency());
+                amount = convertResult.getToAmount();
+            }
+
+            userAmounts.merge(oderId, amount, BigDecimal::add);
+            userNames.put(oderId, contributorName);
+        }
+
         BigDecimal totalAmount = goal.getCurrentAmount();
 
         List<ContributorSummary> summaries = new ArrayList<>();
-        for (Object[] row : results) {
-            UUID contributorId = (UUID) row[0];
-            String contributorName = (String) row[1];
-            BigDecimal amount = (BigDecimal) row[2];
+        for (java.util.Map.Entry<UUID, BigDecimal> entry : userAmounts.entrySet()) {
+            UUID contributorId = entry.getKey();
+            BigDecimal amount = entry.getValue();
 
             double percentage = totalAmount.compareTo(BigDecimal.ZERO) > 0
                     ? amount.divide(totalAmount, 4, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100)).doubleValue()
@@ -264,7 +285,7 @@ public class SavingsGoalService {
 
             summaries.add(ContributorSummary.builder()
                     .userId(contributorId)
-                    .userName(contributorName)
+                    .userName(userNames.get(contributorId))
                     .totalAmount(amount)
                     .percentage(percentage)
                     .build());
