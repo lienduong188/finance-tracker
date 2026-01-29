@@ -101,6 +101,9 @@ export interface Category {
 
 export interface CategoryRequest {
   name: string
+  nameVi?: string
+  nameEn?: string
+  nameJa?: string
   type: CategoryType
   icon?: string
   color?: string

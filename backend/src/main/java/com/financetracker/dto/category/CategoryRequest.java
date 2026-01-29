@@ -19,6 +19,11 @@ public class CategoryRequest {
     @NotBlank(message = "Category name is required")
     private String name;
 
+    // Multi-language names (optional)
+    private String nameVi;
+    private String nameEn;
+    private String nameJa;
+
     @NotNull(message = "Category type is required")
     private CategoryType type;
 

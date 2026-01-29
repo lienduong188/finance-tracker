@@ -27,6 +27,9 @@ const passwordSchema = z.object({
 
 const categorySchema = z.object({
   name: z.string().min(1, "Category name is required"),
+  nameVi: z.string().optional(),
+  nameEn: z.string().optional(),
+  nameJa: z.string().optional(),
   type: z.enum(["INCOME", "EXPENSE"]),
   icon: z.string().optional(),
   color: z.string().optional(),
@@ -74,6 +77,9 @@ export function SettingsPage() {
     resolver: zodResolver(categorySchema),
     defaultValues: {
       name: "",
+      nameVi: "",
+      nameEn: "",
+      nameJa: "",
       type: "EXPENSE",
       icon: "",
       color: "#3b82f6",
@@ -166,6 +172,9 @@ export function SettingsPage() {
   const onCategorySubmit = (data: CategoryForm) => {
     const categoryData: CategoryRequest = {
       name: data.name,
+      nameVi: data.nameVi || undefined,
+      nameEn: data.nameEn || undefined,
+      nameJa: data.nameJa || undefined,
       type: data.type,
       icon: data.icon || undefined,
       color: data.color || undefined,
@@ -182,6 +191,9 @@ export function SettingsPage() {
     setEditingCategory(category)
     categoryForm.reset({
       name: category.name,
+      nameVi: category.nameVi || "",
+      nameEn: category.nameEn || "",
+      nameJa: category.nameJa || "",
       type: category.type,
       icon: category.icon || "",
       color: category.color || "#3b82f6",
@@ -236,6 +248,9 @@ export function SettingsPage() {
     setEditingCategory(null)
     categoryForm.reset({
       name: "",
+      nameVi: "",
+      nameEn: "",
+      nameJa: "",
       type: categoryTab,
       icon: "",
       color: "#3b82f6",
@@ -549,8 +564,8 @@ export function SettingsPage() {
 
       {/* Category Modal */}
       {showCategoryModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-lg bg-background p-6 shadow-lg">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-lg bg-background p-6 shadow-lg">
             <h2 className="mb-4 text-lg font-semibold">
               {editingCategory ? t("settings.editCategory") : t("settings.addCategory")}
             </h2>
@@ -581,6 +596,32 @@ export function SettingsPage() {
                   <option value="EXPENSE">{t("transactions.types.EXPENSE")}</option>
                   <option value="INCOME">{t("transactions.types.INCOME")}</option>
                 </select>
+              </div>
+
+              {/* Multi-language names */}
+              <div className="rounded-lg border border-border p-3 space-y-3">
+                <p className="text-sm font-medium text-muted-foreground">{t("settings.multiLanguageNames")}</p>
+
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium">
+                    {t("settings.languages.vi")}
+                  </label>
+                  <Input {...categoryForm.register("nameVi")} />
+                </div>
+
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium">
+                    {t("settings.languages.en")}
+                  </label>
+                  <Input {...categoryForm.register("nameEn")} />
+                </div>
+
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium">
+                    {t("settings.languages.ja")}
+                  </label>
+                  <Input {...categoryForm.register("nameJa")} />
+                </div>
               </div>
 
               <div>

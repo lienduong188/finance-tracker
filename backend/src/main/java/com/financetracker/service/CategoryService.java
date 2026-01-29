@@ -77,6 +77,9 @@ public class CategoryService {
         Category category = Category.builder()
                 .user(user)
                 .name(request.getName())
+                .nameVi(request.getNameVi())
+                .nameEn(request.getNameEn())
+                .nameJa(request.getNameJa())
                 .type(request.getType())
                 .icon(request.getIcon())
                 .color(request.getColor())
@@ -98,6 +101,9 @@ public class CategoryService {
         }
 
         category.setName(request.getName());
+        category.setNameVi(request.getNameVi());
+        category.setNameEn(request.getNameEn());
+        category.setNameJa(request.getNameJa());
         category.setIcon(request.getIcon());
         category.setColor(request.getColor());
 
