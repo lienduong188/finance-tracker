@@ -29,11 +29,12 @@ public class CreditCardPaymentPlanController {
     @GetMapping
     public ResponseEntity<Page<CreditCardPaymentPlanResponse>> getAll(
             @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam(required = false) UUID accountId,
             @RequestParam(required = false) PaymentPlanStatus status,
             @RequestParam(required = false) PaymentType paymentType,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        return ResponseEntity.ok(planService.getAll(userDetails.getId(), status, paymentType, pageable));
+        return ResponseEntity.ok(planService.getAll(userDetails.getId(), accountId, status, paymentType, pageable));
     }
 
     @GetMapping("/{id}")

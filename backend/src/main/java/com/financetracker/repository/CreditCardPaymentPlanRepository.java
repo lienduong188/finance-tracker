@@ -27,6 +27,18 @@ public interface CreditCardPaymentPlanRepository extends JpaRepository<CreditCar
     Page<CreditCardPaymentPlan> findByUserIdAndStatusAndPaymentType(
             UUID userId, PaymentPlanStatus status, PaymentType paymentType, Pageable pageable);
 
+    // Filter by account
+    Page<CreditCardPaymentPlan> findByUserIdAndAccountId(UUID userId, UUID accountId, Pageable pageable);
+
+    Page<CreditCardPaymentPlan> findByUserIdAndAccountIdAndStatus(
+            UUID userId, UUID accountId, PaymentPlanStatus status, Pageable pageable);
+
+    Page<CreditCardPaymentPlan> findByUserIdAndAccountIdAndPaymentType(
+            UUID userId, UUID accountId, PaymentType paymentType, Pageable pageable);
+
+    Page<CreditCardPaymentPlan> findByUserIdAndAccountIdAndStatusAndPaymentType(
+            UUID userId, UUID accountId, PaymentPlanStatus status, PaymentType paymentType, Pageable pageable);
+
     Optional<CreditCardPaymentPlan> findByIdAndUserId(UUID id, UUID userId);
 
     Optional<CreditCardPaymentPlan> findByTransactionId(UUID transactionId);

@@ -14,13 +14,17 @@ export const creditCardPlansApi = {
     page = 0,
     size = 20,
     status?: PaymentPlanStatus,
-    paymentType?: PaymentType
+    paymentType?: PaymentType,
+    accountId?: string,
+    sort?: string
   ): Promise<PageResponse<CreditCardPaymentPlan>> => {
     const params = new URLSearchParams()
     params.set("page", page.toString())
     params.set("size", size.toString())
     if (status) params.set("status", status)
     if (paymentType) params.set("paymentType", paymentType)
+    if (accountId) params.set("accountId", accountId)
+    if (sort) params.set("sort", sort)
 
     const { data } = await apiClient.get(`/credit-card-plans?${params.toString()}`)
     return data

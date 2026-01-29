@@ -11,12 +11,14 @@ import {
   Clock,
   Percent,
 } from "lucide-react"
-import { creditCardPlansApi } from "@/api"
+import { creditCardPlansApi, accountsApi } from "@/api"
 import { Button, Card } from "@/components/ui"
 import { cn, formatCurrency } from "@/lib/utils"
 import type { CreditCardPaymentPlan, PaymentPlanStatus, PaymentType } from "@/types"
 import { CreatePlanModal } from "./CreatePlanModal"
 import { PlanDetailModal } from "./PlanDetailModal"
+
+type SortOption = "createdAt,desc" | "nextPaymentDate,asc" | "accountName,asc" | "originalAmount,desc"
 
 export function CreditCardPlansPage() {
   const { t } = useTranslation()
@@ -24,17 +26,29 @@ export function CreditCardPlansPage() {
   const [page, setPage] = useState(0)
   const [statusFilter, setStatusFilter] = useState<PaymentPlanStatus | "">("")
   const [typeFilter, setTypeFilter] = useState<PaymentType | "">("")
+  const [accountFilter, setAccountFilter] = useState<string>("")
+  const [sortOption, setSortOption] = useState<SortOption>("createdAt,desc")
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [selectedPlan, setSelectedPlan] = useState<CreditCardPaymentPlan | null>(null)
 
+  // Get credit card accounts for filter
+  const { data: accounts } = useQuery({
+    queryKey: ["accounts"],
+    queryFn: accountsApi.getAll,
+  })
+
+  const creditCardAccounts = accounts?.filter((a) => a.type === "CREDIT_CARD") || []
+
   const { data: plansData, isLoading } = useQuery({
-    queryKey: ["credit-card-plans", page, statusFilter, typeFilter],
+    queryKey: ["credit-card-plans", page, statusFilter, typeFilter, accountFilter, sortOption],
     queryFn: () =>
       creditCardPlansApi.getAll(
         page,
         20,
         statusFilter || undefined,
-        typeFilter || undefined
+        typeFilter || undefined,
+        accountFilter || undefined,
+        sortOption
       ),
   })
 
@@ -169,6 +183,24 @@ export function CreditCardPlansPage() {
 
       {/* Filters */}
       <div className="flex flex-wrap gap-2">
+        {/* Account filter */}
+        <select
+          value={accountFilter}
+          onChange={(e) => {
+            setAccountFilter(e.target.value)
+            setPage(0)
+          }}
+          className="rounded-md border bg-background px-3 py-2 text-sm"
+        >
+          <option value="">{t("creditCard.allAccounts")}</option>
+          {creditCardAccounts.map((account) => (
+            <option key={account.id} value={account.id}>
+              {account.name}
+            </option>
+          ))}
+        </select>
+
+        {/* Status filter */}
         <select
           value={statusFilter}
           onChange={(e) => {
@@ -183,6 +215,7 @@ export function CreditCardPlansPage() {
           <option value="CANCELLED">{t("creditCard.statuses.CANCELLED")}</option>
         </select>
 
+        {/* Type filter */}
         <select
           value={typeFilter}
           onChange={(e) => {
@@ -194,6 +227,20 @@ export function CreditCardPlansPage() {
           <option value="">{t("creditCard.allTypes")}</option>
           <option value="INSTALLMENT">{t("creditCard.installment")}</option>
           <option value="REVOLVING">{t("creditCard.revolving")}</option>
+        </select>
+
+        {/* Sort */}
+        <select
+          value={sortOption}
+          onChange={(e) => {
+            setSortOption(e.target.value as SortOption)
+            setPage(0)
+          }}
+          className="ml-auto flex items-center gap-1 rounded-md border bg-background px-3 py-2 text-sm"
+        >
+          <option value="createdAt,desc">{t("creditCard.sortNewest")}</option>
+          <option value="nextPaymentDate,asc">{t("creditCard.sortDueDate")}</option>
+          <option value="originalAmount,desc">{t("creditCard.sortAmount")}</option>
         </select>
       </div>
 

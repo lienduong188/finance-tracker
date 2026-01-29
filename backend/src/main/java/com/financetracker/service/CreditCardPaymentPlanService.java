@@ -32,17 +32,31 @@ public class CreditCardPaymentPlanService {
     private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
-    public Page<CreditCardPaymentPlanResponse> getAll(UUID userId, PaymentPlanStatus status, PaymentType paymentType, Pageable pageable) {
+    public Page<CreditCardPaymentPlanResponse> getAll(UUID userId, UUID accountId, PaymentPlanStatus status, PaymentType paymentType, Pageable pageable) {
         Page<CreditCardPaymentPlan> plans;
 
-        if (status != null && paymentType != null) {
-            plans = planRepository.findByUserIdAndStatusAndPaymentType(userId, status, paymentType, pageable);
-        } else if (status != null) {
-            plans = planRepository.findByUserIdAndStatus(userId, status, pageable);
-        } else if (paymentType != null) {
-            plans = planRepository.findByUserIdAndPaymentType(userId, paymentType, pageable);
+        if (accountId != null) {
+            // Filter by account
+            if (status != null && paymentType != null) {
+                plans = planRepository.findByUserIdAndAccountIdAndStatusAndPaymentType(userId, accountId, status, paymentType, pageable);
+            } else if (status != null) {
+                plans = planRepository.findByUserIdAndAccountIdAndStatus(userId, accountId, status, pageable);
+            } else if (paymentType != null) {
+                plans = planRepository.findByUserIdAndAccountIdAndPaymentType(userId, accountId, paymentType, pageable);
+            } else {
+                plans = planRepository.findByUserIdAndAccountId(userId, accountId, pageable);
+            }
         } else {
-            plans = planRepository.findByUserId(userId, pageable);
+            // No account filter
+            if (status != null && paymentType != null) {
+                plans = planRepository.findByUserIdAndStatusAndPaymentType(userId, status, paymentType, pageable);
+            } else if (status != null) {
+                plans = planRepository.findByUserIdAndStatus(userId, status, pageable);
+            } else if (paymentType != null) {
+                plans = planRepository.findByUserIdAndPaymentType(userId, paymentType, pageable);
+            } else {
+                plans = planRepository.findByUserId(userId, pageable);
+            }
         }
 
         return plans.map(this::toResponse);
