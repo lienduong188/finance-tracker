@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { useForm } from "react-hook-form"
+import { useForm, Controller } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { X, AlertCircle } from "lucide-react"
 import { format } from "date-fns"
-import { Button, Input, Label, Select } from "@/components/ui"
+import { Button, Input, Label, Select, CurrencyInput } from "@/components/ui"
 import { budgetsApi, categoriesApi } from "@/api"
 import { VALIDATION } from "@/lib/validation"
 import type { Budget, BudgetRequest } from "@/types"
@@ -49,6 +49,7 @@ export function BudgetFormModal({ isOpen, onClose, budget }: BudgetFormModalProp
     handleSubmit,
     reset,
     watch,
+    control,
     formState: { errors },
   } = useForm<BudgetForm>({
     resolver: zodResolver(budgetSchema),
@@ -61,6 +62,7 @@ export function BudgetFormModal({ isOpen, onClose, budget }: BudgetFormModalProp
   })
 
   const watchPeriod = watch("period")
+  const watchCurrency = watch("currency")
 
   const { data: categories } = useQuery({
     queryKey: ["categories", "EXPENSE"],
@@ -193,12 +195,20 @@ export function BudgetFormModal({ isOpen, onClose, budget }: BudgetFormModalProp
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="amount" required>{t("budgets.amount")}</Label>
-              <Input
-                id="amount"
-                type="number"
-                placeholder="0"
-                error={errors.amount?.message}
-                {...register("amount", { valueAsNumber: true })}
+              <Controller
+                name="amount"
+                control={control}
+                render={({ field }) => (
+                  <CurrencyInput
+                    id="amount"
+                    placeholder="0"
+                    currency={watchCurrency}
+                    error={errors.amount?.message}
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                  />
+                )}
               />
             </div>
 

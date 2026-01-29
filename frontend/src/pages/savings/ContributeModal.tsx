@@ -1,10 +1,10 @@
-import { useForm } from "react-hook-form"
+import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
 import { savingsGoalsApi, accountsApi } from "@/api"
-import { Button, Input, Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui"
+import { Button, Input, Dialog, DialogContent, DialogHeader, DialogTitle, CurrencyInput } from "@/components/ui"
 
 const createContributeSchema = (t: (key: string) => string) => z.object({
   amount: z.number().positive(t("savings.validation.amountPositive")),
@@ -55,6 +55,7 @@ export default function ContributeModal({
     handleSubmit,
     reset,
     watch,
+    control,
     formState: { errors },
   } = useForm<ContributeForm>({
     resolver: zodResolver(contributeSchema),
@@ -138,14 +139,20 @@ export default function ContributeModal({
 
           <div>
             <label className="block text-sm font-medium mb-1">{t("savings.contributeAmount")} *</label>
-            <Input
-              {...register("amount", { valueAsNumber: true })}
-              type="number"
-              placeholder="1,000,000"
+            <Controller
+              name="amount"
+              control={control}
+              render={({ field }) => (
+                <CurrencyInput
+                  placeholder="1.000.000"
+                  currency={selectedAccount?.currency || currency}
+                  value={field.value}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  error={errors.amount?.message}
+                />
+              )}
             />
-            {errors.amount && (
-              <p className="text-sm text-destructive mt-1">{errors.amount.message}</p>
-            )}
           </div>
 
           <div>

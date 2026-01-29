@@ -1,12 +1,12 @@
 import { useEffect } from "react"
-import { useForm } from "react-hook-form"
+import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
 import { savingsGoalsApi, familiesApi } from "@/api"
 import type { SavingsGoal } from "@/types"
-import { Button, Input, Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui"
+import { Button, Input, Dialog, DialogContent, DialogHeader, DialogTitle, CurrencyInput } from "@/components/ui"
 
 const createSavingsSchema = (t: (key: string) => string) => z.object({
   name: z.string().min(1, t("savings.validation.nameRequired")).max(100),
@@ -47,6 +47,7 @@ export default function SavingsFormModal({ isOpen, onClose, goal }: SavingsFormM
     reset,
     watch,
     setValue,
+    control,
     formState: { errors },
   } = useForm<SavingsForm>({
     resolver: zodResolver(savingsSchema),
@@ -62,6 +63,7 @@ export default function SavingsFormModal({ isOpen, onClose, goal }: SavingsFormM
   })
 
   const selectedIcon = watch("icon")
+  const watchCurrency = watch("currency")
 
   useEffect(() => {
     if (goal) {
@@ -163,14 +165,20 @@ export default function SavingsFormModal({ isOpen, onClose, goal }: SavingsFormM
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-1">{t("savings.targetAmount")} *</label>
-              <Input
-                {...register("targetAmount", { valueAsNumber: true })}
-                type="number"
-                placeholder="10,000,000"
+              <Controller
+                name="targetAmount"
+                control={control}
+                render={({ field }) => (
+                  <CurrencyInput
+                    placeholder="10.000.000"
+                    currency={watchCurrency || "VND"}
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    error={errors.targetAmount?.message}
+                  />
+                )}
               />
-              {errors.targetAmount && (
-                <p className="text-sm text-destructive mt-1">{errors.targetAmount.message}</p>
-              )}
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">{t("accounts.currency")}</label>
