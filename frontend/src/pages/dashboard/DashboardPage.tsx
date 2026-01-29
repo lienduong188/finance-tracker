@@ -16,7 +16,7 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip,
+  Tooltip as RechartsTooltip,
   ResponsiveContainer,
   PieChart,
   Pie,
@@ -183,7 +183,7 @@ export function DashboardPage() {
                     tick={{ fontSize: 10 }}
                     width={40}
                   />
-                  <Tooltip
+                  <RechartsTooltip
                     formatter={(value) => formatCurrency(Number(value) || 0, currency)}
                     labelFormatter={(label) => formatFullDate(label, lang).split(", ")[1]}
                   />
@@ -239,7 +239,7 @@ export function DashboardPage() {
                         />
                       ))}
                     </Pie>
-                    <Tooltip
+                    <RechartsTooltip
                       formatter={(value) => formatCurrency(Number(value) || 0, currency)}
                     />
                   </PieChart>
