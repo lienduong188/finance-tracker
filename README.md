@@ -4,11 +4,28 @@ A personal finance management application to help individuals and families track
 
 ## Features
 
+### Core
 - **Account Management**: Track multiple money sources (cash, bank accounts, e-wallets, credit cards)
 - **Transaction Tracking**: Record income, expenses, and transfers between accounts
 - **Budget Management**: Set spending limits by category with alerts
-- **Multi-Currency Support**: Handle transactions in multiple currencies (VND, USD, EUR, etc.)
-- **Dashboard**: Visual overview of financial status, cash flow, and spending by category
+- **Multi-Currency Support**: Handle transactions in multiple currencies (VND, JPY)
+
+### Planning
+- **Recurring Transactions**: Automate regular income/expenses (daily, weekly, monthly, yearly)
+- **Savings Goals**: Set and track personal or group savings targets
+- **Debts Tracking**: Manage money lent and borrowed with payment history
+
+### Collaboration
+- **Family/Group Management**: Share finances with family or friends
+- **Group Invitations**: Invite members to join groups
+- **Shared Savings Goals**: Create savings goals that multiple members can contribute to
+
+### User Experience
+- **Dashboard**: Visual overview with cash flow charts and spending by category
+- **Dark Mode**: Light, Dark, and System theme options
+- **Multi-language**: Vietnamese, English, and Japanese (i18n)
+- **AI Chat Assistant**: Ask questions about your finances
+- **Notifications**: Budget warnings, debt reminders, group invitations
 
 ## Tech Stack
 
@@ -24,9 +41,11 @@ A personal finance management application to help individuals and families track
 ### Frontend
 - React 18 + TypeScript
 - Vite
-- TanStack Query
-- Tailwind CSS
+- TanStack Query (React Query)
+- Tailwind CSS v4
 - Recharts
+- react-i18next
+- React Hook Form + Zod
 
 ## Quick Start with Docker
 
@@ -86,9 +105,7 @@ npm run dev
 4. Set root directory to `/backend`
 5. Add environment variables:
    ```
-   DATABASE_URL=<from Railway PostgreSQL>
-   DATABASE_USERNAME=postgres
-   DATABASE_PASSWORD=<from Railway>
+   PGHOST, PGPORT, PGDATABASE, PGUSER, PGPASSWORD (auto from Railway PostgreSQL)
    JWT_SECRET=<generate a 32+ char secret>
    SPRING_PROFILES_ACTIVE=prod
    ```
@@ -103,39 +120,6 @@ npm run dev
    VITE_API_URL=https://your-railway-backend.up.railway.app/api
    ```
 4. Deploy!
-
-### Environment Variables
-
-#### Backend
-| Variable | Description | Example |
-|----------|-------------|---------|
-| DATABASE_URL | PostgreSQL connection URL | jdbc:postgresql://localhost:5432/finance_tracker |
-| DATABASE_USERNAME | Database username | postgres |
-| DATABASE_PASSWORD | Database password | your_password |
-| JWT_SECRET | Secret key for JWT (min 32 chars) | your-super-secret-key-here |
-| JWT_EXPIRATION | Access token expiry (ms) | 86400000 (24h) |
-| PORT | Server port | 8080 |
-
-#### Frontend
-| Variable | Description | Example |
-|----------|-------------|---------|
-| VITE_API_URL | Backend API URL | http://localhost:8080/api |
-
-## API Documentation
-
-Once running, access Swagger UI at: `http://localhost:8080/swagger-ui.html`
-
-### Main Endpoints
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/auth/register` | POST | Register new user |
-| `/api/auth/login` | POST | Login |
-| `/api/accounts` | GET/POST | List/Create accounts |
-| `/api/transactions` | GET/POST | List/Create transactions |
-| `/api/budgets` | GET/POST | List/Create budgets |
-| `/api/categories` | GET | List categories |
-| `/api/dashboard/summary` | GET | Financial summary |
 
 ## Project Structure
 
@@ -161,8 +145,9 @@ finance-tracker/
 │   ├── src/
 │   │   ├── api/             # API clients
 │   │   ├── components/      # UI components
-│   │   ├── context/         # React contexts
+│   │   ├── context/         # React contexts (Auth, Theme)
 │   │   ├── pages/           # Page components
+│   │   ├── i18n/            # Translations (vi, en, ja)
 │   │   ├── types/           # TypeScript types
 │   │   └── lib/             # Utilities
 │   ├── Dockerfile
@@ -171,9 +156,25 @@ finance-tracker/
 └── docker-compose.yml       # Local development
 ```
 
-## Screenshots
+## API Documentation
 
-Coming soon...
+Once running, access Swagger UI at: `http://localhost:8080/swagger-ui.html`
+
+### Main Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/auth/register` | POST | Register new user |
+| `/api/auth/login` | POST | Login |
+| `/api/accounts` | GET/POST | List/Create accounts |
+| `/api/transactions` | GET/POST | List/Create transactions |
+| `/api/budgets` | GET/POST | List/Create budgets |
+| `/api/recurring` | GET/POST | List/Create recurring transactions |
+| `/api/debts` | GET/POST | List/Create debts |
+| `/api/families` | GET/POST | List/Create family groups |
+| `/api/savings-goals` | GET/POST | List/Create savings goals |
+| `/api/categories` | GET | List categories |
+| `/api/dashboard/summary` | GET | Financial summary |
 
 ## License
 
