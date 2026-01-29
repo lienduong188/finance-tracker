@@ -138,14 +138,7 @@ export function Sidebar({ isOpen = true, onClose, onOpenChat }: SidebarProps) {
                   </span>
                 )}
               </div>
-              <span className="flex items-center gap-2">
-                {t("nav.notifications", "Thông báo")}
-                {totalNotificationCount > 0 && (
-                  <span className="rounded-full bg-destructive px-2 py-0.5 text-xs text-destructive-foreground">
-                    {totalNotificationCount}
-                  </span>
-                )}
-              </span>
+              {t("nav.notifications", "Thông báo")}
             </NavLink>
 
             {/* AI Assistant - only show on mobile/tablet */}

@@ -49,11 +49,13 @@ export default function NotificationsPage() {
   const { data: notificationsPage, isLoading } = useQuery({
     queryKey: ["notifications"],
     queryFn: () => notificationsApi.getAll(0, 50),
+    refetchInterval: 15000, // Real-time: refetch mỗi 15 giây
   })
 
   const { data: pendingInvitations } = useQuery({
     queryKey: ["received-invitations"],
     queryFn: invitationsApi.getReceived,
+    refetchInterval: 15000, // Real-time: refetch mỗi 15 giây
   })
 
   const markAsReadMutation = useMutation({
@@ -212,12 +214,20 @@ function NotificationItem({
   notification: Notification
   onMarkAsRead: () => void
 }) {
-  const { t } = useTranslation()
   const icon = typeIcons[notification.type] || <Bell className="w-5 h-5" />
   const currentLocale = localeMap[i18n.language] || vi
 
+  const handleClick = () => {
+    if (!notification.isRead) {
+      onMarkAsRead()
+    }
+  }
+
   return (
-    <Card className={notification.isRead ? "opacity-60" : ""}>
+    <Card
+      className={`${notification.isRead ? "opacity-60" : ""} ${!notification.isRead ? "cursor-pointer hover:bg-accent/50 transition-colors" : ""}`}
+      onClick={handleClick}
+    >
       <CardContent className="p-4">
         <div className="flex items-start gap-3">
           <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
@@ -230,9 +240,7 @@ function NotificationItem({
                 <p className="text-sm text-muted-foreground">{notification.message}</p>
               </div>
               {!notification.isRead && (
-                <Button variant="ghost" size="sm" onClick={onMarkAsRead} title={t("notifications.markAsRead")}>
-                  <Check className="w-4 h-4" />
-                </Button>
+                <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0 mt-2" title="Chưa đọc" />
               )}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
