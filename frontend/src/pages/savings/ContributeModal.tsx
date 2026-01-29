@@ -46,9 +46,7 @@ export default function ContributeModal({
     queryFn: accountsApi.getAll,
   })
 
-  const filteredAccounts = accounts?.filter(
-    (a) => a.isActive && a.currency === currency
-  )
+  const activeAccounts = accounts?.filter((a) => a.isActive)
 
   const contributeSchema = createContributeSchema(t)
 
@@ -111,9 +109,10 @@ export default function ContributeModal({
               className="w-full border rounded-md p-2"
             >
               <option value="">{t("savings.selectAccount")}</option>
-              {filteredAccounts?.map((account) => (
+              {activeAccounts?.map((account) => (
                 <option key={account.id} value={account.id}>
                   {account.name} - {formatCurrency(account.currentBalance, account.currency)}
+                  {account.currency !== currency && ` (${account.currency})`}
                 </option>
               ))}
             </select>
@@ -121,9 +120,19 @@ export default function ContributeModal({
               <p className="text-sm text-destructive mt-1">{errors.accountId.message}</p>
             )}
             {selectedAccount && (
-              <p className="text-sm text-muted-foreground mt-1">
-                {t("savings.currentBalance")}: {formatCurrency(selectedAccount.currentBalance, selectedAccount.currency)}
-              </p>
+              <>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {t("savings.currentBalance")}: {formatCurrency(selectedAccount.currentBalance, selectedAccount.currency)}
+                </p>
+                {selectedAccount.currency !== currency && (
+                  <p className="text-sm text-amber-600 mt-1">
+                    {t("savings.currencyMismatchWarning", {
+                      accountCurrency: selectedAccount.currency,
+                      goalCurrency: currency
+                    })}
+                  </p>
+                )}
+              </>
             )}
           </div>
 

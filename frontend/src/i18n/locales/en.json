@@ -623,6 +623,7 @@
     "contributeDate": "Contribution Date",
     "contributeNote": "Note (optional)",
     "contributeHint": "The amount will be deducted from the source account and added to the savings goal",
+    "currencyMismatchWarning": "Note: This account uses {{accountCurrency}}, different from the goal ({{goalCurrency}}). The amount will be converted.",
     "goalName": "Goal Name",
     "goalNamePlaceholder": "e.g. Trip to Danang",
     "goalDescription": "Description",

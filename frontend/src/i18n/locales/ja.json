@@ -623,6 +623,7 @@
     "contributeDate": "入金日",
     "contributeNote": "メモ（任意）",
     "contributeHint": "金額は引き落とし口座から差し引かれ、貯蓄目標に追加されます",
+    "currencyMismatchWarning": "注意：この口座は{{accountCurrency}}を使用しており、目標（{{goalCurrency}}）と異なります。金額は換算されます。",
     "goalName": "目標名",
     "goalNamePlaceholder": "例：沖縄旅行",
     "goalDescription": "説明",

@@ -623,6 +623,7 @@
     "contributeDate": "Ngày đóng góp",
     "contributeNote": "Ghi chú (tùy chọn)",
     "contributeHint": "Số tiền sẽ được trừ từ tài khoản nguồn và thêm vào mục tiêu tiết kiệm",
+    "currencyMismatchWarning": "Lưu ý: Tài khoản này sử dụng {{accountCurrency}}, khác với mục tiêu ({{goalCurrency}}). Số tiền sẽ được quy đổi.",
     "goalName": "Tên mục tiêu",
     "goalNamePlaceholder": "Ví dụ: Du lịch Đà Nẵng",
     "goalDescription": "Mô tả",
