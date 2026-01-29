@@ -218,6 +218,7 @@ export function BudgetFormModal({ isOpen, onClose, budget }: BudgetFormModalProp
                 <option value="VND">VND</option>
                 <option value="USD">USD</option>
                 <option value="EUR">EUR</option>
+                <option value="JPY">JPY</option>
               </Select>
             </div>
           </div>
