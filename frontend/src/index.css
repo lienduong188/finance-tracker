@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 @theme {
+  /* Light mode colors (default) */
   --color-background: #ffffff;
   --color-foreground: #0f172a;
   --color-card: #ffffff;
@@ -19,7 +20,7 @@
   --color-input: #e2e8f0;
   --color-ring: #2563eb;
 
-  /* Finance specific colors */
+  /* Finance specific colors - same in both themes */
   --color-income: #22c55e;
   --color-expense: #ef4444;
   --color-transfer: #3b82f6;
@@ -27,6 +28,27 @@
 
   --radius: 0.5rem;
   --font-sans: "Inter", system-ui, sans-serif;
+}
+
+/* Dark mode overrides */
+.dark {
+  --color-background: #0f172a;
+  --color-foreground: #f8fafc;
+  --color-card: #1e293b;
+  --color-card-foreground: #f8fafc;
+  --color-primary: #3b82f6;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #334155;
+  --color-secondary-foreground: #f8fafc;
+  --color-muted: #334155;
+  --color-muted-foreground: #94a3b8;
+  --color-accent: #334155;
+  --color-accent-foreground: #f8fafc;
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+  --color-border: #334155;
+  --color-input: #334155;
+  --color-ring: #3b82f6;
 }
 
 @layer base {

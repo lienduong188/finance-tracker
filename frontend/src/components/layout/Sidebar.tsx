@@ -22,6 +22,7 @@ import {
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/context/AuthContext"
 import { LanguageSwitch } from "@/components/LanguageSwitch"
+import { ThemeSwitch } from "@/components/ThemeSwitch"
 import { invitationsApi, notificationsApi } from "@/api"
 import { CollapsibleNavGroup } from "./CollapsibleNavGroup"
 
@@ -204,9 +205,10 @@ export function Sidebar({ isOpen = true, onClose, onOpenChat }: SidebarProps) {
             )}
           </nav>
 
-          {/* Language Switch */}
+          {/* Language & Theme Switch */}
           <div className="border-t">
             <LanguageSwitch />
+            <ThemeSwitch />
           </div>
 
           {/* User section */}

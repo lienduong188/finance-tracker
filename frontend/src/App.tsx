@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { AuthProvider } from "./context/AuthContext"
+import { ThemeProvider } from "./context/ThemeContext"
 import { MainLayout, AdminLayout } from "./components/layout"
 import { LoginPage, RegisterPage, ForgotPasswordPage, ResetPasswordPage, VerifyEmailPage } from "./pages/auth"
 import { TermsPage, PrivacyPage } from "./pages/legal"
@@ -29,8 +30,9 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <BrowserRouter>
+      <ThemeProvider>
+        <AuthProvider>
+          <BrowserRouter>
           <Routes>
             {/* Public routes */}
             <Route path="/login" element={<LoginPage />} />
@@ -65,8 +67,9 @@ function App() {
               <Route path="/admin/token-usage" element={<AdminTokenUsagePage />} />
             </Route>
           </Routes>
-        </BrowserRouter>
-      </AuthProvider>
+          </BrowserRouter>
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   )
 }

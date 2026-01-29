@@ -339,6 +339,12 @@
   "settings": {
     "title": "Cài đặt",
     "language": "Ngôn ngữ",
+    "theme": "Giao diện",
+    "themes": {
+      "light": "Sáng",
+      "dark": "Tối",
+      "system": "Theo hệ thống"
+    },
     "languages": {
       "vi": "Tiếng Việt",
       "en": "English",

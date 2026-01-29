@@ -339,6 +339,12 @@
   "settings": {
     "title": "設定",
     "language": "言語",
+    "theme": "テーマ",
+    "themes": {
+      "light": "ライト",
+      "dark": "ダーク",
+      "system": "システム"
+    },
     "languages": {
       "vi": "Tiếng Việt",
       "en": "English",
