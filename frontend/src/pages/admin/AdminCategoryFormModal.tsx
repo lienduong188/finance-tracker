@@ -60,6 +60,8 @@ export function AdminCategoryFormModal({
   })
 
   useEffect(() => {
+    if (!isOpen) return
+
     setErrorMessage(null)
     if (category) {
       reset({
@@ -82,7 +84,7 @@ export function AdminCategoryFormModal({
         color: "#3b82f6",
       })
     }
-  }, [category, reset])
+  }, [category, reset, isOpen])
 
   const createMutation = useMutation({
     mutationFn: adminApi.createSystemCategory,

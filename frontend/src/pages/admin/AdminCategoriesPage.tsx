@@ -154,6 +154,7 @@ export function AdminCategoriesPage() {
 
       {/* Modal */}
       <AdminCategoryFormModal
+        key={editingCategory?.id ?? "new"}
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         category={editingCategory}
