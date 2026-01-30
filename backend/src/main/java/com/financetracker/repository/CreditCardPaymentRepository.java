@@ -22,7 +22,7 @@ public interface CreditCardPaymentRepository extends JpaRepository<CreditCardPay
 
     List<CreditCardPayment> findByPlanIdAndStatus(UUID planId, PaymentStatus status);
 
-    @Query("SELECT p FROM CreditCardPayment p WHERE p.plan.user.id = :userId AND p.status = 'PENDING' AND p.dueDate BETWEEN :startDate AND :endDate ORDER BY p.dueDate")
+    @Query("SELECT p FROM CreditCardPayment p WHERE p.plan.user.id = :userId AND p.plan.status = 'ACTIVE' AND p.status = 'PENDING' AND p.dueDate BETWEEN :startDate AND :endDate ORDER BY p.dueDate")
     List<CreditCardPayment> findUpcomingPayments(
             @Param("userId") UUID userId,
             @Param("startDate") LocalDate startDate,
