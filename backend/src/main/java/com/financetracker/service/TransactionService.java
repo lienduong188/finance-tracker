@@ -29,6 +29,7 @@ public class TransactionService {
     private final RecurringTransactionRepository recurringTransactionRepository;
     private final FamilyRepository familyRepository;
     private final FamilyMemberRepository familyMemberRepository;
+    private final SavingsContributionRepository savingsContributionRepository;
 
     public Page<TransactionResponse> getTransactions(UUID userId, Pageable pageable) {
         return transactionRepository.findByUserId(userId, pageable)
@@ -126,6 +127,11 @@ public class TransactionService {
         Transaction transaction = transactionRepository.findByIdAndUserId(transactionId, userId)
                 .orElseThrow(() -> ApiException.notFound("Transaction"));
 
+        // Check if transaction is linked to a savings contribution
+        if (savingsContributionRepository.existsByTransactionId(transactionId)) {
+            throw ApiException.badRequest("Giao dịch này liên kết với đóng góp mục tiêu tiết kiệm. Vui lòng chỉnh sửa từ trang Mục tiêu tiết kiệm.");
+        }
+
         // Revert old balance
         updateAccountBalance(transaction.getAccount(), transaction.getType(), transaction.getAmount(), false);
         if (transaction.getToAccount() != null) {
@@ -177,6 +183,11 @@ public class TransactionService {
     public void deleteTransaction(UUID userId, UUID transactionId) {
         Transaction transaction = transactionRepository.findByIdAndUserId(transactionId, userId)
                 .orElseThrow(() -> ApiException.notFound("Transaction"));
+
+        // Check if transaction is linked to a savings contribution
+        if (savingsContributionRepository.existsByTransactionId(transactionId)) {
+            throw ApiException.badRequest("Giao dịch này liên kết với đóng góp mục tiêu tiết kiệm. Vui lòng xóa từ trang Mục tiêu tiết kiệm.");
+        }
 
         updateAccountBalance(transaction.getAccount(), transaction.getType(), transaction.getAmount(), false);
         if (transaction.getToAccount() != null) {

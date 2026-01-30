@@ -29,4 +29,6 @@ public interface SavingsContributionRepository extends JpaRepository<SavingsCont
 
     @Query("SELECT COUNT(DISTINCT c.user.id) FROM SavingsContribution c WHERE c.goal.id = :goalId")
     long countDistinctUsersByGoalId(@Param("goalId") UUID goalId);
+
+    boolean existsByTransactionId(UUID transactionId);
 }
