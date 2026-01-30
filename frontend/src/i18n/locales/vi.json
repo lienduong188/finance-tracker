@@ -186,7 +186,14 @@
     "clearFilters": "Xóa bộ lọc",
     "totalIncome": "Tổng thu",
     "totalExpense": "Tổng chi",
-    "balance": "Số dư"
+    "balance": "Số dư",
+    "initialBalance": "Số dư ban đầu",
+    "transferIn": "Nhận chuyển khoản",
+    "periods": {
+      "day": "Ngày",
+      "week": "Tuần",
+      "month": "Tháng"
+    }
   },
   "budgets": {
     "title": "Ngân sách",

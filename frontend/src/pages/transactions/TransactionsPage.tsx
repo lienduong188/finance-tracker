@@ -49,6 +49,7 @@ import { TransactionFormModal } from "./TransactionFormModal"
 
 type ViewMode = "list" | "calendar" | "category" | "account"
 type CalendarViewMode = "month" | "week" | "day"
+type AccountViewPeriod = "day" | "week" | "month"
 
 const transactionTypeIcons: Record<TransactionType, typeof TrendingUp> = {
   INCOME: TrendingUp,
@@ -94,6 +95,7 @@ export function TransactionsPage() {
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [calendarMonth, setCalendarMonth] = useState<Date>(new Date())
+  const [accountViewPeriod, setAccountViewPeriod] = useState<AccountViewPeriod>("week")
   const [filters, setFilters] = useState({
     accountId: "",
     type: "",
@@ -174,20 +176,97 @@ export function TransactionsPage() {
     return Object.entries(categoryMap).sort((a, b) => Math.abs(b[1].total) - Math.abs(a[1].total))
   }, [transactions, t])
 
-  // Group transactions by account
+  // Calculate period date range for account view
+  const accountViewDateRange = useMemo(() => {
+    const today = new Date()
+    let start: Date
+    let end: Date = endOfWeek(today, { locale })
+
+    if (accountViewPeriod === "day") {
+      start = today
+      end = today
+    } else if (accountViewPeriod === "week") {
+      start = startOfWeek(today, { locale })
+      end = endOfWeek(today, { locale })
+    } else {
+      start = startOfMonth(today)
+      end = endOfMonth(today)
+    }
+
+    return {
+      start: format(start, "yyyy-MM-dd"),
+      end: format(end, "yyyy-MM-dd"),
+    }
+  }, [accountViewPeriod, locale])
+
+  // Group transactions by account with period filter
   const groupedByAccount = useMemo(() => {
-    const accountMap: Record<string, { name: string; income: number; expense: number; transactions: Transaction[] }> = {}
-    transactions?.content?.forEach((tx) => {
+    const accountMap: Record<string, {
+      id: string
+      name: string
+      initialBalance: number
+      currency: string
+      income: number
+      expense: number
+      transferIn: number
+      transactions: Transaction[]
+    }> = {}
+
+    // Initialize accounts with their info
+    accounts?.forEach((acc) => {
+      accountMap[acc.id] = {
+        id: acc.id,
+        name: acc.name,
+        initialBalance: acc.initialBalance,
+        currency: acc.currency,
+        income: 0,
+        expense: 0,
+        transferIn: 0,
+        transactions: [],
+      }
+    })
+
+    // Filter transactions by period
+    const filteredTxns = transactions?.content?.filter((tx) => {
+      return tx.transactionDate >= accountViewDateRange.start && tx.transactionDate <= accountViewDateRange.end
+    }) || []
+
+    filteredTxns.forEach((tx) => {
       const key = tx.accountId
       if (!accountMap[key]) {
-        accountMap[key] = { name: tx.accountName, income: 0, expense: 0, transactions: [] }
+        accountMap[key] = {
+          id: key,
+          name: tx.accountName,
+          initialBalance: 0,
+          currency: tx.currency,
+          income: 0,
+          expense: 0,
+          transferIn: 0,
+          transactions: [],
+        }
       }
-      if (tx.type === "INCOME") accountMap[key].income += tx.amount
-      else if (tx.type === "EXPENSE") accountMap[key].expense += tx.amount
+
+      if (tx.type === "INCOME") {
+        accountMap[key].income += tx.amount
+      } else if (tx.type === "EXPENSE") {
+        accountMap[key].expense += tx.amount
+      } else if (tx.type === "TRANSFER") {
+        // Transfer out from this account (expense side)
+        accountMap[key].expense += tx.amount
+
+        // Transfer in to target account
+        if (tx.toAccountId && accountMap[tx.toAccountId]) {
+          const transferAmount = tx.exchangeRate ? tx.amount * tx.exchangeRate : tx.amount
+          accountMap[tx.toAccountId].transferIn += transferAmount
+        }
+      }
+
       accountMap[key].transactions.push(tx)
     })
-    return Object.entries(accountMap)
-  }, [transactions])
+
+    // Only return accounts that have transactions in the period
+    return Object.entries(accountMap).filter(([, acc]) => acc.transactions.length > 0)
+  }, [transactions, accounts, accountViewDateRange])
 
   // Calendar data
   const calendarDays = useMemo(() => {
@@ -710,57 +789,84 @@ export function TransactionsPage() {
 
   // Render Account View - 2 columns grid
   const renderAccountView = () => (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-      {groupedByAccount.map(([key, acc]) => (
-        <Card key={key}>
-          <CardHeader className="p-4 pb-2">
-            <CardTitle className="flex items-center justify-between text-base">
-              <span>{acc.name}</span>
-              <span className={cn("text-sm", acc.income - acc.expense >= 0 ? "text-income" : "text-expense")}>
-                {acc.income - acc.expense >= 0 ? "+" : ""}{formatCurrency(acc.income - acc.expense, defaultCurrency)}
-              </span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 pt-0">
-            <div className="mb-3 flex gap-4 text-sm">
-              <div>
-                <span className="text-muted-foreground">{t("transactions.totalIncome")}: </span>
-                <span className="font-medium text-income">{formatCurrency(acc.income, defaultCurrency)}</span>
-              </div>
-              <div>
-                <span className="text-muted-foreground">{t("transactions.totalExpense")}: </span>
-                <span className="font-medium text-expense">{formatCurrency(acc.expense, defaultCurrency)}</span>
-              </div>
-            </div>
-            <div className="space-y-2">
-              {acc.transactions.slice(0, 5).map((tx) => (
-                <div key={tx.id} className="flex items-center justify-between rounded border p-2 text-sm">
-                  <div className="flex items-center gap-2">
-                    <span>{tx.categoryIcon || "💰"}</span>
-                    <div>
-                      <p className="font-medium">{tx.categoryName ? t(`categories.${tx.categoryName}`, tx.categoryName) : t(`transactions.types.${tx.type}`)}</p>
-                      <p className="text-xs text-muted-foreground">{formatFullDate(tx.transactionDate, lang)}</p>
-                    </div>
-                  </div>
-                  <span className={cn("font-medium", transactionTypeColors[tx.type])}>
-                    {tx.type === "INCOME" ? "+" : "-"}{formatCurrency(tx.amount, tx.currency)}
+    <div className="space-y-4">
+      {/* Period filter */}
+      <div className="flex justify-center gap-1 rounded-lg bg-muted p-1">
+        {(["day", "week", "month"] as AccountViewPeriod[]).map((period) => (
+          <button
+            key={period}
+            onClick={() => setAccountViewPeriod(period)}
+            className={cn(
+              "rounded-md px-4 py-1.5 text-sm font-medium transition-colors",
+              accountViewPeriod === period ? "bg-background shadow" : "hover:bg-background/50"
+            )}
+          >
+            {t(`transactions.periods.${period}`)}
+          </button>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {groupedByAccount.map(([key, acc]) => {
+          // 総収入 = initialBalance + income + transferIn
+          const totalIncome = acc.initialBalance + acc.income + acc.transferIn
+          // 総支出 = expense (bao gồm cả transfer out)
+          const totalExpense = acc.expense
+          // 収支 = totalIncome - totalExpense
+          const balance = totalIncome - totalExpense
+
+          return (
+            <Card key={key}>
+              <CardHeader className="p-4 pb-2">
+                <CardTitle className="flex items-center justify-between text-base">
+                  <span>{acc.name}</span>
+                  <span className={cn("text-sm", balance >= 0 ? "text-income" : "text-expense")}>
+                    {balance >= 0 ? "+" : ""}{formatCurrency(balance, acc.currency)}
                   </span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4 pt-0">
+                <div className="mb-3 flex gap-4 text-sm">
+                  <div>
+                    <span className="text-muted-foreground">{t("transactions.totalIncome")}: </span>
+                    <span className="font-medium text-income">{formatCurrency(totalIncome, acc.currency)}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">{t("transactions.totalExpense")}: </span>
+                    <span className="font-medium text-expense">{formatCurrency(totalExpense, acc.currency)}</span>
+                  </div>
                 </div>
-              ))}
-              {acc.transactions.length > 5 && (
-                <p className="text-center text-xs text-muted-foreground">+{acc.transactions.length - 5} more transactions</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-      {groupedByAccount.length === 0 && (
-        <Card>
-          <CardContent className="flex h-48 items-center justify-center text-muted-foreground">
-            {t("transactions.noTransactions")}
-          </CardContent>
-        </Card>
-      )}
+                <div className="space-y-2">
+                  {acc.transactions.slice(0, 5).map((tx) => (
+                    <div key={tx.id} className="flex items-center justify-between rounded border p-2 text-sm">
+                      <div className="flex items-center gap-2">
+                        <span>{tx.categoryIcon || "💰"}</span>
+                        <div>
+                          <p className="font-medium">{tx.categoryName ? t(`categories.${tx.categoryName}`, tx.categoryName) : t(`transactions.types.${tx.type}`)}</p>
+                          <p className="text-xs text-muted-foreground">{formatFullDate(tx.transactionDate, lang)}</p>
+                        </div>
+                      </div>
+                      <span className={cn("font-medium", transactionTypeColors[tx.type])}>
+                        {tx.type === "INCOME" ? "+" : "-"}{formatCurrency(tx.amount, tx.currency)}
+                      </span>
+                    </div>
+                  ))}
+                  {acc.transactions.length > 5 && (
+                    <p className="text-center text-xs text-muted-foreground">+{acc.transactions.length - 5} more transactions</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )
+        })}
+        {groupedByAccount.length === 0 && (
+          <Card className="sm:col-span-2">
+            <CardContent className="flex h-48 items-center justify-center text-muted-foreground">
+              {t("transactions.noTransactions")}
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   )
 

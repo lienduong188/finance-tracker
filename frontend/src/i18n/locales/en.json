@@ -186,7 +186,14 @@
     "clearFilters": "Clear Filters",
     "totalIncome": "Total Income",
     "totalExpense": "Total Expense",
-    "balance": "Balance"
+    "balance": "Balance",
+    "initialBalance": "Initial Balance",
+    "transferIn": "Transfer In",
+    "periods": {
+      "day": "Day",
+      "week": "Week",
+      "month": "Month"
+    }
   },
   "budgets": {
     "title": "Budgets",

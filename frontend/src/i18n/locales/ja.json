@@ -186,7 +186,14 @@
     "clearFilters": "フィルターをクリア",
     "totalIncome": "総収入",
     "totalExpense": "総支出",
-    "balance": "残高"
+    "balance": "残高",
+    "initialBalance": "初期残高",
+    "transferIn": "振込入金",
+    "periods": {
+      "day": "日",
+      "week": "週",
+      "month": "月"
+    }
   },
   "budgets": {
     "title": "予算",
