@@ -761,19 +761,40 @@
     "invitedBy": "Invited by",
     "invitedToJoin": "invited you to join",
     "types": {
-      "INVITATION_RECEIVED": "Group invitation received",
+      "INVITATION_RECEIVED": "Group invitation",
       "INVITATION_ACCEPTED": "Invitation accepted",
       "RECURRING_DUE_SOON": "Recurring transaction due soon",
       "DEBT_DUE_SOON": "Debt/Loan due soon",
+      "CREDIT_CARD_PAYMENT_DUE": "Credit card payment due soon",
+      "CREDIT_CARD_PAYMENT_OVERDUE": "Credit card payment overdue",
       "BUDGET_WARNING": "Budget warning",
       "BUDGET_EXCEEDED": "Budget exceeded",
-      "ACCOUNT_LOW_BALANCE": "Account low balance",
+      "ACCOUNT_LOW_BALANCE": "Low balance",
       "ACCOUNT_EMPTY": "Account empty",
       "EXCHANGE_RATE_ALERT": "Exchange rate alert",
       "SAVINGS_CONTRIBUTION": "Savings contribution",
       "SAVINGS_GOAL_REACHED": "Savings goal reached",
       "MEMBER_JOINED": "New member joined",
-      "MEMBER_LEFT": "Member left group"
+      "MEMBER_LEFT": "Member left",
+      "USER_ACCOUNT_DELETED": "Account deletion requested"
+    },
+    "messages": {
+      "INVITATION_RECEIVED": "{{inviterName}} invited you to join \"{{familyName}}\"",
+      "INVITATION_ACCEPTED": "{{inviteeName}} accepted your invitation to join \"{{familyName}}\"",
+      "RECURRING_DUE_SOON": "Transaction \"{{transactionName}}\" is due in {{daysUntilDue}} days",
+      "DEBT_DUE_SOON": "Debt \"{{debtName}}\" ({{amount}} {{currency}}) is due in {{daysUntilDue}} days",
+      "CREDIT_CARD_PAYMENT_DUE": "Credit card payment \"{{planName}}\" ({{amount}} {{currency}}) is due on {{dueDate}}",
+      "CREDIT_CARD_PAYMENT_OVERDUE": "Credit card payment \"{{planName}}\" ({{amount}} {{currency}}) is overdue since {{dueDate}}",
+      "BUDGET_WARNING": "Budget for \"{{categoryName}}\" has reached {{percentage}}%",
+      "BUDGET_EXCEEDED": "Budget for \"{{categoryName}}\" has exceeded {{percentage}}%!",
+      "ACCOUNT_LOW_BALANCE": "Account \"{{accountName}}\" has {{balance}} {{currency}} remaining",
+      "ACCOUNT_EMPTY": "Account \"{{accountName}}\" has {{balance}} {{currency}} remaining",
+      "EXCHANGE_RATE_ALERT": "Exchange rate {{fromCurrency}}/{{toCurrency}} has reached 1:{{rate}}",
+      "SAVINGS_CONTRIBUTION": "{{contributorName}} contributed {{amount}} {{currency}} to \"{{goalName}}\"",
+      "SAVINGS_GOAL_REACHED": "Congratulations! Goal \"{{goalName}}\" has reached {{targetAmount}} {{currency}}",
+      "MEMBER_JOINED": "{{memberName}} joined \"{{familyName}}\"",
+      "MEMBER_LEFT": "{{memberName}} left \"{{familyName}}\"",
+      "USER_ACCOUNT_DELETED": "User {{userFullName}} ({{userEmail}}) requested account deletion. Data will be deleted in 7 days."
     }
   }
 }

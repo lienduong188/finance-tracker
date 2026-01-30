@@ -765,6 +765,8 @@
       "INVITATION_ACCEPTED": "招待が承諾されました",
       "RECURRING_DUE_SOON": "定期取引が近づいています",
       "DEBT_DUE_SOON": "借入の期限が近づいています",
+      "CREDIT_CARD_PAYMENT_DUE": "クレジットカード支払いが近づいています",
+      "CREDIT_CARD_PAYMENT_OVERDUE": "クレジットカード支払いが延滞しています",
       "BUDGET_WARNING": "予算警告",
       "BUDGET_EXCEEDED": "予算超過",
       "ACCOUNT_LOW_BALANCE": "残高不足",
@@ -773,7 +775,26 @@
       "SAVINGS_CONTRIBUTION": "貯蓄への入金",
       "SAVINGS_GOAL_REACHED": "貯蓄目標達成",
       "MEMBER_JOINED": "新しいメンバーが参加",
-      "MEMBER_LEFT": "メンバーが退出"
+      "MEMBER_LEFT": "メンバーが退出",
+      "USER_ACCOUNT_DELETED": "退会リクエスト"
+    },
+    "messages": {
+      "INVITATION_RECEIVED": "{{inviterName}}さんが「{{familyName}}」への参加を招待しました",
+      "INVITATION_ACCEPTED": "{{inviteeName}}さんが「{{familyName}}」への招待を承諾しました",
+      "RECURRING_DUE_SOON": "取引「{{transactionName}}」は{{daysUntilDue}}日後に期限を迎えます",
+      "DEBT_DUE_SOON": "借入「{{debtName}}」（{{amount}} {{currency}}）は{{daysUntilDue}}日後に期限を迎えます",
+      "CREDIT_CARD_PAYMENT_DUE": "クレジットカード支払い「{{planName}}」（{{amount}} {{currency}}）の期限は{{dueDate}}です",
+      "CREDIT_CARD_PAYMENT_OVERDUE": "クレジットカード支払い「{{planName}}」（{{amount}} {{currency}}）は{{dueDate}}から延滞しています",
+      "BUDGET_WARNING": "「{{categoryName}}」の予算は{{percentage}}%に達しました",
+      "BUDGET_EXCEEDED": "「{{categoryName}}」の予算は{{percentage}}%を超えました！",
+      "ACCOUNT_LOW_BALANCE": "口座「{{accountName}}」の残高は{{balance}} {{currency}}です",
+      "ACCOUNT_EMPTY": "口座「{{accountName}}」の残高は{{balance}} {{currency}}です",
+      "EXCHANGE_RATE_ALERT": "為替レート{{fromCurrency}}/{{toCurrency}}が1:{{rate}}に達しました",
+      "SAVINGS_CONTRIBUTION": "{{contributorName}}さんが「{{goalName}}」に{{amount}} {{currency}}を入金しました",
+      "SAVINGS_GOAL_REACHED": "おめでとうございます！目標「{{goalName}}」が{{targetAmount}} {{currency}}に達成しました",
+      "MEMBER_JOINED": "{{memberName}}さんが「{{familyName}}」に参加しました",
+      "MEMBER_LEFT": "{{memberName}}さんが「{{familyName}}」を退出しました",
+      "USER_ACCOUNT_DELETED": "ユーザー{{userFullName}}（{{userEmail}}）が退会をリクエストしました。データは7日後に削除されます。"
     }
   }
 }

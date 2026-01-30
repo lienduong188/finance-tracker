@@ -12,6 +12,7 @@ import {
   UserPlus,
   UserMinus,
   AlertCircle,
+  CreditCard,
 } from "lucide-react"
 import { notificationsApi, invitationsApi } from "@/api"
 import type { Notification } from "@/api/notifications"
@@ -31,6 +32,8 @@ const typeIcons: Record<string, React.ReactNode> = {
   INVITATION_ACCEPTED: <Check className="w-5 h-5 text-green-500" />,
   RECURRING_DUE_SOON: <Calendar className="w-5 h-5 text-orange-500" />,
   DEBT_DUE_SOON: <Wallet className="w-5 h-5 text-red-500" />,
+  CREDIT_CARD_PAYMENT_DUE: <CreditCard className="w-5 h-5 text-orange-500" />,
+  CREDIT_CARD_PAYMENT_OVERDUE: <CreditCard className="w-5 h-5 text-red-500" />,
   BUDGET_WARNING: <AlertCircle className="w-5 h-5 text-yellow-500" />,
   BUDGET_EXCEEDED: <AlertCircle className="w-5 h-5 text-red-500" />,
   ACCOUNT_LOW_BALANCE: <Wallet className="w-5 h-5 text-yellow-500" />,
@@ -40,6 +43,7 @@ const typeIcons: Record<string, React.ReactNode> = {
   SAVINGS_GOAL_REACHED: <PiggyBank className="w-5 h-5 text-green-600" />,
   MEMBER_JOINED: <UserPlus className="w-5 h-5 text-blue-500" />,
   MEMBER_LEFT: <UserMinus className="w-5 h-5 text-gray-500" />,
+  USER_ACCOUNT_DELETED: <AlertCircle className="w-5 h-5 text-red-500" />,
 }
 
 export default function NotificationsPage() {
@@ -214,6 +218,7 @@ function NotificationItem({
   notification: Notification
   onMarkAsRead: () => void
 }) {
+  const { t } = useTranslation()
   const icon = typeIcons[notification.type] || <Bell className="w-5 h-5" />
   const currentLocale = localeMap[i18n.language] || vi
 
@@ -221,6 +226,22 @@ function NotificationItem({
     if (!notification.isRead) {
       onMarkAsRead()
     }
+  }
+
+  // Get localized title and message
+  const getLocalizedTitle = () => {
+    const key = `notifications.types.${notification.type}`
+    const translated = t(key)
+    // Fallback to backend title if translation key not found
+    return translated !== key ? translated : notification.title
+  }
+
+  const getLocalizedMessage = () => {
+    const key = `notifications.messages.${notification.type}`
+    const data = notification.data || {}
+    const translated = t(key, data as Record<string, string>)
+    // Fallback to backend message if translation key not found
+    return translated !== key ? translated : notification.message
   }
 
   return (
@@ -236,11 +257,11 @@ function NotificationItem({
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
               <div>
-                <p className="font-medium">{notification.title}</p>
-                <p className="text-sm text-muted-foreground">{notification.message}</p>
+                <p className="font-medium">{getLocalizedTitle()}</p>
+                <p className="text-sm text-muted-foreground">{getLocalizedMessage()}</p>
               </div>
               {!notification.isRead && (
-                <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0 mt-2" title="Chưa đọc" />
+                <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0 mt-2" title={t("notifications.markAsRead")} />
               )}
             </div>
             <p className="text-xs text-muted-foreground mt-1">

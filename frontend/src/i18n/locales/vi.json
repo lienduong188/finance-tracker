@@ -765,6 +765,8 @@
       "INVITATION_ACCEPTED": "Lời mời được chấp nhận",
       "RECURRING_DUE_SOON": "Giao dịch định kỳ sắp đến hạn",
       "DEBT_DUE_SOON": "Khoản vay/nợ sắp đến hạn",
+      "CREDIT_CARD_PAYMENT_DUE": "Thanh toán thẻ tín dụng sắp đến hạn",
+      "CREDIT_CARD_PAYMENT_OVERDUE": "Thanh toán thẻ tín dụng quá hạn",
       "BUDGET_WARNING": "Cảnh báo ngân sách",
       "BUDGET_EXCEEDED": "Vượt ngân sách",
       "ACCOUNT_LOW_BALANCE": "Tài khoản sắp hết tiền",
@@ -773,7 +775,26 @@
       "SAVINGS_CONTRIBUTION": "Đóng góp tiết kiệm",
       "SAVINGS_GOAL_REACHED": "Đạt mục tiêu tiết kiệm",
       "MEMBER_JOINED": "Thành viên mới",
-      "MEMBER_LEFT": "Thành viên rời nhóm"
+      "MEMBER_LEFT": "Thành viên rời nhóm",
+      "USER_ACCOUNT_DELETED": "Yêu cầu xóa tài khoản"
+    },
+    "messages": {
+      "INVITATION_RECEIVED": "{{inviterName}} đã mời bạn tham gia nhóm \"{{familyName}}\"",
+      "INVITATION_ACCEPTED": "{{inviteeName}} đã chấp nhận lời mời tham gia nhóm \"{{familyName}}\"",
+      "RECURRING_DUE_SOON": "Giao dịch \"{{transactionName}}\" sẽ đến hạn trong {{daysUntilDue}} ngày",
+      "DEBT_DUE_SOON": "Khoản \"{{debtName}}\" ({{amount}} {{currency}}) sẽ đến hạn trong {{daysUntilDue}} ngày",
+      "CREDIT_CARD_PAYMENT_DUE": "Thanh toán thẻ tín dụng \"{{planName}}\" ({{amount}} {{currency}}) sắp đến hạn vào {{dueDate}}",
+      "CREDIT_CARD_PAYMENT_OVERDUE": "Thanh toán thẻ tín dụng \"{{planName}}\" ({{amount}} {{currency}}) đã quá hạn từ {{dueDate}}",
+      "BUDGET_WARNING": "Ngân sách cho \"{{categoryName}}\" đã đạt {{percentage}}%",
+      "BUDGET_EXCEEDED": "Ngân sách cho \"{{categoryName}}\" đã vượt {{percentage}}%!",
+      "ACCOUNT_LOW_BALANCE": "Tài khoản \"{{accountName}}\" còn {{balance}} {{currency}}",
+      "ACCOUNT_EMPTY": "Tài khoản \"{{accountName}}\" còn {{balance}} {{currency}}",
+      "EXCHANGE_RATE_ALERT": "Tỷ giá {{fromCurrency}}/{{toCurrency}} đã đạt 1:{{rate}}",
+      "SAVINGS_CONTRIBUTION": "{{contributorName}} đã đóng góp {{amount}} {{currency}} vào mục tiêu \"{{goalName}}\"",
+      "SAVINGS_GOAL_REACHED": "Chúc mừng! Mục tiêu \"{{goalName}}\" đã đạt {{targetAmount}} {{currency}}",
+      "MEMBER_JOINED": "{{memberName}} đã tham gia nhóm \"{{familyName}}\"",
+      "MEMBER_LEFT": "{{memberName}} đã rời khỏi nhóm \"{{familyName}}\"",
+      "USER_ACCOUNT_DELETED": "Người dùng {{userFullName}} ({{userEmail}}) đã yêu cầu xóa tài khoản. Dữ liệu sẽ bị xóa sau 7 ngày."
     }
   }
 }
