@@ -468,51 +468,55 @@ export function TransactionsPage() {
     }
   }
 
-  // Render transaction item
+  // Render transaction item (similar to list view)
   const renderTransactionItem = (tx: Transaction, showDate = false) => {
     const Icon = transactionTypeIcons[tx.type]
     return (
       <div
         key={tx.id}
-        className="group flex items-center justify-between rounded-lg border p-2 hover:bg-accent/50"
+        className="group flex items-center justify-between gap-3 rounded-lg border p-3 hover:bg-accent/50"
       >
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 flex-1 items-center gap-3">
           <div
             className={cn(
-              "flex h-8 w-8 shrink-0 items-center justify-center rounded-full",
+              "flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
               tx.type === "INCOME" && "bg-income/10",
               tx.type === "EXPENSE" && "bg-expense/10",
               tx.type === "TRANSFER" && "bg-transfer/10"
             )}
           >
             {tx.categoryIcon ? (
-              <span className="text-sm">{tx.categoryIcon}</span>
+              <span className="text-lg">{tx.categoryIcon}</span>
             ) : (
               <Icon className={cn("h-4 w-4", transactionTypeColors[tx.type])} />
             )}
           </div>
-          <div>
-            <p className="text-sm font-medium">
-              {tx.categoryName ? t(`categories.${tx.categoryName}`, tx.categoryName) : t(`transactions.types.${tx.type}`)}
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-medium">
+              {tx.description || t(`transactions.types.${tx.type}`)}
             </p>
-            {showDate && (
-              <p className="text-xs text-muted-foreground">{formatFullDate(tx.transactionDate, lang)}</p>
-            )}
-            {tx.description && (
-              <p className="text-xs text-muted-foreground">{tx.description}</p>
-            )}
+            <p className="truncate text-xs text-muted-foreground">
+              {tx.categoryName
+                ? t(`categories.${tx.categoryName}`, tx.categoryName)
+                : t(`transactions.types.${tx.type}`)}
+              {" · "}
+              {tx.accountName}
+              {tx.type === "TRANSFER" && ` → ${tx.toAccountName}`}
+              {showDate && ` · ${formatFullDate(tx.transactionDate, lang)}`}
+            </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <span className={cn("text-sm font-medium", transactionTypeColors[tx.type])}>
-            {tx.type === "INCOME" ? "+" : "-"}{formatCurrency(tx.amount, tx.currency)}
-          </span>
-          <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-            <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => handleEdit(tx)}>
-              <Pencil className="h-3 w-3" />
+        <div className="flex shrink-0 items-center gap-2">
+          <p className={cn("text-sm font-semibold", transactionTypeColors[tx.type])}>
+            {tx.type === "INCOME" ? "+" : "-"}
+            {formatCurrency(tx.amount, tx.currency)}
+          </p>
+          <div className="flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+            <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => handleEdit(tx)}>
+              <Pencil className="h-3.5 w-3.5" />
             </Button>
-            <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-destructive" onClick={() => handleDelete(tx.id)}>
-              <Trash2 className="h-3 w-3" />
+            <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive hover:text-destructive" onClick={() => handleDelete(tx.id)}>
+              <Trash2 className="h-3.5 w-3.5" />
             </Button>
           </div>
         </div>
@@ -617,7 +621,7 @@ export function TransactionsPage() {
     }, 0)
 
     return (
-      <div className="space-y-4">
+      <div className="mx-auto max-w-4xl space-y-4">
         {/* Week summary */}
         <div className="flex justify-center gap-6 text-sm">
           <div>
@@ -696,7 +700,7 @@ export function TransactionsPage() {
     const expense = dayTxns.filter((tx) => tx.type === "EXPENSE").reduce((s, tx) => s + tx.amount, 0)
 
     return (
-      <div className="space-y-4">
+      <div className="mx-auto max-w-4xl space-y-4">
         {/* Day summary */}
         <div className="flex justify-center gap-6 text-sm">
           <div>
