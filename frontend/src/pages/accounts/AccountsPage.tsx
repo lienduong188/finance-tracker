@@ -45,8 +45,10 @@ export function AccountsPage() {
     },
   })
 
-  // Group balances by currency
+  // Group balances by currency (excluding credit cards)
   const balancesByCurrency = accounts?.reduce((acc, account) => {
+    // Exclude credit cards from total balance
+    if (account.type === "CREDIT_CARD") return acc
     const currency = account.currency
     acc[currency] = (acc[currency] || 0) + account.currentBalance
     return acc
@@ -102,7 +104,12 @@ export function AccountsPage() {
       {/* Total Balance Card */}
       <Card className="bg-primary text-primary-foreground">
         <CardContent className="p-4 md:p-6">
-          <p className="text-sm opacity-90">{t("dashboard.totalBalance")}</p>
+          <p className="text-sm opacity-90">
+            {t("dashboard.totalBalance")}
+            <span className="ml-1 text-xs opacity-75">
+              ({t("accounts.excludingCreditCards")})
+            </span>
+          </p>
           <p className="text-2xl font-bold md:text-3xl">
             {formatCurrency(primaryBalance, defaultCurrency)}
           </p>

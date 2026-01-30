@@ -147,7 +147,8 @@
     "paymentDueDay": "Payment Due Day",
     "linkedAccount": "Auto-payment Account",
     "selectLinkedAccount": "Select account",
-    "linkedAccountHelp": "On billing day, balance will be automatically paid from this account"
+    "linkedAccountHelp": "On billing day, balance will be automatically paid from this account",
+    "excludingCreditCards": "excl. credit cards"
   },
   "transactions": {
     "title": "Transactions",

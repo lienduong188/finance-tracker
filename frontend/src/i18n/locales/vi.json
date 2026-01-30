@@ -147,7 +147,8 @@
     "paymentDueDay": "Ngày đến hạn thanh toán",
     "linkedAccount": "Tài khoản thanh toán tự động",
     "selectLinkedAccount": "Chọn tài khoản",
-    "linkedAccountHelp": "Vào ngày chốt sao kê, số dư sẽ được tự động thanh toán từ tài khoản này"
+    "linkedAccountHelp": "Vào ngày chốt sao kê, số dư sẽ được tự động thanh toán từ tài khoản này",
+    "excludingCreditCards": "không bao gồm thẻ tín dụng"
   },
   "transactions": {
     "title": "Giao dịch",

@@ -147,7 +147,8 @@
     "paymentDueDay": "支払い日",
     "linkedAccount": "自動引き落とし口座",
     "selectLinkedAccount": "口座を選択",
-    "linkedAccountHelp": "締め日に、この口座から自動的に支払われます"
+    "linkedAccountHelp": "締め日に、この口座から自動的に支払われます",
+    "excludingCreditCards": "クレジットカードを除く"
   },
   "transactions": {
     "title": "取引",
