@@ -606,7 +606,8 @@
     "refresh": "Làm mới",
     "base": "Đơn vị",
     "noData": "Không có dữ liệu tỷ giá",
-    "converter": "Quy đổi nhanh"
+    "converter": "Quy đổi nhanh",
+    "updatedAt": "Cập nhật"
   },
   "family": {
     "title": "Nhóm",

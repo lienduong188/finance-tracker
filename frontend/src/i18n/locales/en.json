@@ -606,7 +606,8 @@
     "refresh": "Refresh",
     "base": "Base",
     "noData": "No exchange rate data",
-    "converter": "Quick Convert"
+    "converter": "Quick Convert",
+    "updatedAt": "Updated"
   },
   "family": {
     "title": "Groups",

@@ -13,8 +13,19 @@ const CURRENCIES = ["VND", "JPY", "USD", "EUR"]
 const DISPLAY_CURRENCIES = ["VND", "JPY", "EUR"] // Order for rate list display
 
 // Component to display a single rate item
-function RateItem({ from, to, formatRate }: { from: string; to: string; formatRate: (rate: number, currency: string) => string }) {
+function RateItem({ from, to, formatRate, onUpdatedAt }: {
+  from: string;
+  to: string;
+  formatRate: (rate: number, currency: string) => string;
+  onUpdatedAt?: (updatedAt: string) => void;
+}) {
   const { data, isLoading } = useExchangeRate(from, to)
+
+  // Report updatedAt to parent when data is available
+  if (data?.updatedAt && onUpdatedAt) {
+    onUpdatedAt(data.updatedAt)
+  }
+
   if (isLoading) return <div className="h-10 animate-pulse rounded-lg bg-muted" />
   if (!data) return null
   return (
@@ -32,6 +43,7 @@ export function ExchangeRateCard({ baseCurrency = "USD" }: ExchangeRateCardProps
   const [amount, setAmount] = useState<string>("1")
   const [fromCurrency, setFromCurrency] = useState("JPY")
   const [toCurrency, setToCurrency] = useState("VND")
+  const [lastUpdatedAt, setLastUpdatedAt] = useState<string | null>(null)
 
   const { data: rateData } = useExchangeRate(fromCurrency, toCurrency)
 
@@ -51,6 +63,16 @@ export function ExchangeRateCard({ baseCurrency = "USD" }: ExchangeRateCardProps
       return rate.toLocaleString(undefined, { maximumFractionDigits: 0 })
     }
     return rate.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })
+  }
+
+  const formatUpdatedAt = (dateStr: string) => {
+    const date = new Date(dateStr)
+    return date.toLocaleString(undefined, {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    })
   }
 
   return (
@@ -124,11 +146,15 @@ export function ExchangeRateCard({ baseCurrency = "USD" }: ExchangeRateCardProps
               from={baseCurrency}
               to={currency}
               formatRate={formatRate}
+              onUpdatedAt={setLastUpdatedAt}
             />
           ))}
-          <p className="text-xs text-muted-foreground">
-            {t("exchangeRates.base")}: 1 {baseCurrency}
-          </p>
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>{t("exchangeRates.base")}: 1 {baseCurrency}</span>
+            {lastUpdatedAt && (
+              <span>{t("exchangeRates.updatedAt")}: {formatUpdatedAt(lastUpdatedAt)}</span>
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>

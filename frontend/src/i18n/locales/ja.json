@@ -606,7 +606,8 @@
     "refresh": "更新",
     "base": "基準",
     "noData": "為替レートデータがありません",
-    "converter": "通貨換算"
+    "converter": "通貨換算",
+    "updatedAt": "更新日時"
   },
   "family": {
     "title": "グループ",
