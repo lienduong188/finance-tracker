@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { Link } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
@@ -9,6 +10,7 @@ import {
   Calendar,
   Repeat,
   ArrowLeftRight,
+  Plus,
 } from "lucide-react"
 import {
   AreaChart,
@@ -23,7 +25,8 @@ import {
   Cell,
 } from "recharts"
 import { format, subDays } from "date-fns"
-import { Card, CardContent, CardHeader, CardTitle, Tooltip } from "@/components/ui"
+import { Button, Card, CardContent, CardHeader, CardTitle, Tooltip } from "@/components/ui"
+import { TransactionFormModal } from "@/pages/transactions/TransactionFormModal"
 import { dashboardApi, recurringApi } from "@/api"
 import { formatCurrency, formatShortDate, formatFullDate, cn } from "@/lib/utils"
 import { useAuth } from "@/context/AuthContext"
@@ -34,6 +37,7 @@ export function DashboardPage() {
   const { user } = useAuth()
   const currency = user?.defaultCurrency || "VND"
   const lang = i18n.language
+  const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false)
 
   const today = new Date()
   const startDate = format(subDays(today, 30), "yyyy-MM-dd")
@@ -104,11 +108,17 @@ export function DashboardPage() {
 
   return (
     <div className="space-y-4 md:space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold md:text-3xl">{t("dashboard.title")}</h1>
-        <p className="text-sm text-muted-foreground md:text-base">
-          {t("dashboard.greeting", { name: user?.fullName })}
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold md:text-3xl">{t("dashboard.title")}</h1>
+          <p className="text-sm text-muted-foreground md:text-base">
+            {t("dashboard.greeting", { name: user?.fullName })}
+          </p>
+        </div>
+        <Button onClick={() => setIsTransactionModalOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" />
+          {t("transactions.addTransaction")}
+        </Button>
       </div>
 
       {/* Summary Cards */}
@@ -348,6 +358,12 @@ export function DashboardPage() {
         </CardContent>
         </Card>
       </div>
+
+      <TransactionFormModal
+        isOpen={isTransactionModalOpen}
+        onClose={() => setIsTransactionModalOpen(false)}
+        transaction={null}
+      />
     </div>
   )
 }
