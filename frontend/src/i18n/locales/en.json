@@ -46,6 +46,8 @@
     "resetTokenSent": "Password reset token generated",
     "resetTokenInfo": "Use this token to reset your password (in production, this would be sent via email):",
     "resetPasswordNow": "Reset password now",
+    "resetEmailSent": "Password reset email sent",
+    "checkEmailToReset": "Please check your email inbox to reset your password. The link will expire in 15 minutes.",
     "resetPasswordTitle": "Reset Password",
     "resetPasswordDescription": "Enter a new password for your account",
     "resetPassword": "Reset Password",

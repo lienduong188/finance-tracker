@@ -82,4 +82,5 @@ app:
     from: ${MAIL_FROM:noreply@resend.dev}
     resend-api-key: ${RESEND_API_KEY:}
     verification-url: ${APP_URL:http://localhost:5173}/verify-email
+    reset-password-url: ${APP_URL:http://localhost:5173}/reset-password
     verification-token-expiry-hours: 24

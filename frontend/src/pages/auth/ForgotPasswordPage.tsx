@@ -19,7 +19,6 @@ export function ForgotPasswordPage() {
   const { t } = useTranslation()
   const [isLoading, setIsLoading] = useState(false)
   const [success, setSuccess] = useState(false)
-  const [resetToken, setResetToken] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const {
@@ -34,12 +33,11 @@ export function ForgotPasswordPage() {
     setIsLoading(true)
     setError(null)
     try {
-      const response = await apiClient.post<{ message: string; token: string }>(
+      await apiClient.post<{ message: string }>(
         "/auth/forgot-password",
         data
       )
       setSuccess(true)
-      setResetToken(response.data.token)
     } catch (err) {
       setError(t("auth.forgotPasswordFailed"))
     } finally {
@@ -67,26 +65,11 @@ export function ForgotPasswordPage() {
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-green-600">
                 <Check className="h-5 w-5" />
-                <span>{t("auth.resetTokenSent")}</span>
+                <span>{t("auth.resetEmailSent")}</span>
               </div>
-              {resetToken && (
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">
-                    {t("auth.resetTokenInfo")}
-                  </p>
-                  <div className="rounded-md bg-muted p-3">
-                    <code className="text-xs break-all">{resetToken}</code>
-                  </div>
-                  <Link
-                    to={`/reset-password?token=${resetToken}`}
-                    className="block"
-                  >
-                    <Button className="w-full">
-                      {t("auth.resetPasswordNow")}
-                    </Button>
-                  </Link>
-                </div>
-              )}
+              <p className="text-sm text-muted-foreground">
+                {t("auth.checkEmailToReset")}
+              </p>
               <Link
                 to="/login"
                 className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"

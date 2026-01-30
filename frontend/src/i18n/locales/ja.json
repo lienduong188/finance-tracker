@@ -46,6 +46,8 @@
     "resetTokenSent": "パスワードリセットトークンが生成されました",
     "resetTokenInfo": "このトークンを使用してパスワードをリセットします（本番環境ではメールで送信されます）：",
     "resetPasswordNow": "今すぐパスワードをリセット",
+    "resetEmailSent": "パスワードリセットメールを送信しました",
+    "checkEmailToReset": "パスワードをリセットするには、メールの受信箱を確認してください。リンクは15分後に期限切れになります。",
     "resetPasswordTitle": "パスワードをリセット",
     "resetPasswordDescription": "アカウントの新しいパスワードを入力",
     "resetPassword": "パスワードをリセット",

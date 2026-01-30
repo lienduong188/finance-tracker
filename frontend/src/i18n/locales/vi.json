@@ -46,6 +46,8 @@
     "resetTokenSent": "Đã tạo token đặt lại mật khẩu",
     "resetTokenInfo": "Token này dùng để đặt lại mật khẩu (trong thực tế sẽ gửi qua email):",
     "resetPasswordNow": "Đặt lại mật khẩu ngay",
+    "resetEmailSent": "Đã gửi email đặt lại mật khẩu",
+    "checkEmailToReset": "Vui lòng kiểm tra hộp thư email của bạn để đặt lại mật khẩu. Link sẽ hết hạn sau 15 phút.",
     "resetPasswordTitle": "Đặt lại mật khẩu",
     "resetPasswordDescription": "Nhập mật khẩu mới cho tài khoản của bạn",
     "resetPassword": "Đặt lại mật khẩu",

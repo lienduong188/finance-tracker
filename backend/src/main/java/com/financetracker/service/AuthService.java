@@ -213,13 +213,21 @@ public class AuthService {
         refreshTokenRepository.revokeAllByUser(user);
     }
 
-    public String forgotPassword(ForgotPasswordRequest request) {
+    public void forgotPassword(ForgotPasswordRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> ApiException.notFound("User with this email not found"));
 
+        // Check if user account is deleted or pending deletion
+        if (user.getDeletedAt() != null || user.getDeletionScheduledAt() != null) {
+            throw ApiException.badRequest("This account has been deleted or is pending deletion");
+        }
+
         CustomUserDetails userDetails = new CustomUserDetails(user);
         // Generate a short-lived token (15 minutes) for password reset
-        return jwtService.generatePasswordResetToken(userDetails, user.getId());
+        String token = jwtService.generatePasswordResetToken(userDetails, user.getId());
+
+        // Send password reset email
+        emailService.sendPasswordResetEmail(user, token);
     }
 
     @Transactional

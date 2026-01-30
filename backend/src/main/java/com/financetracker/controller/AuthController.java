@@ -76,11 +76,9 @@ public class AuthController {
     @Operation(summary = "Request password reset")
     public ResponseEntity<java.util.Map<String, String>> forgotPassword(
             @Valid @RequestBody ForgotPasswordRequest request) {
-        String token = authService.forgotPassword(request);
-        // In production, send this token via email instead of returning it
+        authService.forgotPassword(request);
         return ResponseEntity.ok(java.util.Map.of(
-                "message", "Password reset token generated",
-                "token", token
+                "message", "Password reset email sent"
         ));
     }
 
