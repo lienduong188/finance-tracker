@@ -185,25 +185,26 @@ public class SavingsGoalService {
         account.setCurrentBalance(account.getCurrentBalance().subtract(request.getAmount()));
         accountRepository.save(account);
 
-        // Create contribution record
+        // Calculate amount in goal currency (convert if different currency)
+        BigDecimal amountInGoalCurrency = request.getAmount();
+        if (!account.getCurrency().equalsIgnoreCase(goal.getCurrency())) {
+            var convertResult = exchangeRateService.convert(request.getAmount(), account.getCurrency(), goal.getCurrency());
+            amountInGoalCurrency = convertResult.getToAmount();
+        }
+
+        // Create contribution record with converted amount
         SavingsContribution contribution = SavingsContribution.builder()
                 .goal(goal)
                 .user(user)
                 .account(account)
                 .transaction(transaction)
                 .amount(request.getAmount())
+                .amountInGoalCurrency(amountInGoalCurrency)
                 .note(request.getNote())
                 .contributionDate(request.getContributionDate() != null ? request.getContributionDate() : LocalDate.now())
                 .build();
 
         contribution = savingsContributionRepository.save(contribution);
-
-        // Update goal current amount (convert currency if different)
-        BigDecimal amountInGoalCurrency = request.getAmount();
-        if (!account.getCurrency().equalsIgnoreCase(goal.getCurrency())) {
-            var convertResult = exchangeRateService.convert(request.getAmount(), account.getCurrency(), goal.getCurrency());
-            amountInGoalCurrency = convertResult.getToAmount();
-        }
 
         boolean wasNotCompleted = goal.getStatus() != SavingsGoalStatus.COMPLETED;
         goal.setCurrentAmount(goal.getCurrentAmount().add(amountInGoalCurrency));
@@ -274,21 +275,14 @@ public class SavingsGoalService {
         // Get all contributions and convert to goal currency
         List<SavingsContribution> contributions = savingsContributionRepository.findByGoalIdOrderByContributionDateDesc(goalId);
 
-        // Group by user and sum converted amounts
+        // Group by user and sum converted amounts (using stored amountInGoalCurrency)
         java.util.Map<UUID, BigDecimal> userAmounts = new java.util.HashMap<>();
         java.util.Map<UUID, String> userNames = new java.util.HashMap<>();
 
         for (SavingsContribution contribution : contributions) {
             UUID oderId = contribution.getUser().getId();
             String contributorName = contribution.getUser().getFullName();
-            BigDecimal amount = contribution.getAmount();
-            String contributionCurrency = contribution.getAccount().getCurrency();
-
-            // Convert to goal currency if different
-            if (!contributionCurrency.equalsIgnoreCase(goal.getCurrency())) {
-                var convertResult = exchangeRateService.convert(amount, contributionCurrency, goal.getCurrency());
-                amount = convertResult.getToAmount();
-            }
+            BigDecimal amount = contribution.getAmountInGoalCurrency();
 
             userAmounts.merge(oderId, amount, BigDecimal::add);
             userNames.put(oderId, contributorName);
@@ -381,14 +375,8 @@ public class SavingsGoalService {
             transactionRepository.delete(contribution.getTransaction());
         }
 
-        // Update goal current amount (convert currency if different)
-        BigDecimal amountInGoalCurrency = contribution.getAmount();
-        if (!account.getCurrency().equalsIgnoreCase(goal.getCurrency())) {
-            var convertResult = exchangeRateService.convert(contribution.getAmount(), account.getCurrency(), goal.getCurrency());
-            amountInGoalCurrency = convertResult.getToAmount();
-        }
-
-        goal.setCurrentAmount(goal.getCurrentAmount().subtract(amountInGoalCurrency));
+        // Update goal current amount using stored converted amount
+        goal.setCurrentAmount(goal.getCurrentAmount().subtract(contribution.getAmountInGoalCurrency()));
         if (goal.getStatus() == SavingsGoalStatus.COMPLETED && !goal.isCompleted()) {
             goal.setStatus(SavingsGoalStatus.ACTIVE);
         }

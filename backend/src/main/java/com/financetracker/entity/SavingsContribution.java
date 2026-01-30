@@ -34,6 +34,9 @@ public class SavingsContribution extends BaseEntity {
     @Column(nullable = false, precision = 19, scale = 4)
     private BigDecimal amount;
 
+    @Column(name = "amount_in_goal_currency", nullable = false, precision = 19, scale = 4)
+    private BigDecimal amountInGoalCurrency;
+
     @Column(columnDefinition = "TEXT")
     private String note;
 
