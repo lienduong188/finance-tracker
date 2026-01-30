@@ -96,6 +96,7 @@ export function TransactionsPage() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [calendarMonth, setCalendarMonth] = useState<Date>(new Date())
   const [accountViewPeriod, setAccountViewPeriod] = useState<AccountViewPeriod>("week")
+  const [categoryViewPeriod, setCategoryViewPeriod] = useState<AccountViewPeriod>("month")
   const [filters, setFilters] = useState({
     accountId: "",
     type: "",
@@ -155,17 +156,53 @@ export function TransactionsPage() {
     return Object.fromEntries(sortedEntries)
   }, [transactions])
 
+  // Calculate period date range for category view
+  const categoryViewDateRange = useMemo(() => {
+    const today = new Date()
+    let start: Date
+    let end: Date
+
+    if (categoryViewPeriod === "day") {
+      start = today
+      end = today
+    } else if (categoryViewPeriod === "week") {
+      start = startOfWeek(today, { locale })
+      end = endOfWeek(today, { locale })
+    } else {
+      start = startOfMonth(today)
+      end = endOfMonth(today)
+    }
+
+    return {
+      start: format(start, "yyyy-MM-dd"),
+      end: format(end, "yyyy-MM-dd"),
+    }
+  }, [categoryViewPeriod, locale])
+
+  // Color palette for pie chart
+  const CHART_COLORS = [
+    "#ef4444", "#f97316", "#f59e0b", "#eab308", "#84cc16",
+    "#22c55e", "#14b8a6", "#06b6d4", "#0ea5e9", "#3b82f6",
+    "#6366f1", "#8b5cf6", "#a855f7", "#d946ef", "#ec4899",
+  ]
+
   // Group transactions by category
   const groupedByCategory = useMemo(() => {
     const categoryMap: Record<string, { name: string; icon: string; color: string; total: number; transactions: Transaction[] }> = {}
-    transactions?.content?.forEach((tx) => {
+
+    // Filter transactions by period
+    const filteredTxns = transactions?.content?.filter((tx) => {
+      return tx.transactionDate >= categoryViewDateRange.start && tx.transactionDate <= categoryViewDateRange.end
+    }) || []
+
+    filteredTxns.forEach((tx) => {
       if (tx.type === "TRANSFER") return
       const key = tx.categoryId || "uncategorized"
       if (!categoryMap[key]) {
         categoryMap[key] = {
           name: tx.categoryName || t(`transactions.types.${tx.type}`),
           icon: tx.categoryIcon || "",
-          color: tx.type === "INCOME" ? "#22c55e" : "#ef4444",
+          color: "", // Will be assigned after sorting
           total: 0,
           transactions: [],
         }
@@ -173,8 +210,14 @@ export function TransactionsPage() {
       categoryMap[key].total += tx.type === "EXPENSE" ? tx.amount : -tx.amount
       categoryMap[key].transactions.push(tx)
     })
-    return Object.entries(categoryMap).sort((a, b) => Math.abs(b[1].total) - Math.abs(a[1].total))
-  }, [transactions, t])
+
+    // Sort and assign colors
+    const sorted = Object.entries(categoryMap).sort((a, b) => Math.abs(b[1].total) - Math.abs(a[1].total))
+    sorted.forEach(([, cat], index) => {
+      cat.color = CHART_COLORS[index % CHART_COLORS.length]
+    })
+    return sorted
+  }, [transactions, t, categoryViewDateRange])
 
   // Calculate period date range for account view
   const accountViewDateRange = useMemo(() => {
@@ -290,11 +333,22 @@ export function TransactionsPage() {
   // Render List View
   const renderListView = () => (
     <div className="space-y-4 md:space-y-6">
-      {groupedByDate && Object.entries(groupedByDate).map(([date, txns]) => (
+      {groupedByDate && Object.entries(groupedByDate).map(([date, txns]) => {
+        // Tính tổng thu chi cho ngày này
+        const dayIncome = txns.filter((tx) => tx.type === "INCOME").reduce((s, tx) => s + tx.amount, 0)
+        const dayExpense = txns.filter((tx) => tx.type === "EXPENSE").reduce((s, tx) => s + tx.amount, 0)
+
+        return (
         <div key={date}>
-          <h3 className="mb-2 text-xs font-medium text-muted-foreground md:mb-3 md:text-sm">
-            {formatFullDate(date, lang)}
-          </h3>
+          <div className="mb-2 flex items-center justify-between md:mb-3">
+            <h3 className="text-xs font-medium text-muted-foreground md:text-sm">
+              {formatFullDate(date, lang)}
+            </h3>
+            <div className="flex gap-3 text-xs">
+              {dayIncome > 0 && <span className="text-income">+{formatCurrency(dayIncome, defaultCurrency)}</span>}
+              {dayExpense > 0 && <span className="text-expense">-{formatCurrency(dayExpense, defaultCurrency)}</span>}
+            </div>
+          </div>
           <Card>
             <CardContent className="divide-y p-0">
               {txns.map((transaction) => {
@@ -317,12 +371,18 @@ export function TransactionsPage() {
                         )}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="min-w-0">
-                            {/* 説明 (Description) */}
-                            <p className="truncate text-sm font-medium md:text-base">
-                              {transaction.description || t(`transactions.types.${transaction.type}`)}
-                            </p>
+                        <div className="flex items-start gap-2">
+                          <div className="min-w-0 flex-1">
+                            {/* 説明 (Description) + 金額 */}
+                            <div className="flex items-baseline gap-2">
+                              <p className="truncate text-sm font-medium md:text-base">
+                                {transaction.description || t(`transactions.types.${transaction.type}`)}
+                              </p>
+                              <p className={cn("shrink-0 text-sm font-semibold md:text-base", transactionTypeColors[transaction.type])}>
+                                {transaction.type === "INCOME" ? "+" : "-"}
+                                {formatCurrency(transaction.amount, transaction.currency)}
+                              </p>
+                            </div>
                             {/* 口座 (Account) */}
                             <p className="truncate text-xs text-muted-foreground md:text-sm">
                               {transaction.accountName}
@@ -335,10 +395,6 @@ export function TransactionsPage() {
                                 : t(`transactions.types.${transaction.type}`)}
                             </p>
                           </div>
-                          <p className={cn("shrink-0 text-sm font-semibold md:text-lg", transactionTypeColors[transaction.type])}>
-                            {transaction.type === "INCOME" ? "+" : "-"}
-                            {formatCurrency(transaction.amount, transaction.currency)}
-                          </p>
                         </div>
                         <div className="mt-2 flex gap-1 md:mt-0 md:opacity-0 md:transition-opacity md:group-hover:opacity-100">
                           <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={() => handleEdit(transaction)}>
@@ -363,7 +419,7 @@ export function TransactionsPage() {
             </CardContent>
           </Card>
         </div>
-      ))}
+      )})}
     </div>
   )
 
@@ -473,8 +529,31 @@ export function TransactionsPage() {
   }
 
   // Render Month View
-  const renderMonthView = () => (
-    <div className="overflow-hidden rounded-lg border border-border">
+  const renderMonthView = () => {
+    // Tính tổng thu chi cho tháng
+    const monthIncome = calendarDays.filter(day => isSameMonth(day, calendarMonth)).reduce((sum, day) => {
+      const txns = transactionsByDay[format(day, "yyyy-MM-dd")] || []
+      return sum + txns.filter((tx) => tx.type === "INCOME").reduce((s, tx) => s + tx.amount, 0)
+    }, 0)
+    const monthExpense = calendarDays.filter(day => isSameMonth(day, calendarMonth)).reduce((sum, day) => {
+      const txns = transactionsByDay[format(day, "yyyy-MM-dd")] || []
+      return sum + txns.filter((tx) => tx.type === "EXPENSE").reduce((s, tx) => s + tx.amount, 0)
+    }, 0)
+
+    return (
+    <div className="space-y-4">
+      {/* Month summary */}
+      <div className="flex justify-center gap-6 text-sm">
+        <div>
+          <span className="text-muted-foreground">{t("transactions.totalIncome")}: </span>
+          <span className="font-medium text-income">{formatCurrency(monthIncome, defaultCurrency)}</span>
+        </div>
+        <div>
+          <span className="text-muted-foreground">{t("transactions.totalExpense")}: </span>
+          <span className="font-medium text-expense">{formatCurrency(monthExpense, defaultCurrency)}</span>
+        </div>
+      </div>
+      <div className="overflow-hidden rounded-lg border border-border">
       {/* Week headers */}
       <div className="grid grid-cols-7 border-b border-border bg-muted/30 text-center text-xs font-medium">
         {weekDayLabels.map((d, index) => (
@@ -531,7 +610,8 @@ export function TransactionsPage() {
         })}
       </div>
     </div>
-  )
+    </div>
+  )}
 
   // Render Week View
   const renderWeekView = () => {
@@ -635,12 +715,6 @@ export function TransactionsPage() {
             <span className="text-muted-foreground">{t("transactions.totalExpense")}: </span>
             <span className="font-medium text-expense">{formatCurrency(expense, defaultCurrency)}</span>
           </div>
-          <div>
-            <span className="text-muted-foreground">{t("transactions.balance")}: </span>
-            <span className={cn("font-medium", income - expense >= 0 ? "text-income" : "text-expense")}>
-              {income - expense >= 0 ? "+" : ""}{formatCurrency(income - expense, defaultCurrency)}
-            </span>
-          </div>
         </div>
         {/* Transactions list */}
         {dayTxns.length > 0 ? (
@@ -718,6 +792,22 @@ export function TransactionsPage() {
 
     return (
       <div className="space-y-4">
+        {/* Period filter */}
+        <div className="flex justify-center gap-1 rounded-lg bg-muted p-1">
+          {(["day", "week", "month"] as AccountViewPeriod[]).map((period) => (
+            <button
+              key={period}
+              onClick={() => setCategoryViewPeriod(period)}
+              className={cn(
+                "rounded-md px-4 py-1.5 text-sm font-medium transition-colors",
+                categoryViewPeriod === period ? "bg-background shadow" : "hover:bg-background/50"
+              )}
+            >
+              {t(`transactions.periods.${period}`)}
+            </button>
+          ))}
+        </div>
+
         {pieData.length > 0 ? (
           <>
             <Card>
@@ -890,7 +980,11 @@ export function TransactionsPage() {
           return (
             <button
               key={mode}
-              onClick={() => setViewMode(mode)}
+              onClick={() => {
+                setViewMode(mode)
+                // Reset filters khi chuyển tab
+                setFilters({ accountId: "", type: "", startDate: "", endDate: "", page: 0, size: 100 })
+              }}
               className={cn(
                 "flex flex-1 items-center justify-center gap-1 rounded-md px-2 py-2 text-xs font-medium transition-colors md:gap-2 md:px-3 md:text-sm",
                 viewMode === mode ? "bg-background shadow" : "hover:bg-background/50"
