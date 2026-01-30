@@ -332,7 +332,7 @@ export function TransactionsPage() {
 
   // Render List View
   const renderListView = () => (
-    <div className="space-y-4 md:space-y-6">
+    <div className="mx-auto max-w-4xl space-y-4 md:space-y-5">
       {groupedByDate && Object.entries(groupedByDate).map(([date, txns]) => {
         // Tính tổng thu chi cho ngày này
         const dayIncome = txns.filter((tx) => tx.type === "INCOME").reduce((s, tx) => s + tx.amount, 0)
@@ -340,11 +340,11 @@ export function TransactionsPage() {
 
         return (
         <div key={date}>
-          <div className="mb-2 flex items-center justify-between md:mb-3">
+          <div className="mb-2 flex items-center gap-3">
             <h3 className="text-xs font-medium text-muted-foreground md:text-sm">
               {formatFullDate(date, lang)}
             </h3>
-            <div className="flex gap-3 text-xs">
+            <div className="flex gap-2 text-xs">
               {dayIncome > 0 && <span className="text-income">+{formatCurrency(dayIncome, defaultCurrency)}</span>}
               {dayExpense > 0 && <span className="text-expense">-{formatCurrency(dayExpense, defaultCurrency)}</span>}
             </div>
@@ -354,63 +354,55 @@ export function TransactionsPage() {
               {txns.map((transaction) => {
                 const Icon = transactionTypeIcons[transaction.type]
                 return (
-                  <div key={transaction.id} className="group p-3 hover:bg-accent/50 md:p-4">
-                    <div className="flex items-start gap-3">
+                  <div key={transaction.id} className="group flex items-center justify-between gap-3 p-3 hover:bg-accent/50 md:px-4 md:py-3">
+                    <div className="flex min-w-0 flex-1 items-center gap-3">
                       <div
                         className={cn(
-                          "flex h-9 w-9 shrink-0 items-center justify-center rounded-full md:h-10 md:w-10",
+                          "flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
                           transaction.type === "INCOME" && "bg-income/10",
                           transaction.type === "EXPENSE" && "bg-expense/10",
                           transaction.type === "TRANSFER" && "bg-transfer/10"
                         )}
                       >
                         {transaction.categoryIcon ? (
-                          <span className="text-lg md:text-xl">{transaction.categoryIcon}</span>
+                          <span className="text-lg">{transaction.categoryIcon}</span>
                         ) : (
-                          <Icon className={cn("h-4 w-4 md:h-5 md:w-5", transactionTypeColors[transaction.type])} />
+                          <Icon className={cn("h-4 w-4", transactionTypeColors[transaction.type])} />
                         )}
                       </div>
+                      {/* Description + Category */}
                       <div className="min-w-0 flex-1">
-                        <div className="flex items-start gap-2">
-                          <div className="min-w-0 flex-1">
-                            {/* 説明 (Description) + 金額 */}
-                            <div className="flex items-baseline gap-2">
-                              <p className="truncate text-sm font-medium md:text-base">
-                                {transaction.description || t(`transactions.types.${transaction.type}`)}
-                              </p>
-                              <p className={cn("shrink-0 text-sm font-semibold md:text-base", transactionTypeColors[transaction.type])}>
-                                {transaction.type === "INCOME" ? "+" : "-"}
-                                {formatCurrency(transaction.amount, transaction.currency)}
-                              </p>
-                            </div>
-                            {/* 口座 (Account) */}
-                            <p className="truncate text-xs text-muted-foreground md:text-sm">
-                              {transaction.accountName}
-                              {transaction.type === "TRANSFER" && ` → ${transaction.toAccountName}`}
-                            </p>
-                            {/* カテゴリー (Category) */}
-                            <p className="truncate text-xs text-muted-foreground">
-                              {transaction.categoryName
-                                ? t(`categories.${transaction.categoryName}`, transaction.categoryName)
-                                : t(`transactions.types.${transaction.type}`)}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="mt-2 flex gap-1 md:mt-0 md:opacity-0 md:transition-opacity md:group-hover:opacity-100">
-                          <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={() => handleEdit(transaction)}>
-                            <Pencil className="mr-1 h-3 w-3" />
-                            {t("common.edit")}
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 px-2 text-xs text-destructive hover:text-destructive"
-                            onClick={() => handleDelete(transaction.id)}
-                          >
-                            <Trash2 className="mr-1 h-3 w-3" />
-                            {t("common.delete")}
-                          </Button>
-                        </div>
+                        <p className="truncate text-sm font-medium">
+                          {transaction.description || t(`transactions.types.${transaction.type}`)}
+                        </p>
+                        <p className="truncate text-xs text-muted-foreground">
+                          {transaction.categoryName
+                            ? t(`categories.${transaction.categoryName}`, transaction.categoryName)
+                            : t(`transactions.types.${transaction.type}`)}
+                          {" · "}
+                          {transaction.accountName}
+                          {transaction.type === "TRANSFER" && ` → ${transaction.toAccountName}`}
+                        </p>
+                      </div>
+                    </div>
+                    {/* Amount + Actions */}
+                    <div className="flex shrink-0 items-center gap-2">
+                      <p className={cn("text-sm font-semibold", transactionTypeColors[transaction.type])}>
+                        {transaction.type === "INCOME" ? "+" : "-"}
+                        {formatCurrency(transaction.amount, transaction.currency)}
+                      </p>
+                      <div className="flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => handleEdit(transaction)}>
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+                          onClick={() => handleDelete(transaction.id)}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
                       </div>
                     </div>
                   </div>
