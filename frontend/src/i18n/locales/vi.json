@@ -14,7 +14,9 @@
     "confirm": "Xác nhận",
     "yes": "Có",
     "no": "Không",
-    "select": "-- Chọn --"
+    "select": "-- Chọn --",
+    "back": "Quay lại",
+    "close": "Đóng"
   },
   "auth": {
     "login": "Đăng nhập",
@@ -83,7 +85,7 @@
     "transactions": "Giao dịch",
     "budgets": "Ngân sách",
     "recurring": "Định kỳ",
-    "creditCardPlans": "Trả góp",
+    "creditCardPlans": "Quản lý thẻ tín dụng",
     "debts": "Cho vay / Nợ",
     "family": "Nhóm",
     "savings": "Tiết kiệm",

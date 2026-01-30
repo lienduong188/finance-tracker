@@ -14,7 +14,9 @@
     "confirm": "Confirm",
     "yes": "Yes",
     "no": "No",
-    "select": "-- Select --"
+    "select": "-- Select --",
+    "back": "Back",
+    "close": "Close"
   },
   "auth": {
     "login": "Login",
@@ -83,7 +85,7 @@
     "transactions": "Transactions",
     "budgets": "Budgets",
     "recurring": "Recurring",
-    "creditCardPlans": "Installments",
+    "creditCardPlans": "Credit Card Management",
     "debts": "Debts",
     "family": "Groups",
     "savings": "Savings",

@@ -14,7 +14,9 @@
     "confirm": "確認",
     "yes": "はい",
     "no": "いいえ",
-    "select": "-- 選択 --"
+    "select": "-- 選択 --",
+    "back": "戻る",
+    "close": "閉じる"
   },
   "auth": {
     "login": "ログイン",
@@ -83,7 +85,7 @@
     "transactions": "取引",
     "budgets": "予算",
     "recurring": "定期取引",
-    "creditCardPlans": "分割・リボ",
+    "creditCardPlans": "クレジットカード管理",
     "debts": "貸借",
     "family": "グループ",
     "savings": "貯金",
