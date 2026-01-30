@@ -64,6 +64,10 @@ public class User extends BaseEntity {
     @Column(name = "deletion_scheduled_at")
     private OffsetDateTime deletionScheduledAt;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "deleted_by")
+    private User deletedBy;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Account> accounts = new ArrayList<>();

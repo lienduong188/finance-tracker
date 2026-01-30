@@ -61,11 +61,25 @@ public class AdminUserController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete a user")
+    @Operation(summary = "Delete a user (hard delete)")
     public ResponseEntity<Void> deleteUser(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable UUID id) {
         adminUserService.deleteUser(id, userDetails.getId());
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/soft-delete")
+    @Operation(summary = "Soft delete a user with 7-day grace period")
+    public ResponseEntity<AdminUserResponse> softDeleteUser(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable UUID id) {
+        return ResponseEntity.ok(adminUserService.softDeleteUser(id, userDetails.getId()));
+    }
+
+    @PostMapping("/{id}/cancel-deletion")
+    @Operation(summary = "Cancel user deletion and restore account")
+    public ResponseEntity<AdminUserResponse> cancelDeletion(@PathVariable UUID id) {
+        return ResponseEntity.ok(adminUserService.cancelDeletion(id));
     }
 }

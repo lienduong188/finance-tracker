@@ -14,6 +14,9 @@ import {
   Monitor,
   Clock,
   X,
+  CalendarX,
+  RotateCcw,
+  AlertTriangle,
 } from "lucide-react"
 import { adminApi } from "@/api"
 import { Button, Input, Card } from "@/components/ui"
@@ -64,6 +67,20 @@ export function AdminUsersPage() {
     },
   })
 
+  const softDeleteMutation = useMutation({
+    mutationFn: adminApi.softDeleteUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "users"] })
+    },
+  })
+
+  const cancelDeletionMutation = useMutation({
+    mutationFn: adminApi.cancelDeletion,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "users"] })
+    },
+  })
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     setSearch(searchInput)
@@ -96,8 +113,24 @@ export function AdminUsersPage() {
       alert("Không thể xóa chính bạn")
       return
     }
-    if (confirm(`Bạn có chắc muốn xóa user ${user.email}? Hành động này không thể hoàn tác.`)) {
+    if (confirm(`Bạn có chắc muốn xóa vĩnh viễn user ${user.email}? Hành động này không thể hoàn tác và sẽ xóa TẤT CẢ dữ liệu.`)) {
       deleteMutation.mutate(user.id)
+    }
+  }
+
+  const handleSoftDelete = (user: AdminUser) => {
+    if (user.id === currentUser?.id) {
+      alert("Không thể xóa chính bạn")
+      return
+    }
+    if (confirm(`Bạn có chắc muốn xóa mềm user ${user.email}?\n\nUser sẽ có 7 ngày để phục hồi tài khoản. Sau 7 ngày, tất cả dữ liệu sẽ bị xóa vĩnh viễn.`)) {
+      softDeleteMutation.mutate(user.id)
+    }
+  }
+
+  const handleCancelDeletion = (user: AdminUser) => {
+    if (confirm(`Phục hồi tài khoản cho user ${user.email}?`)) {
+      cancelDeletionMutation.mutate(user.id)
     }
   }
 
@@ -157,6 +190,7 @@ export function AdminUsersPage() {
                 <th className="px-4 py-3 text-left text-sm font-medium">User</th>
                 <th className="px-4 py-3 text-left text-sm font-medium">Role</th>
                 <th className="px-4 py-3 text-left text-sm font-medium">Trạng thái</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">Trạng thái xóa</th>
                 <th className="px-4 py-3 text-left text-sm font-medium">Hoạt động cuối</th>
                 <th className="px-4 py-3 text-left text-sm font-medium">Thống kê</th>
                 <th className="px-4 py-3 text-left text-sm font-medium">Ngày tạo</th>
@@ -165,7 +199,7 @@ export function AdminUsersPage() {
             </thead>
             <tbody className="divide-y">
               {data?.content?.map((user) => (
-                <tr key={user.id} className={!user.enabled ? "opacity-50" : ""}>
+                <tr key={user.id} className={`${!user.enabled ? "opacity-50" : ""} ${user.deletionStatus === "DELETED" ? "bg-red-50 dark:bg-red-950/20" : user.deletionStatus === "PENDING_DELETION" ? "bg-amber-50 dark:bg-amber-950/20" : ""}`}>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground">
@@ -197,8 +231,8 @@ export function AdminUsersPage() {
                     <span
                       className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${
                         user.enabled
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
+                          ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                          : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
                       }`}
                     >
                       {user.enabled ? (
@@ -213,6 +247,46 @@ export function AdminUsersPage() {
                         </>
                       )}
                     </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    {user.deletionStatus === "ACTIVE" ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+                        Bình thường
+                      </span>
+                    ) : user.deletionStatus === "PENDING_DELETION" ? (
+                      <div className="space-y-1">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-1 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                          <AlertTriangle className="h-3 w-3" />
+                          Đang chờ xóa
+                        </span>
+                        <div className="text-xs text-muted-foreground">
+                          <div>
+                            Xóa lúc: {user.deletedAt ? new Date(user.deletedAt).toLocaleString("vi-VN") : "N/A"}
+                          </div>
+                          <div>
+                            Bởi: {user.deletedByEmail || "Tự xóa"}
+                          </div>
+                          <div className="text-amber-600 dark:text-amber-400">
+                            Xóa vĩnh viễn: {user.deletionScheduledAt ? new Date(user.deletionScheduledAt).toLocaleDateString("vi-VN") : "N/A"}
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-1">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-1 text-xs font-medium text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                          <CalendarX className="h-3 w-3" />
+                          Đã xóa dữ liệu
+                        </span>
+                        <div className="text-xs text-muted-foreground">
+                          <div>
+                            Xóa lúc: {user.deletedAt ? new Date(user.deletedAt).toLocaleString("vi-VN") : "N/A"}
+                          </div>
+                          <div>
+                            Bởi: {user.deletedByEmail || "Tự xóa"}
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </td>
                   <td className="px-4 py-3">
                     {user.lastLoginAt ? (
@@ -250,42 +324,81 @@ export function AdminUsersPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex justify-end gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleToggleRole(user)}
-                        disabled={user.id === currentUser?.id}
-                        title={user.role === "ADMIN" ? "Bỏ quyền Admin" : "Cấp quyền Admin"}
-                      >
-                        {user.role === "ADMIN" ? (
-                          <ShieldOff className="h-4 w-4" />
-                        ) : (
-                          <Shield className="h-4 w-4" />
-                        )}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleToggleEnabled(user)}
-                        disabled={user.id === currentUser?.id}
-                        title={user.enabled ? "Vô hiệu hóa" : "Kích hoạt"}
-                      >
-                        {user.enabled ? (
-                          <UserX className="h-4 w-4" />
-                        ) : (
-                          <UserCheck className="h-4 w-4" />
-                        )}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(user)}
-                        disabled={user.id === currentUser?.id}
-                        className="text-destructive hover:text-destructive"
-                        title="Xóa user"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      {user.deletionStatus === "ACTIVE" && (
+                        <>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleToggleRole(user)}
+                            disabled={user.id === currentUser?.id}
+                            title={user.role === "ADMIN" ? "Bỏ quyền Admin" : "Cấp quyền Admin"}
+                          >
+                            {user.role === "ADMIN" ? (
+                              <ShieldOff className="h-4 w-4" />
+                            ) : (
+                              <Shield className="h-4 w-4" />
+                            )}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleToggleEnabled(user)}
+                            disabled={user.id === currentUser?.id}
+                            title={user.enabled ? "Vô hiệu hóa" : "Kích hoạt"}
+                          >
+                            {user.enabled ? (
+                              <UserX className="h-4 w-4" />
+                            ) : (
+                              <UserCheck className="h-4 w-4" />
+                            )}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleSoftDelete(user)}
+                            disabled={user.id === currentUser?.id}
+                            className="text-amber-600 hover:text-amber-600"
+                            title="Xóa mềm (7 ngày)"
+                          >
+                            <CalendarX className="h-4 w-4" />
+                          </Button>
+                        </>
+                      )}
+                      {user.deletionStatus === "PENDING_DELETION" && (
+                        <>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleCancelDeletion(user)}
+                            className="text-green-600 hover:text-green-600"
+                            title="Phục hồi tài khoản"
+                          >
+                            <RotateCcw className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDelete(user)}
+                            disabled={user.id === currentUser?.id}
+                            className="text-destructive hover:text-destructive"
+                            title="Xóa vĩnh viễn ngay"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </>
+                      )}
+                      {user.deletionStatus === "DELETED" && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(user)}
+                          disabled={user.id === currentUser?.id}
+                          className="text-destructive hover:text-destructive"
+                          title="Xóa hoàn toàn"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                   </td>
                 </tr>

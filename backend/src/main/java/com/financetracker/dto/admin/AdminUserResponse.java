@@ -33,4 +33,10 @@ public class AdminUserResponse {
     // Statistics
     private Integer accountsCount;
     private Integer transactionsCount;
+
+    // Deletion info
+    private OffsetDateTime deletedAt;
+    private OffsetDateTime deletionScheduledAt;
+    private String deletedByEmail;  // null = self-deleted, value = admin who deleted
+    private String deletionStatus;  // ACTIVE, PENDING_DELETION, DELETED
 }

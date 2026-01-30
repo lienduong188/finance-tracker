@@ -14,11 +14,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class AdminUserService {
+
+    private static final int DELETION_GRACE_PERIOD_DAYS = 7;
 
     private final UserRepository userRepository;
     private final AccountRepository accountRepository;
@@ -99,9 +102,89 @@ public class AdminUserService {
         userRepository.delete(user);
     }
 
+    @Transactional
+    public AdminUserResponse softDeleteUser(UUID id, UUID adminUserId) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> ApiException.notFound("User"));
+
+        User admin = userRepository.findById(adminUserId)
+                .orElseThrow(() -> ApiException.notFound("Admin"));
+
+        // Prevent self-delete
+        if (id.equals(adminUserId)) {
+            throw ApiException.badRequest("Cannot delete yourself");
+        }
+
+        // Prevent deleting last admin
+        if (user.getRole() == Role.ADMIN) {
+            long adminCount = userRepository.countByRole(Role.ADMIN);
+            if (adminCount <= 1) {
+                throw ApiException.badRequest("Cannot delete the last admin");
+            }
+        }
+
+        // Check if already marked for deletion
+        if (user.getDeletedAt() != null) {
+            throw ApiException.badRequest("User is already marked for deletion");
+        }
+
+        // Set deletion timestamps
+        OffsetDateTime now = OffsetDateTime.now();
+        user.setDeletedAt(now);
+        user.setDeletionScheduledAt(now.plusDays(DELETION_GRACE_PERIOD_DAYS));
+        user.setDeletedBy(admin);
+        user.setEnabled(false);
+
+        user = userRepository.save(user);
+        return toResponse(user);
+    }
+
+    @Transactional
+    public AdminUserResponse cancelDeletion(UUID id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> ApiException.notFound("User"));
+
+        // Check if marked for deletion
+        if (user.getDeletedAt() == null) {
+            throw ApiException.badRequest("User is not marked for deletion");
+        }
+
+        // Check if still in grace period
+        if (user.getDeletionScheduledAt() == null) {
+            throw ApiException.badRequest("User data has already been deleted");
+        }
+
+        // Clear deletion timestamps and re-enable account
+        user.setDeletedAt(null);
+        user.setDeletionScheduledAt(null);
+        user.setDeletedBy(null);
+        user.setEnabled(true);
+
+        user = userRepository.save(user);
+        return toResponse(user);
+    }
+
     private AdminUserResponse toResponse(User user) {
         int accountsCount = accountRepository.findByUserId(user.getId()).size();
         int transactionsCount = (int) transactionRepository.findByUserId(user.getId(), Pageable.unpaged()).getTotalElements();
+
+        // Determine deletion status
+        String deletionStatus = "ACTIVE";
+        if (user.getDeletedAt() != null) {
+            if (user.getDeletionScheduledAt() == null) {
+                // Data already deleted (deletionScheduledAt cleared after data deletion)
+                deletionStatus = "DELETED";
+            } else {
+                // Still in grace period
+                deletionStatus = "PENDING_DELETION";
+            }
+        }
+
+        // Get email of admin who deleted (if any)
+        String deletedByEmail = null;
+        if (user.getDeletedBy() != null) {
+            deletedByEmail = user.getDeletedBy().getEmail();
+        }
 
         return AdminUserResponse.builder()
                 .id(user.getId())
@@ -118,6 +201,10 @@ public class AdminUserService {
                 .lastUserAgent(user.getLastUserAgent())
                 .accountsCount(accountsCount)
                 .transactionsCount(transactionsCount)
+                .deletedAt(user.getDeletedAt())
+                .deletionScheduledAt(user.getDeletionScheduledAt())
+                .deletedByEmail(deletedByEmail)
+                .deletionStatus(deletionStatus)
                 .build();
     }
 }

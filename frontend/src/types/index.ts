@@ -258,6 +258,8 @@ export interface LogoutRequest {
 }
 
 // Admin types
+export type DeletionStatus = "ACTIVE" | "PENDING_DELETION" | "DELETED"
+
 export interface AdminUser {
   id: string
   email: string
@@ -273,6 +275,11 @@ export interface AdminUser {
   lastUserAgent: string | null
   accountsCount: number
   transactionsCount: number
+  // Deletion info
+  deletedAt: string | null
+  deletionScheduledAt: string | null
+  deletedByEmail: string | null
+  deletionStatus: DeletionStatus
 }
 
 export interface UpdateUserRoleRequest {

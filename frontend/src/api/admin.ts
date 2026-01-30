@@ -54,6 +54,16 @@ export const adminApi = {
     await apiClient.delete(`/admin/users/${id}`)
   },
 
+  softDeleteUser: async (id: string): Promise<AdminUser> => {
+    const response = await apiClient.post<AdminUser>(`/admin/users/${id}/soft-delete`)
+    return response.data
+  },
+
+  cancelDeletion: async (id: string): Promise<AdminUser> => {
+    const response = await apiClient.post<AdminUser>(`/admin/users/${id}/cancel-deletion`)
+    return response.data
+  },
+
   // System Categories
   getSystemCategories: async (): Promise<Category[]> => {
     const response = await apiClient.get<Category[]>("/admin/categories")
