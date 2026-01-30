@@ -40,4 +40,8 @@ public interface InvitationRepository extends JpaRepository<Invitation, UUID> {
 
     @Query("SELECT COUNT(i) FROM Invitation i WHERE (i.inviteeEmail = :email OR i.invitee.id = :userId) AND i.status = 'PENDING'")
     long countPendingByEmailOrUserId(@Param("email") String email, @Param("userId") UUID userId);
+
+    void deleteByInviterId(UUID inviterId);
+
+    void deleteByFamilyId(UUID familyId);
 }

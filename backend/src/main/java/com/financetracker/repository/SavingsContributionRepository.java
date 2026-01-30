@@ -31,4 +31,6 @@ public interface SavingsContributionRepository extends JpaRepository<SavingsCont
     long countDistinctUsersByGoalId(@Param("goalId") UUID goalId);
 
     boolean existsByTransactionId(UUID transactionId);
+
+    void deleteByUserId(UUID userId);
 }

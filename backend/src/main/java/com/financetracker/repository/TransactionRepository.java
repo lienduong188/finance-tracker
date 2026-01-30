@@ -105,4 +105,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID>,
             @Param("type") TransactionType type,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate);
+
+    void deleteByUserId(UUID userId);
 }

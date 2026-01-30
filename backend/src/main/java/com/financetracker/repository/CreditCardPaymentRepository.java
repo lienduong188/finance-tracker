@@ -39,4 +39,8 @@ public interface CreditCardPaymentRepository extends JpaRepository<CreditCardPay
     long countPendingPayments(@Param("userId") UUID userId);
 
     Optional<CreditCardPayment> findFirstByPlanIdAndStatusOrderByPaymentNumber(UUID planId, PaymentStatus status);
+
+    @Modifying
+    @Query("DELETE FROM CreditCardPayment p WHERE p.plan.id = :planId")
+    void deleteByPaymentPlanId(@Param("planId") UUID planId);
 }

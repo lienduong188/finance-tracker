@@ -34,4 +34,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     long countByEnabled(Boolean enabled);
 
     long countByCreatedAtAfter(OffsetDateTime date);
+
+    // Find users with pending deletion that should be processed
+    List<User> findByDeletionScheduledAtBeforeAndDeletionScheduledAtIsNotNull(OffsetDateTime date);
 }

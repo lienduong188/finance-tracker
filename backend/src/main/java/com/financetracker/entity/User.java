@@ -58,6 +58,12 @@ public class User extends BaseEntity {
     @Column(name = "last_login_location", length = 200)
     private String lastLoginLocation;
 
+    @Column(name = "deleted_at")
+    private OffsetDateTime deletedAt;
+
+    @Column(name = "deletion_scheduled_at")
+    private OffsetDateTime deletionScheduledAt;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Account> accounts = new ArrayList<>();

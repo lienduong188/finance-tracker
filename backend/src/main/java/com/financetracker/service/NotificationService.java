@@ -273,6 +273,32 @@ public class NotificationService {
         );
     }
 
+    // User account deleted - notify all admins
+    public void notifyAdminsUserDeleted(User deletedUser) {
+        List<User> admins = userRepository.findByRole(Role.ADMIN);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("userId", deletedUser.getId().toString());
+        data.put("userEmail", deletedUser.getEmail());
+        data.put("userFullName", deletedUser.getFullName());
+        data.put("deletedAt", deletedUser.getDeletedAt().toString());
+        data.put("deletionScheduledAt", deletedUser.getDeletionScheduledAt().toString());
+
+        for (User admin : admins) {
+            createNotification(
+                    admin,
+                    NotificationType.USER_ACCOUNT_DELETED,
+                    "Người dùng yêu cầu xóa tài khoản",
+                    String.format("Người dùng %s (%s) đã yêu cầu xóa tài khoản. Dữ liệu sẽ bị xóa sau 7 ngày.",
+                            deletedUser.getFullName() != null ? deletedUser.getFullName() : deletedUser.getEmail(),
+                            deletedUser.getEmail()),
+                    data
+            );
+        }
+
+        log.info("Notified {} admins about user deletion request: {}", admins.size(), deletedUser.getEmail());
+    }
+
     // Delete old read notifications
     @Transactional
     public int deleteOldNotifications(OffsetDateTime before) {

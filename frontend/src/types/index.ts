@@ -9,6 +9,8 @@ export interface User {
   defaultCurrency: string
   role: Role
   createdAt: string
+  deletedAt?: string | null
+  deletionScheduledAt?: string | null
 }
 
 // Auth types
@@ -44,6 +46,14 @@ export interface UpdateProfileRequest {
 export interface ChangePasswordRequest {
   currentPassword: string
   newPassword: string
+}
+
+export interface DeleteAccountRequest {
+  password: string
+}
+
+export interface RestoreAccountRequest {
+  password: string
 }
 
 // Account types

@@ -62,4 +62,6 @@ public interface TokenUsageRepository extends JpaRepository<TokenUsage, UUID> {
     List<Object[]> findUsageByModel();
 
     long countByCreatedAtAfter(OffsetDateTime date);
+
+    void deleteByUserId(UUID userId);
 }

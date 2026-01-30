@@ -1,6 +1,8 @@
 package com.financetracker.controller;
 
 import com.financetracker.dto.user.ChangePasswordRequest;
+import com.financetracker.dto.user.DeleteAccountRequest;
+import com.financetracker.dto.user.RestoreAccountRequest;
 import com.financetracker.dto.user.UpdateProfileRequest;
 import com.financetracker.dto.user.UserResponse;
 import com.financetracker.security.CustomUserDetails;
@@ -41,6 +43,24 @@ public class UserController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody ChangePasswordRequest request) {
         userService.changePassword(userDetails.getId(), request);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/account")
+    @Operation(summary = "Request account deletion (soft delete with 7-day grace period)")
+    public ResponseEntity<Void> deleteAccount(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody DeleteAccountRequest request) {
+        userService.deleteAccount(userDetails.getId(), request);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/account/restore")
+    @Operation(summary = "Restore account within grace period")
+    public ResponseEntity<Void> restoreAccount(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody RestoreAccountRequest request) {
+        userService.restoreAccount(userDetails.getId(), request);
         return ResponseEntity.ok().build();
     }
 }

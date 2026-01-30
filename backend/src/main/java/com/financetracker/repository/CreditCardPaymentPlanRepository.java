@@ -54,4 +54,6 @@ public interface CreditCardPaymentPlanRepository extends JpaRepository<CreditCar
 
     @Query("SELECT p FROM CreditCardPaymentPlan p WHERE p.status = 'ACTIVE' AND p.nextPaymentDate <= :date")
     List<CreditCardPaymentPlan> findAllActivePlansWithUpcomingPayments(@Param("date") LocalDate date);
+
+    List<CreditCardPaymentPlan> findByUserId(UUID userId);
 }

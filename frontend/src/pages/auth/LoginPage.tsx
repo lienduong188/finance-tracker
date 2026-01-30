@@ -17,6 +17,7 @@ export function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [sessionExpired, setSessionExpired] = useState(false)
+  const [accountDeleted, setAccountDeleted] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
 
   const loginSchema = z.object({
@@ -39,6 +40,11 @@ export function LoginPage() {
     if (searchParams.get("expired") === "true") {
       setSessionExpired(true)
       searchParams.delete("expired")
+      setSearchParams(searchParams, { replace: true })
+    }
+    if (searchParams.get("deleted") === "true") {
+      setAccountDeleted(true)
+      searchParams.delete("deleted")
       setSearchParams(searchParams, { replace: true })
     }
   }, [searchParams, setSearchParams])
@@ -85,6 +91,12 @@ export function LoginPage() {
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardContent className="space-y-4 p-4 pt-0 md:p-6 md:pt-0">
+            {accountDeleted && (
+              <div className="rounded-md bg-green-500/10 p-3 text-sm text-green-600">
+                {t("settings.deleteAccountSuccess")}
+              </div>
+            )}
+
             {sessionExpired && (
               <div className="rounded-md bg-amber-500/10 p-3 text-sm text-amber-600">
                 {t("auth.sessionExpired")}

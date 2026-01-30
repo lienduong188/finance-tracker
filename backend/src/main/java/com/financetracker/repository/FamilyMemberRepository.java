@@ -29,4 +29,10 @@ public interface FamilyMemberRepository extends JpaRepository<FamilyMember, UUID
     Optional<FamilyMember> findByFamilyIdAndRole(@Param("familyId") UUID familyId, @Param("role") FamilyRole role);
 
     void deleteByFamilyIdAndUserId(UUID familyId, UUID userId);
+
+    @Query("SELECT m FROM FamilyMember m WHERE m.family.id = :familyId AND m.role = :role AND m.user.id != :userId")
+    List<FamilyMember> findByFamilyIdAndRoleAndUserIdNot(@Param("familyId") UUID familyId, @Param("role") FamilyRole role, @Param("userId") UUID userId);
+
+    @Query("SELECT m FROM FamilyMember m WHERE m.family.id = :familyId AND m.user.id != :userId")
+    List<FamilyMember> findByFamilyIdAndUserIdNot(@Param("familyId") UUID familyId, @Param("userId") UUID userId);
 }

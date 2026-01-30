@@ -7,7 +7,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { usersApi, categoriesApi } from "@/api"
 import { useAuth } from "@/context/AuthContext"
 import { Button, Input, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui"
-import { User, Lock, Check, AlertCircle, Tags, Plus, Pencil, Trash2, CheckSquare, Square } from "lucide-react"
+import { User, Lock, Check, AlertCircle, Tags, Plus, Pencil, Trash2, CheckSquare, Square, UserX } from "lucide-react"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
 import type { Category, CategoryType, CategoryRequest } from "@/types"
 
@@ -55,6 +55,11 @@ export function SettingsPage() {
   const [selectedCategories, setSelectedCategories] = useState<Set<string>>(new Set())
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null)
+
+  // Delete account state
+  const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false)
+  const [deletePassword, setDeletePassword] = useState("")
+  const [deleteAccountError, setDeleteAccountError] = useState<string | null>(null)
 
   const profileForm = useForm<ProfileForm>({
     resolver: zodResolver(profileSchema),
@@ -154,6 +159,20 @@ export function SettingsPage() {
       setSelectedCategories(new Set())
       setCategorySuccess(t("settings.categoriesDeleted", { count: selectedCategories.size }))
       setTimeout(() => setCategorySuccess(null), 3000)
+    },
+  })
+
+  const deleteAccountMutation = useMutation({
+    mutationFn: usersApi.deleteAccount,
+    onSuccess: async () => {
+      // Clear tokens and redirect to login
+      localStorage.removeItem("accessToken")
+      localStorage.removeItem("refreshToken")
+      window.location.href = "/login?deleted=true"
+    },
+    onError: (error: Error & { response?: { data?: { message?: string } } }) => {
+      const message = error.response?.data?.message || t("settings.deleteAccountFailed")
+      setDeleteAccountError(message)
     },
   })
 
@@ -561,6 +580,103 @@ export function SettingsPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Danger Zone - Delete Account */}
+      <Card className="border-destructive/50">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-destructive">
+            <UserX className="h-5 w-5" />
+            {t("settings.dangerZone")}
+          </CardTitle>
+          <CardDescription>{t("settings.dangerZoneDescription")}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              {t("settings.deleteAccountWarning")}
+            </p>
+            <Button
+              variant="destructive"
+              onClick={() => setShowDeleteAccountModal(true)}
+            >
+              <UserX className="mr-2 h-4 w-4" />
+              {t("settings.deleteAccount")}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Delete Account Modal */}
+      {showDeleteAccountModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-lg bg-background p-6 shadow-lg">
+            <div className="flex justify-center mb-4">
+              <div className="rounded-full bg-red-100 dark:bg-red-900/30 p-3">
+                <UserX className="h-6 w-6 text-destructive" />
+              </div>
+            </div>
+
+            <h2 className="text-lg font-semibold text-center mb-2">
+              {t("settings.deleteAccountTitle")}
+            </h2>
+
+            <p className="text-sm text-muted-foreground text-center mb-2">
+              {t("settings.deleteAccountWarning")}
+            </p>
+
+            <p className="text-sm text-muted-foreground text-center mb-4">
+              {t("settings.deleteAccountDataList")}
+            </p>
+
+            <div className="space-y-4">
+              <div>
+                <label className="mb-1.5 block text-sm font-medium">
+                  {t("settings.enterPasswordToConfirm")}
+                </label>
+                <Input
+                  type="password"
+                  value={deletePassword}
+                  onChange={(e) => setDeletePassword(e.target.value)}
+                  placeholder={t("auth.password")}
+                />
+              </div>
+
+              {deleteAccountError && (
+                <div className="flex items-center gap-2 text-sm text-destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  {deleteAccountError}
+                </div>
+              )}
+
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    setShowDeleteAccountModal(false)
+                    setDeletePassword("")
+                    setDeleteAccountError(null)
+                  }}
+                  disabled={deleteAccountMutation.isPending}
+                >
+                  {t("common.cancel")}
+                </Button>
+                <Button
+                  variant="destructive"
+                  className="flex-1"
+                  onClick={() => {
+                    setDeleteAccountError(null)
+                    deleteAccountMutation.mutate({ password: deletePassword })
+                  }}
+                  disabled={!deletePassword || deleteAccountMutation.isPending}
+                >
+                  {deleteAccountMutation.isPending ? t("common.loading") : t("settings.deleteAccountConfirm")}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Category Modal */}
       {showCategoryModal && (

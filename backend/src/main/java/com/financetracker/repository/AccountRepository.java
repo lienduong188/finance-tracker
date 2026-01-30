@@ -40,4 +40,6 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
     default List<Account> findByCurrency(String currency) {
         return findByCurrencyAndIsActiveTrue(currency);
     }
+
+    void deleteByUserId(UUID userId);
 }

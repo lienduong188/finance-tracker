@@ -45,4 +45,6 @@ public interface DebtRepository extends JpaRepository<Debt, UUID> {
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate,
             @Param("status") DebtStatus status);
+
+    void deleteByUserId(UUID userId);
 }

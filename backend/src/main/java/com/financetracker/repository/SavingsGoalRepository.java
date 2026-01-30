@@ -31,4 +31,8 @@ public interface SavingsGoalRepository extends JpaRepository<SavingsGoal, UUID> 
 
     @Query("SELECT sg FROM SavingsGoal sg WHERE (sg.user.id = :userId OR sg.family.id IN :familyIds) AND sg.status = :status")
     List<SavingsGoal> findAccessibleGoalsByStatus(@Param("userId") UUID userId, @Param("familyIds") List<UUID> familyIds, @Param("status") SavingsGoalStatus status);
+
+    void deleteByUserIdAndFamilyIsNull(UUID userId);
+
+    void deleteByFamilyId(UUID familyId);
 }

@@ -43,4 +43,6 @@ public interface BudgetRepository extends JpaRepository<Budget, UUID> {
 
     @Query("SELECT b FROM Budget b WHERE (b.user.id = :userId OR b.family.id IN :familyIds) AND b.isActive = true")
     List<Budget> findAccessibleActiveBudgets(@Param("userId") UUID userId, @Param("familyIds") List<UUID> familyIds);
+
+    void deleteByUserId(UUID userId);
 }

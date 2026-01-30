@@ -8,6 +8,7 @@ A personal finance management application to help individuals and families track
 - **Account Management**: Track multiple money sources (cash, bank accounts, e-wallets, credit cards)
 - **Transaction Tracking**: Record income, expenses, and transfers between accounts
 - **Budget Management**: Set spending limits by category with alerts
+- **Credit Card Installments (分割・リボ払い)**: Split credit card purchases into installment or revolving payments
 - **Multi-Currency Support**: Handle transactions in multiple currencies (VND, JPY)
 
 ### Planning
@@ -26,6 +27,7 @@ A personal finance management application to help individuals and families track
 - **Multi-language**: Vietnamese, English, and Japanese (i18n)
 - **AI Chat Assistant**: Ask questions about your finances
 - **Notifications**: Budget warnings, debt reminders, group invitations
+- **Account Deletion (退会)**: Request account deletion with 7-day grace period for restoration
 
 ## Tech Stack
 
@@ -171,6 +173,7 @@ Once running, access Swagger UI at: `http://localhost:8080/swagger-ui.html`
 | `/api/budgets` | GET/POST | List/Create budgets |
 | `/api/recurring` | GET/POST | List/Create recurring transactions |
 | `/api/debts` | GET/POST | List/Create debts |
+| `/api/credit-card-plans` | GET/POST | List/Create credit card payment plans |
 | `/api/families` | GET/POST | List/Create family groups |
 | `/api/savings-goals` | GET/POST | List/Create savings goals |
 | `/api/categories` | GET | List categories |

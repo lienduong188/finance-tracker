@@ -41,4 +41,6 @@ public interface NotificationRepository extends JpaRepository<Notification, UUID
     @Modifying
     @Query("DELETE FROM Notification n WHERE n.isRead = true AND n.createdAt < :before")
     int deleteOldReadNotifications(@Param("before") OffsetDateTime before);
+
+    void deleteByUserId(UUID userId);
 }

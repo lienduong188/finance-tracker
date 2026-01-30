@@ -28,4 +28,6 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> {
 
     @Query("SELECT c FROM Category c WHERE c.id = :id AND (c.user.id = :userId OR c.isSystem = true)")
     Optional<Category> findByIdAndUserIdOrSystem(@Param("id") UUID id, @Param("userId") UUID userId);
+
+    void deleteByUserIdAndIsSystemFalse(UUID userId);
 }

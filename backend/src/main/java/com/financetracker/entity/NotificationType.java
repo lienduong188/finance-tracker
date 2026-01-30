@@ -32,5 +32,8 @@ public enum NotificationType {
 
     // Family/Group
     MEMBER_JOINED,             // New member joined
-    MEMBER_LEFT                // Member left
+    MEMBER_LEFT,               // Member left
+
+    // User account
+    USER_ACCOUNT_DELETED       // User requested account deletion (notify admins)
 }
