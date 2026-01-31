@@ -16,7 +16,7 @@ import {
   Clock,
 } from "lucide-react"
 import { debtsApi } from "@/api"
-import { Button, Card } from "@/components/ui"
+import { Button, Card, ConfirmDialog } from "@/components/ui"
 import { cn, formatCurrency } from "@/lib/utils"
 import type { Debt, DebtType, DebtStatus } from "@/types"
 import { DebtFormModal } from "./DebtFormModal"
@@ -32,6 +32,15 @@ export function DebtsPage() {
   const [isPaymentOpen, setIsPaymentOpen] = useState(false)
   const [editingDebt, setEditingDebt] = useState<Debt | null>(null)
   const [payingDebt, setPayingDebt] = useState<Debt | null>(null)
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean
+    type: "markPaid" | "cancel" | "delete"
+    debt: Debt | null
+  }>({
+    isOpen: false,
+    type: "markPaid",
+    debt: null,
+  })
 
   const { data: debtsData, isLoading } = useQuery({
     queryKey: ["debts", page, typeFilter, statusFilter],
@@ -81,21 +90,27 @@ export function DebtsPage() {
   }
 
   const handleMarkPaid = (debt: Debt) => {
-    if (confirm(t("debts.confirmMarkPaid"))) {
-      markPaidMutation.mutate(debt.id)
-    }
+    setConfirmDialog({ isOpen: true, type: "markPaid", debt })
   }
 
   const handleCancel = (debt: Debt) => {
-    if (confirm(t("debts.confirmCancel"))) {
-      cancelMutation.mutate(debt.id)
-    }
+    setConfirmDialog({ isOpen: true, type: "cancel", debt })
   }
 
   const handleDelete = (debt: Debt) => {
-    if (confirm(t("debts.confirmDelete"))) {
-      deleteMutation.mutate(debt.id)
+    setConfirmDialog({ isOpen: true, type: "delete", debt })
+  }
+
+  const handleConfirmAction = () => {
+    if (!confirmDialog.debt) return
+    if (confirmDialog.type === "markPaid") {
+      markPaidMutation.mutate(confirmDialog.debt.id)
+    } else if (confirmDialog.type === "cancel") {
+      cancelMutation.mutate(confirmDialog.debt.id)
+    } else if (confirmDialog.type === "delete") {
+      deleteMutation.mutate(confirmDialog.debt.id)
     }
+    setConfirmDialog({ isOpen: false, type: "markPaid", debt: null })
   }
 
   const handleCloseForm = () => {
@@ -409,6 +424,27 @@ export function DebtsPage() {
         isOpen={isPaymentOpen}
         onClose={handleClosePayment}
         debt={payingDebt}
+      />
+
+      {/* Confirm Dialog */}
+      <ConfirmDialog
+        isOpen={confirmDialog.isOpen}
+        onClose={() => setConfirmDialog({ isOpen: false, type: "markPaid", debt: null })}
+        onConfirm={handleConfirmAction}
+        title={
+          confirmDialog.type === "markPaid" ? t("debts.markAsPaid") :
+          confirmDialog.type === "cancel" ? t("debts.cancel") :
+          t("common.delete")
+        }
+        message={
+          confirmDialog.type === "markPaid" ? t("debts.confirmMarkPaid") :
+          confirmDialog.type === "cancel" ? t("debts.confirmCancel") :
+          t("debts.confirmDelete")
+        }
+        confirmText={t("common.confirm")}
+        cancelText={t("common.cancel")}
+        variant={confirmDialog.type === "delete" ? "danger" : "warning"}
+        isLoading={markPaidMutation.isPending || cancelMutation.isPending || deleteMutation.isPending}
       />
     </div>
   )

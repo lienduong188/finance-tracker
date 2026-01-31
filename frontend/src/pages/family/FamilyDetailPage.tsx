@@ -14,7 +14,7 @@ import {
 } from "lucide-react"
 import { familiesApi, invitationsApi } from "@/api"
 import type { FamilyRole, FamilyMember } from "@/types"
-import { Button, Card, CardContent, CardHeader, CardTitle } from "@/components/ui"
+import { Button, Card, CardContent, CardHeader, CardTitle, ConfirmDialog } from "@/components/ui"
 import { useAuth } from "@/context/AuthContext"
 import InviteMemberModal from "./InviteMemberModal"
 
@@ -31,6 +31,15 @@ export default function FamilyDetailPage() {
   const queryClient = useQueryClient()
   const { user } = useAuth()
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false)
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean
+    type: "changeRole" | "removeMember" | "leave"
+    member?: FamilyMember
+    newRole?: FamilyRole
+  }>({
+    isOpen: false,
+    type: "leave",
+  })
 
   const { data: family, isLoading: familyLoading } = useQuery({
     queryKey: ["family", id],
@@ -82,21 +91,26 @@ export default function FamilyDetailPage() {
   })
 
   const handleChangeRole = (member: FamilyMember, newRole: FamilyRole) => {
-    if (confirm(t("family.confirmChangeRole", { name: member.fullName, role: t(`family.roles.${newRole}`) }))) {
-      updateRoleMutation.mutate({ memberId: member.id, role: newRole })
-    }
+    setConfirmDialog({ isOpen: true, type: "changeRole", member, newRole })
   }
 
   const handleRemoveMember = (member: FamilyMember) => {
-    if (confirm(t("family.confirmRemoveMember", { name: member.fullName }))) {
-      removeMemberMutation.mutate(member.id)
-    }
+    setConfirmDialog({ isOpen: true, type: "removeMember", member })
   }
 
   const handleLeave = () => {
-    if (confirm(t("family.confirmLeave"))) {
+    setConfirmDialog({ isOpen: true, type: "leave" })
+  }
+
+  const handleConfirmAction = () => {
+    if (confirmDialog.type === "changeRole" && confirmDialog.member && confirmDialog.newRole) {
+      updateRoleMutation.mutate({ memberId: confirmDialog.member.id, role: confirmDialog.newRole })
+    } else if (confirmDialog.type === "removeMember" && confirmDialog.member) {
+      removeMemberMutation.mutate(confirmDialog.member.id)
+    } else if (confirmDialog.type === "leave") {
       leaveMutation.mutate()
     }
+    setConfirmDialog({ isOpen: false, type: "leave" })
   }
 
   if (familyLoading || membersLoading) {
@@ -249,6 +263,29 @@ export default function FamilyDetailPage() {
         isOpen={isInviteModalOpen}
         onClose={() => setIsInviteModalOpen(false)}
         familyId={id!}
+      />
+
+      {/* Confirm Dialog */}
+      <ConfirmDialog
+        isOpen={confirmDialog.isOpen}
+        onClose={() => setConfirmDialog({ isOpen: false, type: "leave" })}
+        onConfirm={handleConfirmAction}
+        title={
+          confirmDialog.type === "changeRole" ? t("family.changeRole") :
+          confirmDialog.type === "removeMember" ? t("family.removeFromGroup") :
+          t("family.leaveGroup")
+        }
+        message={
+          confirmDialog.type === "changeRole" && confirmDialog.member && confirmDialog.newRole
+            ? t("family.confirmChangeRole", { name: confirmDialog.member.fullName, role: t(`family.roles.${confirmDialog.newRole}`) })
+            : confirmDialog.type === "removeMember" && confirmDialog.member
+            ? t("family.confirmRemoveMember", { name: confirmDialog.member.fullName })
+            : t("family.confirmLeave")
+        }
+        confirmText={t("common.confirm")}
+        cancelText={t("common.cancel")}
+        variant={confirmDialog.type === "removeMember" ? "danger" : "warning"}
+        isLoading={updateRoleMutation.isPending || removeMemberMutation.isPending || leaveMutation.isPending}
       />
     </div>
   )

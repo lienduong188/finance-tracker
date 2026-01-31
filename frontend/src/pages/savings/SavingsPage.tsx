@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next"
 import { Plus, Target, Users, User, Trash2 } from "lucide-react"
 import { savingsGoalsApi } from "@/api"
 import type { SavingsGoal, SavingsGoalStatus } from "@/types"
-import { Button, Card, CardContent, CardHeader, CardTitle } from "@/components/ui"
+import { Button, Card, CardContent, CardHeader, CardTitle, ConfirmDialog } from "@/components/ui"
 import SavingsFormModal from "./SavingsFormModal"
 
 const statusColors: Record<SavingsGoalStatus, string> = {
@@ -29,6 +29,10 @@ export default function SavingsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingGoal, setEditingGoal] = useState<SavingsGoal | null>(null)
   const [statusFilter, setStatusFilter] = useState<SavingsGoalStatus | "ALL">("ALL")
+  const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; goal: SavingsGoal | null }>({
+    isOpen: false,
+    goal: null,
+  })
 
   const { data: goals, isLoading } = useQuery({
     queryKey: ["savings-goals"],
@@ -48,8 +52,13 @@ export default function SavingsPage() {
   }
 
   const handleDelete = (goal: SavingsGoal) => {
-    if (confirm(t("savings.confirmDelete", { name: goal.name }))) {
-      deleteMutation.mutate(goal.id)
+    setDeleteConfirm({ isOpen: true, goal })
+  }
+
+  const handleDeleteConfirm = () => {
+    if (deleteConfirm.goal) {
+      deleteMutation.mutate(deleteConfirm.goal.id)
+      setDeleteConfirm({ isOpen: false, goal: null })
     }
   }
 
@@ -203,6 +212,19 @@ export default function SavingsPage() {
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         goal={editingGoal}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={deleteConfirm.isOpen}
+        onClose={() => setDeleteConfirm({ isOpen: false, goal: null })}
+        onConfirm={handleDeleteConfirm}
+        title={t("savings.deleteGoal")}
+        message={t("savings.confirmDelete", { name: deleteConfirm.goal?.name || "" })}
+        confirmText={t("common.delete")}
+        cancelText={t("common.cancel")}
+        variant="danger"
+        isLoading={deleteMutation.isPending}
       />
     </div>
   )

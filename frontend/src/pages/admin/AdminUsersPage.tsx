@@ -19,7 +19,7 @@ import {
   AlertTriangle,
 } from "lucide-react"
 import { adminApi } from "@/api"
-import { Button, Input, Card } from "@/components/ui"
+import { Button, Input, Card, ConfirmDialog, AlertDialog } from "@/components/ui"
 import type { AdminUser, Role } from "@/types"
 import { useAuth } from "@/context/AuthContext"
 
@@ -39,6 +39,23 @@ export function AdminUsersPage() {
   const [searchInput, setSearchInput] = useState("")
   const queryClient = useQueryClient()
   const { user: currentUser } = useAuth()
+  const [alertDialog, setAlertDialog] = useState<{ isOpen: boolean; message: string }>({
+    isOpen: false,
+    message: "",
+  })
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean
+    title: string
+    message: string
+    onConfirm: () => void
+    variant?: "danger" | "warning" | "info"
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+    onConfirm: () => {},
+    variant: "danger",
+  })
 
   const { data, isLoading } = useQuery({
     queryKey: ["admin", "users", page, search],
@@ -89,49 +106,84 @@ export function AdminUsersPage() {
 
   const handleToggleRole = (user: AdminUser) => {
     if (user.id === currentUser?.id) {
-      alert("Không thể thay đổi role của chính bạn")
+      setAlertDialog({ isOpen: true, message: "Không thể thay đổi role của chính bạn" })
       return
     }
     const newRole: Role = user.role === "ADMIN" ? "USER" : "ADMIN"
-    if (confirm(`Bạn có chắc muốn ${newRole === "ADMIN" ? "cấp quyền Admin" : "bỏ quyền Admin"} cho ${user.email}?`)) {
-      updateRoleMutation.mutate({ id: user.id, role: newRole })
-    }
+    setConfirmDialog({
+      isOpen: true,
+      title: newRole === "ADMIN" ? "Cấp quyền Admin" : "Bỏ quyền Admin",
+      message: `Bạn có chắc muốn ${newRole === "ADMIN" ? "cấp quyền Admin" : "bỏ quyền Admin"} cho ${user.email}?`,
+      onConfirm: () => {
+        updateRoleMutation.mutate({ id: user.id, role: newRole })
+        setConfirmDialog((prev) => ({ ...prev, isOpen: false }))
+      },
+      variant: "warning",
+    })
   }
 
   const handleToggleEnabled = (user: AdminUser) => {
     if (user.id === currentUser?.id) {
-      alert("Không thể vô hiệu hóa chính bạn")
+      setAlertDialog({ isOpen: true, message: "Không thể vô hiệu hóa chính bạn" })
       return
     }
-    if (confirm(`Bạn có chắc muốn ${user.enabled ? "vô hiệu hóa" : "kích hoạt"} user ${user.email}?`)) {
-      toggleEnabledMutation.mutate(user.id)
-    }
+    setConfirmDialog({
+      isOpen: true,
+      title: user.enabled ? "Vô hiệu hóa user" : "Kích hoạt user",
+      message: `Bạn có chắc muốn ${user.enabled ? "vô hiệu hóa" : "kích hoạt"} user ${user.email}?`,
+      onConfirm: () => {
+        toggleEnabledMutation.mutate(user.id)
+        setConfirmDialog((prev) => ({ ...prev, isOpen: false }))
+      },
+      variant: "warning",
+    })
   }
 
   const handleDelete = (user: AdminUser) => {
     if (user.id === currentUser?.id) {
-      alert("Không thể xóa chính bạn")
+      setAlertDialog({ isOpen: true, message: "Không thể xóa chính bạn" })
       return
     }
-    if (confirm(`Bạn có chắc muốn xóa vĩnh viễn user ${user.email}? Hành động này không thể hoàn tác và sẽ xóa TẤT CẢ dữ liệu.`)) {
-      deleteMutation.mutate(user.id)
-    }
+    setConfirmDialog({
+      isOpen: true,
+      title: "Xóa vĩnh viễn user",
+      message: `Bạn có chắc muốn xóa vĩnh viễn user ${user.email}? Hành động này không thể hoàn tác và sẽ xóa TẤT CẢ dữ liệu.`,
+      onConfirm: () => {
+        deleteMutation.mutate(user.id)
+        setConfirmDialog((prev) => ({ ...prev, isOpen: false }))
+      },
+      variant: "danger",
+    })
   }
 
   const handleSoftDelete = (user: AdminUser) => {
     if (user.id === currentUser?.id) {
-      alert("Không thể xóa chính bạn")
+      setAlertDialog({ isOpen: true, message: "Không thể xóa chính bạn" })
       return
     }
-    if (confirm(`Bạn có chắc muốn xóa mềm user ${user.email}?\n\nUser sẽ có 7 ngày để phục hồi tài khoản. Sau 7 ngày, tất cả dữ liệu sẽ bị xóa vĩnh viễn.`)) {
-      softDeleteMutation.mutate(user.id)
-    }
+    setConfirmDialog({
+      isOpen: true,
+      title: "Xóa mềm user",
+      message: `Bạn có chắc muốn xóa mềm user ${user.email}?\n\nUser sẽ có 7 ngày để phục hồi tài khoản. Sau 7 ngày, tất cả dữ liệu sẽ bị xóa vĩnh viễn.`,
+      onConfirm: () => {
+        softDeleteMutation.mutate(user.id)
+        setConfirmDialog((prev) => ({ ...prev, isOpen: false }))
+      },
+      variant: "warning",
+    })
   }
 
   const handleCancelDeletion = (user: AdminUser) => {
-    if (confirm(`Phục hồi tài khoản cho user ${user.email}?`)) {
-      cancelDeletionMutation.mutate(user.id)
-    }
+    setConfirmDialog({
+      isOpen: true,
+      title: "Phục hồi tài khoản",
+      message: `Phục hồi tài khoản cho user ${user.email}?`,
+      onConfirm: () => {
+        cancelDeletionMutation.mutate(user.id)
+        setConfirmDialog((prev) => ({ ...prev, isOpen: false }))
+      },
+      variant: "info",
+    })
   }
 
   if (isLoading) {
@@ -434,6 +486,27 @@ export function AdminUsersPage() {
           </div>
         )}
       </Card>
+
+      {/* Alert Dialog */}
+      <AlertDialog
+        isOpen={alertDialog.isOpen}
+        onClose={() => setAlertDialog({ isOpen: false, message: "" })}
+        title="Lỗi"
+        message={alertDialog.message}
+        variant="error"
+      />
+
+      {/* Confirm Dialog */}
+      <ConfirmDialog
+        isOpen={confirmDialog.isOpen}
+        onClose={() => setConfirmDialog((prev) => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmDialog.onConfirm}
+        title={confirmDialog.title}
+        message={confirmDialog.message}
+        confirmText="Xác nhận"
+        cancelText="Hủy"
+        variant={confirmDialog.variant}
+      />
     </div>
   )
 }

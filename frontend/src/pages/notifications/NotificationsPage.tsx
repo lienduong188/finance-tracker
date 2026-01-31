@@ -16,7 +16,8 @@ import {
 } from "lucide-react"
 import { notificationsApi, invitationsApi } from "@/api"
 import type { Notification } from "@/api/notifications"
-import { Button, Card, CardContent } from "@/components/ui"
+import { useState } from "react"
+import { Button, Card, CardContent, AlertDialog } from "@/components/ui"
 import { formatDistanceToNow, type Locale } from "date-fns"
 import { vi, enUS, ja } from "date-fns/locale"
 import i18n from "@/i18n"
@@ -49,6 +50,10 @@ const typeIcons: Record<string, React.ReactNode> = {
 export default function NotificationsPage() {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
+  const [errorDialog, setErrorDialog] = useState<{ isOpen: boolean; message: string }>({
+    isOpen: false,
+    message: "",
+  })
 
   const { data: notificationsPage, isLoading } = useQuery({
     queryKey: ["notifications"],
@@ -86,7 +91,7 @@ export default function NotificationsPage() {
       queryClient.invalidateQueries({ queryKey: ["pending-invitations-count"] })
     },
     onError: (error: Error & { response?: { data?: { message?: string } } }) => {
-      alert(error.response?.data?.message || t("errors.system.internal"))
+      setErrorDialog({ isOpen: true, message: error.response?.data?.message || t("errors.system.internal") })
     },
   })
 
@@ -207,6 +212,15 @@ export default function NotificationsPage() {
           </div>
         )}
       </div>
+
+      {/* Error Dialog */}
+      <AlertDialog
+        isOpen={errorDialog.isOpen}
+        onClose={() => setErrorDialog({ isOpen: false, message: "" })}
+        title={t("common.error")}
+        message={errorDialog.message}
+        variant="error"
+      />
     </div>
   )
 }

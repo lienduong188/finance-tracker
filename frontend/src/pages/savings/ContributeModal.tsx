@@ -5,7 +5,7 @@ import { z } from "zod"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
 import { savingsGoalsApi, accountsApi, exchangeRatesApi } from "@/api"
-import { Button, Input, Dialog, DialogContent, DialogHeader, DialogTitle, CurrencyInput } from "@/components/ui"
+import { Button, Input, Dialog, DialogContent, DialogHeader, DialogTitle, CurrencyInput, AlertDialog } from "@/components/ui"
 import { ArrowRight } from "lucide-react"
 
 const createContributeSchema = (t: (key: string) => string) => z.object({
@@ -47,6 +47,10 @@ export default function ContributeModal({
   const [accountAmount, setAccountAmount] = useState<number>(0)
   const [goalAmount, setGoalAmount] = useState<number>(0)
   const [exchangeRate, setExchangeRate] = useState<number>(1)
+  const [errorDialog, setErrorDialog] = useState<{ isOpen: boolean; message: string }>({
+    isOpen: false,
+    message: "",
+  })
 
   const { data: accounts } = useQuery({
     queryKey: ["accounts"],
@@ -149,7 +153,7 @@ export default function ContributeModal({
       onClose()
     },
     onError: (error: any) => {
-      alert(error.response?.data?.message || t("errors.system.internal"))
+      setErrorDialog({ isOpen: true, message: error.response?.data?.message || t("errors.system.internal") })
     },
   })
 
@@ -289,6 +293,15 @@ export default function ContributeModal({
           </div>
         </form>
       </DialogContent>
+
+      {/* Error Dialog */}
+      <AlertDialog
+        isOpen={errorDialog.isOpen}
+        onClose={() => setErrorDialog({ isOpen: false, message: "" })}
+        title={t("common.error")}
+        message={errorDialog.message}
+        variant="error"
+      />
     </Dialog>
   )
 }

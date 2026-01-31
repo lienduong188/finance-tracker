@@ -1,12 +1,17 @@
+import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
 import { Mail, Check, X, Users } from "lucide-react"
 import { invitationsApi } from "@/api"
-import { Button, Card, CardContent } from "@/components/ui"
+import { Button, Card, CardContent, AlertDialog } from "@/components/ui"
 
 export default function InvitationsPage() {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
+  const [errorDialog, setErrorDialog] = useState<{ isOpen: boolean; message: string }>({
+    isOpen: false,
+    message: "",
+  })
 
   const { data: invitations, isLoading } = useQuery({
     queryKey: ["received-invitations"],
@@ -20,7 +25,7 @@ export default function InvitationsPage() {
       queryClient.invalidateQueries({ queryKey: ["families"] })
     },
     onError: (error: any) => {
-      alert(error.response?.data?.message || t("errors.system.internal"))
+      setErrorDialog({ isOpen: true, message: error.response?.data?.message || t("errors.system.internal") })
     },
   })
 
@@ -107,6 +112,15 @@ export default function InvitationsPage() {
           ))}
         </div>
       )}
+
+      {/* Error Dialog */}
+      <AlertDialog
+        isOpen={errorDialog.isOpen}
+        onClose={() => setErrorDialog({ isOpen: false, message: "" })}
+        title={t("common.error")}
+        message={errorDialog.message}
+        variant="error"
+      />
     </div>
   )
 }

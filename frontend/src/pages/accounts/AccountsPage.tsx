@@ -2,7 +2,7 @@ import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
 import { Plus, Wallet, Building2, Smartphone, CreditCard, Pencil, Trash2 } from "lucide-react"
-import { Button, Card, CardContent, CardHeader, CardTitle, ConfirmDialog } from "@/components/ui"
+import { Button, Card, CardContent, CardHeader, CardTitle, ConfirmDialog, AlertDialog } from "@/components/ui"
 import { accountsApi } from "@/api"
 import { useAuth } from "@/context/AuthContext"
 import { formatCurrency } from "@/lib/utils"
@@ -26,6 +26,10 @@ export function AccountsPage() {
     isOpen: false,
     accountId: null,
   })
+  const [errorDialog, setErrorDialog] = useState<{ isOpen: boolean; message: string }>({
+    isOpen: false,
+    message: "",
+  })
 
   const defaultCurrency = user?.defaultCurrency || "VND"
 
@@ -41,7 +45,7 @@ export function AccountsPage() {
       queryClient.invalidateQueries({ queryKey: ["dashboard-summary"] })
     },
     onError: (error: Error) => {
-      alert(t("common.error") + ": " + error.message)
+      setErrorDialog({ isOpen: true, message: error.message })
     },
   })
 
@@ -230,6 +234,15 @@ export function AccountsPage() {
         cancelText={t("common.cancel", "Hủy")}
         variant="danger"
         isLoading={deleteMutation.isPending}
+      />
+
+      {/* Error Dialog */}
+      <AlertDialog
+        isOpen={errorDialog.isOpen}
+        onClose={() => setErrorDialog({ isOpen: false, message: "" })}
+        title={t("common.error")}
+        message={errorDialog.message}
+        variant="error"
       />
     </div>
   )

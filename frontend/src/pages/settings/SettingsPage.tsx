@@ -9,6 +9,7 @@ import { useAuth } from "@/context/AuthContext"
 import { Button, Input, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui"
 import { User, Lock, Check, AlertCircle, Tags, Plus, Pencil, Trash2, CheckSquare, Square, UserX } from "lucide-react"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
+import { AlertDialog } from "@/components/ui/AlertDialog"
 import type { Category, CategoryType, CategoryRequest } from "@/types"
 
 const profileSchema = z.object({
@@ -58,6 +59,10 @@ export function SettingsPage() {
 
   // Delete account state
   const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false)
+  const [alertDialog, setAlertDialog] = useState<{ isOpen: boolean; message: string }>({
+    isOpen: false,
+    message: "",
+  })
   const [deletePassword, setDeletePassword] = useState("")
   const [deleteAccountError, setDeleteAccountError] = useState<string | null>(null)
 
@@ -222,7 +227,7 @@ export function SettingsPage() {
 
   const handleDeleteCategory = (category: Category) => {
     if (category.isSystem) {
-      alert(t("settings.cannotDeleteSystem"))
+      setAlertDialog({ isOpen: true, message: t("settings.cannotDeleteSystem") })
       return
     }
     setCategoryToDelete(category)
@@ -802,6 +807,15 @@ export function SettingsPage() {
         confirmText={t("common.delete")}
         cancelText={t("common.cancel")}
         variant="danger"
+      />
+
+      {/* Alert Dialog */}
+      <AlertDialog
+        isOpen={alertDialog.isOpen}
+        onClose={() => setAlertDialog({ isOpen: false, message: "" })}
+        title={t("common.error")}
+        message={alertDialog.message}
+        variant="warning"
       />
     </div>
   )

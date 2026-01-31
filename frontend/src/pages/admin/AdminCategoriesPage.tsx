@@ -2,7 +2,7 @@ import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { Plus, Pencil, Trash2, TrendingUp, TrendingDown } from "lucide-react"
 import { adminApi } from "@/api"
-import { Button, Card } from "@/components/ui"
+import { Button, Card, ConfirmDialog } from "@/components/ui"
 import type { Category } from "@/types"
 import { AdminCategoryFormModal } from "./AdminCategoryFormModal"
 
@@ -10,6 +10,10 @@ export function AdminCategoriesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
   const queryClient = useQueryClient()
+  const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; category: Category | null }>({
+    isOpen: false,
+    category: null,
+  })
 
   const { data: categories, isLoading } = useQuery({
     queryKey: ["admin", "categories"],
@@ -32,8 +36,13 @@ export function AdminCategoriesPage() {
   }
 
   const handleDelete = (category: Category) => {
-    if (confirm(`Bạn có chắc muốn xóa category "${category.name}"?`)) {
-      deleteMutation.mutate(category.id)
+    setDeleteConfirm({ isOpen: true, category })
+  }
+
+  const handleDeleteConfirm = () => {
+    if (deleteConfirm.category) {
+      deleteMutation.mutate(deleteConfirm.category.id)
+      setDeleteConfirm({ isOpen: false, category: null })
     }
   }
 
@@ -158,6 +167,19 @@ export function AdminCategoriesPage() {
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         category={editingCategory}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={deleteConfirm.isOpen}
+        onClose={() => setDeleteConfirm({ isOpen: false, category: null })}
+        onConfirm={handleDeleteConfirm}
+        title="Xóa Category"
+        message={`Bạn có chắc muốn xóa category "${deleteConfirm.category?.name}"?`}
+        confirmText="Xóa"
+        cancelText="Hủy"
+        variant="danger"
+        isLoading={deleteMutation.isPending}
       />
     </div>
   )

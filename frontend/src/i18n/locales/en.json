@@ -16,7 +16,9 @@
     "no": "No",
     "select": "-- Select --",
     "back": "Back",
-    "close": "Close"
+    "close": "Close",
+    "ok": "OK",
+    "error": "Error"
   },
   "auth": {
     "login": "Login",

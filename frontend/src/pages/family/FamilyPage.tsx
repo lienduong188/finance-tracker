@@ -5,7 +5,7 @@ import { Plus, Users, Crown, Shield, User, Settings, Home, Briefcase, HelpCircle
 import { useNavigate } from "react-router-dom"
 import { familiesApi } from "@/api"
 import type { Family, FamilyRole, GroupType } from "@/types"
-import { Button, Card, CardContent, CardHeader, CardTitle } from "@/components/ui"
+import { Button, Card, CardContent, CardHeader, CardTitle, ConfirmDialog, AlertDialog } from "@/components/ui"
 import FamilyFormModal from "./FamilyFormModal"
 
 const roleIcons: Record<FamilyRole, React.ReactNode> = {
@@ -27,6 +27,14 @@ export default function FamilyPage() {
   const queryClient = useQueryClient()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingFamily, setEditingFamily] = useState<Family | null>(null)
+  const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; family: Family | null }>({
+    isOpen: false,
+    family: null,
+  })
+  const [alertDialog, setAlertDialog] = useState<{ isOpen: boolean; message: string }>({
+    isOpen: false,
+    message: "",
+  })
 
   const { data: families, isLoading } = useQuery({
     queryKey: ["families"],
@@ -47,11 +55,16 @@ export default function FamilyPage() {
 
   const handleDelete = (family: Family) => {
     if (family.myRole !== "OWNER") {
-      alert(t("family.ownerOnly"))
+      setAlertDialog({ isOpen: true, message: t("family.ownerOnly") })
       return
     }
-    if (confirm(t("family.confirmDelete", { name: family.name }))) {
-      deleteMutation.mutate(family.id)
+    setDeleteConfirm({ isOpen: true, family })
+  }
+
+  const handleDeleteConfirm = () => {
+    if (deleteConfirm.family) {
+      deleteMutation.mutate(deleteConfirm.family.id)
+      setDeleteConfirm({ isOpen: false, family: null })
     }
   }
 
@@ -155,6 +168,28 @@ export default function FamilyPage() {
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         family={editingFamily}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={deleteConfirm.isOpen}
+        onClose={() => setDeleteConfirm({ isOpen: false, family: null })}
+        onConfirm={handleDeleteConfirm}
+        title={t("family.deleteGroup")}
+        message={t("family.confirmDelete", { name: deleteConfirm.family?.name || "" })}
+        confirmText={t("common.delete")}
+        cancelText={t("common.cancel")}
+        variant="danger"
+        isLoading={deleteMutation.isPending}
+      />
+
+      {/* Alert Dialog */}
+      <AlertDialog
+        isOpen={alertDialog.isOpen}
+        onClose={() => setAlertDialog({ isOpen: false, message: "" })}
+        title={t("common.error")}
+        message={alertDialog.message}
+        variant="warning"
       />
     </div>
   )

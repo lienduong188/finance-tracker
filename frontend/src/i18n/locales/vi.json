@@ -16,7 +16,9 @@
     "no": "Không",
     "select": "-- Chọn --",
     "back": "Quay lại",
-    "close": "Đóng"
+    "close": "Đóng",
+    "ok": "OK",
+    "error": "Lỗi"
   },
   "auth": {
     "login": "Đăng nhập",

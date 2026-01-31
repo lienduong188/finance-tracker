@@ -12,7 +12,7 @@ import {
   Percent,
 } from "lucide-react"
 import { creditCardPlansApi, accountsApi } from "@/api"
-import { Button, Card } from "@/components/ui"
+import { Button, Card, ConfirmDialog } from "@/components/ui"
 import { cn, formatCurrency } from "@/lib/utils"
 import type { CreditCardPaymentPlan, PaymentPlanStatus, PaymentType } from "@/types"
 import { CreatePlanModal } from "./CreatePlanModal"
@@ -30,6 +30,10 @@ export function CreditCardPlansPage() {
   const [sortOption, setSortOption] = useState<SortOption>("createdAt,desc")
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [selectedPlan, setSelectedPlan] = useState<CreditCardPaymentPlan | null>(null)
+  const [cancelConfirm, setCancelConfirm] = useState<{ isOpen: boolean; plan: CreditCardPaymentPlan | null }>({
+    isOpen: false,
+    plan: null,
+  })
 
   // Get credit card accounts for filter
   const { data: accounts } = useQuery({
@@ -65,8 +69,13 @@ export function CreditCardPlansPage() {
   })
 
   const handleCancel = (plan: CreditCardPaymentPlan) => {
-    if (confirm(t("creditCard.confirmCancel"))) {
-      cancelMutation.mutate(plan.id)
+    setCancelConfirm({ isOpen: true, plan })
+  }
+
+  const handleCancelConfirm = () => {
+    if (cancelConfirm.plan) {
+      cancelMutation.mutate(cancelConfirm.plan.id)
+      setCancelConfirm({ isOpen: false, plan: null })
     }
   }
 
@@ -372,6 +381,19 @@ export function CreditCardPlansPage() {
         isOpen={!!selectedPlan}
         onClose={() => setSelectedPlan(null)}
         planId={selectedPlan?.id || null}
+      />
+
+      {/* Cancel Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={cancelConfirm.isOpen}
+        onClose={() => setCancelConfirm({ isOpen: false, plan: null })}
+        onConfirm={handleCancelConfirm}
+        title={t("creditCard.cancelPlan")}
+        message={t("creditCard.confirmCancel")}
+        confirmText={t("common.confirm")}
+        cancelText={t("common.cancel")}
+        variant="warning"
+        isLoading={cancelMutation.isPending}
       />
     </div>
   )

@@ -5,7 +5,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
 import { invitationsApi } from "@/api"
 import type { FamilyRole } from "@/types"
-import { Button, Input, Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui"
+import { useState } from "react"
+import { Button, Input, Dialog, DialogContent, DialogHeader, DialogTitle, AlertDialog } from "@/components/ui"
 
 const createInviteSchema = (t: (key: string) => string) => z.object({
   email: z.string().email(t("validation.emailInvalid")),
@@ -24,6 +25,10 @@ interface InviteMemberModalProps {
 export default function InviteMemberModal({ isOpen, onClose, familyId }: InviteMemberModalProps) {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
+  const [errorDialog, setErrorDialog] = useState<{ isOpen: boolean; message: string }>({
+    isOpen: false,
+    message: "",
+  })
 
   const inviteSchema = createInviteSchema(t)
 
@@ -55,7 +60,7 @@ export default function InviteMemberModal({ isOpen, onClose, familyId }: InviteM
       onClose()
     },
     onError: (error: any) => {
-      alert(error.response?.data?.message || t("errors.system.internal"))
+      setErrorDialog({ isOpen: true, message: error.response?.data?.message || t("errors.system.internal") })
     },
   })
 
@@ -111,6 +116,15 @@ export default function InviteMemberModal({ isOpen, onClose, familyId }: InviteM
           </div>
         </form>
       </DialogContent>
+
+      {/* Error Dialog */}
+      <AlertDialog
+        isOpen={errorDialog.isOpen}
+        onClose={() => setErrorDialog({ isOpen: false, message: "" })}
+        title={t("common.error")}
+        message={errorDialog.message}
+        variant="error"
+      />
     </Dialog>
   )
 }

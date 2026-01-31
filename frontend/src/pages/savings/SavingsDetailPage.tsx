@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next"
 import { ArrowLeft, Plus, Users, User, TrendingUp, Trash2 } from "lucide-react"
 import { savingsGoalsApi } from "@/api"
 import type { SavingsGoalStatus, SavingsContribution } from "@/types"
-import { Button, Card, CardContent, CardHeader, CardTitle, ConfirmDialog } from "@/components/ui"
+import { Button, Card, CardContent, CardHeader, CardTitle, ConfirmDialog, AlertDialog } from "@/components/ui"
 import ContributeModal from "./ContributeModal"
 
 const statusColors: Record<SavingsGoalStatus, string> = {
@@ -31,6 +31,10 @@ export default function SavingsDetailPage() {
   const [isContributeModalOpen, setIsContributeModalOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [selectedContribution, setSelectedContribution] = useState<SavingsContribution | null>(null)
+  const [errorDialog, setErrorDialog] = useState<{ isOpen: boolean; message: string }>({
+    isOpen: false,
+    message: "",
+  })
 
   const { data: goal, isLoading: goalLoading } = useQuery({
     queryKey: ["savings-goal", id],
@@ -62,7 +66,7 @@ export default function SavingsDetailPage() {
       setSelectedContribution(null)
     },
     onError: (error: any) => {
-      alert(error.response?.data?.message || t("errors.system.internal"))
+      setErrorDialog({ isOpen: true, message: error.response?.data?.message || t("errors.system.internal") })
     },
   })
 
@@ -282,6 +286,15 @@ export default function SavingsDetailPage() {
         confirmText={t("common.delete")}
         isLoading={deleteMutation.isPending}
         variant="danger"
+      />
+
+      {/* Error Dialog */}
+      <AlertDialog
+        isOpen={errorDialog.isOpen}
+        onClose={() => setErrorDialog({ isOpen: false, message: "" })}
+        title={t("common.error")}
+        message={errorDialog.message}
+        variant="error"
       />
     </div>
   )

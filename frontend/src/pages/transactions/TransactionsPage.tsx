@@ -40,7 +40,7 @@ import {
   isToday,
 } from "date-fns"
 import { vi, enUS, ja } from "date-fns/locale"
-import { Button, Card, CardContent, CardHeader, CardTitle, Select, Input, Label } from "@/components/ui"
+import { Button, Card, CardContent, CardHeader, CardTitle, Select, Input, Label, ConfirmDialog } from "@/components/ui"
 import { transactionsApi, accountsApi } from "@/api"
 import { formatCurrency, formatFullDate, cn } from "@/lib/utils"
 import { useAuth } from "@/context/AuthContext"
@@ -105,6 +105,10 @@ export function TransactionsPage() {
     page: 0,
     size: 100, // Load more for calendar/category views
   })
+  const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; id: string | null }>({
+    isOpen: false,
+    id: null,
+  })
 
   const { data: transactions, isLoading } = useQuery({
     queryKey: ["transactions", filters],
@@ -129,9 +133,14 @@ export function TransactionsPage() {
     setIsModalOpen(true)
   }
 
-  const handleDelete = async (id: string) => {
-    if (confirm(t("common.confirm") + "?")) {
-      await deleteMutation.mutateAsync(id)
+  const handleDelete = (id: string) => {
+    setDeleteConfirm({ isOpen: true, id })
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (deleteConfirm.id) {
+      await deleteMutation.mutateAsync(deleteConfirm.id)
+      setDeleteConfirm({ isOpen: false, id: null })
     }
   }
 
@@ -1088,6 +1097,19 @@ export function TransactionsPage() {
       )}
 
       <TransactionFormModal isOpen={isModalOpen} onClose={handleCloseModal} transaction={editingTransaction} />
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={deleteConfirm.isOpen}
+        onClose={() => setDeleteConfirm({ isOpen: false, id: null })}
+        onConfirm={handleDeleteConfirm}
+        title={t("transactions.deleteTransaction")}
+        message={t("transactions.confirmDelete")}
+        confirmText={t("common.delete")}
+        cancelText={t("common.cancel")}
+        variant="danger"
+        isLoading={deleteMutation.isPending}
+      />
     </div>
   )
 }

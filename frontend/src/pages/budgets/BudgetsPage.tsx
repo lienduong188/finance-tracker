@@ -2,7 +2,7 @@ import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
 import { Plus, PiggyBank, Pencil, Trash2, AlertTriangle } from "lucide-react"
-import { Button, Card, CardContent, CardHeader, CardTitle } from "@/components/ui"
+import { Button, Card, CardContent, CardHeader, CardTitle, ConfirmDialog } from "@/components/ui"
 import { budgetsApi } from "@/api"
 import { formatCurrency, formatPercent, cn } from "@/lib/utils"
 import type { Budget } from "@/types"
@@ -13,6 +13,10 @@ export function BudgetsPage() {
   const queryClient = useQueryClient()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingBudget, setEditingBudget] = useState<Budget | null>(null)
+  const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; budgetId: string | null }>({
+    isOpen: false,
+    budgetId: null,
+  })
 
   const { data: budgets, isLoading } = useQuery({
     queryKey: ["budgets"],
@@ -31,9 +35,14 @@ export function BudgetsPage() {
     setIsModalOpen(true)
   }
 
-  const handleDelete = async (id: string) => {
-    if (confirm(t("common.confirm") + "?")) {
-      await deleteMutation.mutateAsync(id)
+  const handleDelete = (id: string) => {
+    setDeleteConfirm({ isOpen: true, budgetId: id })
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (deleteConfirm.budgetId) {
+      await deleteMutation.mutateAsync(deleteConfirm.budgetId)
+      setDeleteConfirm({ isOpen: false, budgetId: null })
     }
   }
 
@@ -228,6 +237,19 @@ export function BudgetsPage() {
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         budget={editingBudget}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={deleteConfirm.isOpen}
+        onClose={() => setDeleteConfirm({ isOpen: false, budgetId: null })}
+        onConfirm={handleDeleteConfirm}
+        title={t("budgets.deleteBudget")}
+        message={t("budgets.confirmDelete")}
+        confirmText={t("common.delete")}
+        cancelText={t("common.cancel")}
+        variant="danger"
+        isLoading={deleteMutation.isPending}
       />
     </div>
   )
