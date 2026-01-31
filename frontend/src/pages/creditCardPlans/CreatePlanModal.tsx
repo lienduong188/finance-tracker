@@ -54,16 +54,17 @@ export function CreatePlanModal({ isOpen, onClose }: CreatePlanModalProps) {
     enabled: isOpen && creditCardAccountIds.length > 0,
   })
 
-  // Group transactions by account and month
-  const currentMonthTransactions = useMemo(() => {
+  // Group transactions by account and month (previous month for credit card billing)
+  const previousMonthTransactions = useMemo(() => {
     if (!transactions) return []
     const now = new Date()
-    const currentMonth = now.getMonth()
-    const currentYear = now.getFullYear()
+    // Get previous month
+    const prevMonth = now.getMonth() === 0 ? 11 : now.getMonth() - 1
+    const prevYear = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear()
 
     return transactions.filter((tx) => {
       const txDate = new Date(tx.transactionDate)
-      return txDate.getMonth() === currentMonth && txDate.getFullYear() === currentYear
+      return txDate.getMonth() === prevMonth && txDate.getFullYear() === prevYear
     })
   }, [transactions])
 
@@ -71,7 +72,7 @@ export function CreatePlanModal({ isOpen, onClose }: CreatePlanModalProps) {
   const transactionsByAccount = useMemo(() => {
     const grouped: Record<string, { account: Account; transactions: Transaction[]; total: number }> = {}
 
-    currentMonthTransactions.forEach((tx) => {
+    previousMonthTransactions.forEach((tx) => {
       if (!grouped[tx.accountId]) {
         const account = creditCardAccounts.find((a) => a.id === tx.accountId)
         if (account) {
@@ -89,7 +90,7 @@ export function CreatePlanModal({ isOpen, onClose }: CreatePlanModalProps) {
     })
 
     return grouped
-  }, [currentMonthTransactions, creditCardAccounts])
+  }, [previousMonthTransactions, creditCardAccounts])
 
   const selectedAccountData = selectedAccountId ? transactionsByAccount[selectedAccountId] : null
   const totalSelectedAmount = useMemo(() => {
@@ -318,15 +319,15 @@ export function CreatePlanModal({ isOpen, onClose }: CreatePlanModalProps) {
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
               </div>
             ) : mode === "single" ? (
-              // Single transaction mode
-              transactions?.length === 0 ? (
+              // Single transaction mode - show previous month transactions
+              previousMonthTransactions?.length === 0 ? (
                 <div className="py-8 text-center">
                   <Search className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
                   <p className="text-muted-foreground">{t("creditCard.noEligibleTransactions")}</p>
                 </div>
               ) : (
                 <div className="max-h-96 space-y-2 overflow-y-auto">
-                  {transactions?.map((tx) => (
+                  {previousMonthTransactions?.map((tx) => (
                     <div
                       key={tx.id}
                       onClick={() => handleSelectTransaction(tx)}
@@ -355,7 +356,7 @@ export function CreatePlanModal({ isOpen, onClose }: CreatePlanModalProps) {
                   Object.keys(transactionsByAccount).length === 0 ? (
                     <div className="py-8 text-center">
                       <Calendar className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
-                      <p className="text-muted-foreground">{t("creditCard.noTransactionsThisMonth")}</p>
+                      <p className="text-muted-foreground">{t("creditCard.noTransactionsLastMonth")}</p>
                     </div>
                   ) : (
                     <div className="space-y-2">
@@ -377,7 +378,7 @@ export function CreatePlanModal({ isOpen, onClose }: CreatePlanModalProps) {
                               <p className="font-semibold text-expense">
                                 {formatCurrency(total, account.currency)}
                               </p>
-                              <p className="text-xs text-muted-foreground">{t("creditCard.thisMonth")}</p>
+                              <p className="text-xs text-muted-foreground">{t("creditCard.lastMonth")}</p>
                             </div>
                           </div>
                         </div>
