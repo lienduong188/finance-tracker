@@ -69,6 +69,46 @@ public class CreditCardPaymentPlanService {
     }
 
     @Transactional
+    public BulkCreditCardPaymentPlanResponse createBulk(UUID userId, BulkCreditCardPaymentPlanRequest request) {
+        List<CreditCardPaymentPlanResponse> createdPlans = new ArrayList<>();
+        List<BulkCreditCardPaymentPlanResponse.BulkCreateError> errors = new ArrayList<>();
+
+        for (UUID transactionId : request.getTransactionIds()) {
+            try {
+                CreditCardPaymentPlanRequest singleRequest = CreditCardPaymentPlanRequest.builder()
+                        .transactionId(transactionId)
+                        .paymentType(request.getPaymentType())
+                        .totalInstallments(request.getTotalInstallments())
+                        .installmentFeeRate(request.getInstallmentFeeRate())
+                        .monthlyPayment(request.getMonthlyPayment())
+                        .interestRate(request.getInterestRate())
+                        .startDate(request.getStartDate())
+                        .build();
+
+                CreditCardPaymentPlanResponse response = create(userId, singleRequest);
+                createdPlans.add(response);
+            } catch (Exception e) {
+                errors.add(BulkCreditCardPaymentPlanResponse.BulkCreateError.builder()
+                        .transactionId(transactionId.toString())
+                        .error(e.getMessage())
+                        .build());
+                log.warn("Failed to create plan for transaction {}: {}", transactionId, e.getMessage());
+            }
+        }
+
+        log.info("Bulk created {} plans for user {}, {} failed",
+                createdPlans.size(), userId, errors.size());
+
+        return BulkCreditCardPaymentPlanResponse.builder()
+                .totalRequested(request.getTransactionIds().size())
+                .successCount(createdPlans.size())
+                .failedCount(errors.size())
+                .createdPlans(createdPlans)
+                .errors(errors)
+                .build();
+    }
+
+    @Transactional
     public CreditCardPaymentPlanResponse create(UUID userId, CreditCardPaymentPlanRequest request) {
         // Validate transaction
         Transaction transaction = transactionRepository.findById(request.getTransactionId())

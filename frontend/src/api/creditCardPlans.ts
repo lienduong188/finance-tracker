@@ -2,6 +2,8 @@ import apiClient from "./client"
 import type {
   CreditCardPaymentPlan,
   CreditCardPaymentPlanRequest,
+  BulkCreditCardPaymentPlanRequest,
+  BulkCreditCardPaymentPlanResponse,
   CreditCardPayment,
   UpcomingPayment,
   PaymentPlanStatus,
@@ -37,6 +39,11 @@ export const creditCardPlansApi = {
 
   create: async (request: CreditCardPaymentPlanRequest): Promise<CreditCardPaymentPlan> => {
     const { data } = await apiClient.post("/credit-card-plans", request)
+    return data
+  },
+
+  createBulk: async (request: BulkCreditCardPaymentPlanRequest): Promise<BulkCreditCardPaymentPlanResponse> => {
+    const { data } = await apiClient.post("/credit-card-plans/bulk", request)
     return data
   },
 

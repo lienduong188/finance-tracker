@@ -1,23 +1,29 @@
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
-import { X, CreditCard, Search } from "lucide-react"
+import { X, CreditCard, Search, Calendar, CheckSquare, Square } from "lucide-react"
 import { creditCardPlansApi, transactionsApi, accountsApi } from "@/api"
 import { Button, Input, Label } from "@/components/ui"
 import { formatCurrency } from "@/lib/utils"
-import type { PaymentType, Transaction, CreditCardPaymentPlanRequest } from "@/types"
+import type { PaymentType, Transaction, CreditCardPaymentPlanRequest, BulkCreditCardPaymentPlanRequest, Account } from "@/types"
 
 interface CreatePlanModalProps {
   isOpen: boolean
   onClose: () => void
 }
 
+type Mode = "single" | "monthly"
+type Step = "select" | "configure"
+
 export function CreatePlanModal({ isOpen, onClose }: CreatePlanModalProps) {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
 
-  const [step, setStep] = useState<"select" | "configure">("select")
+  const [mode, setMode] = useState<Mode>("single")
+  const [step, setStep] = useState<Step>("select")
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null)
+  const [selectedTransactionIds, setSelectedTransactionIds] = useState<string[]>([])
+  const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null)
   const [paymentType, setPaymentType] = useState<PaymentType>("INSTALLMENT")
   const [totalInstallments, setTotalInstallments] = useState<number>(3)
   const [installmentFeeRate, setInstallmentFeeRate] = useState<number>(0)
@@ -48,6 +54,67 @@ export function CreatePlanModal({ isOpen, onClose }: CreatePlanModalProps) {
     enabled: isOpen && creditCardAccountIds.length > 0,
   })
 
+  // Group transactions by account and month
+  const currentMonthTransactions = useMemo(() => {
+    if (!transactions) return []
+    const now = new Date()
+    const currentMonth = now.getMonth()
+    const currentYear = now.getFullYear()
+
+    return transactions.filter((tx) => {
+      const txDate = new Date(tx.transactionDate)
+      return txDate.getMonth() === currentMonth && txDate.getFullYear() === currentYear
+    })
+  }, [transactions])
+
+  // Group by account
+  const transactionsByAccount = useMemo(() => {
+    const grouped: Record<string, { account: Account; transactions: Transaction[]; total: number }> = {}
+
+    currentMonthTransactions.forEach((tx) => {
+      if (!grouped[tx.accountId]) {
+        const account = creditCardAccounts.find((a) => a.id === tx.accountId)
+        if (account) {
+          grouped[tx.accountId] = {
+            account,
+            transactions: [],
+            total: 0,
+          }
+        }
+      }
+      if (grouped[tx.accountId]) {
+        grouped[tx.accountId].transactions.push(tx)
+        grouped[tx.accountId].total += tx.amount
+      }
+    })
+
+    return grouped
+  }, [currentMonthTransactions, creditCardAccounts])
+
+  const selectedAccountData = selectedAccountId ? transactionsByAccount[selectedAccountId] : null
+  const totalSelectedAmount = useMemo(() => {
+    if (mode === "single" && selectedTransaction) {
+      return selectedTransaction.amount
+    }
+    if (mode === "monthly" && selectedAccountData) {
+      return selectedTransactionIds.reduce((sum, id) => {
+        const tx = selectedAccountData.transactions.find((t) => t.id === id)
+        return sum + (tx?.amount || 0)
+      }, 0)
+    }
+    return 0
+  }, [mode, selectedTransaction, selectedAccountData, selectedTransactionIds])
+
+  const selectedCurrency = useMemo(() => {
+    if (mode === "single" && selectedTransaction) {
+      return selectedTransaction.currency
+    }
+    if (mode === "monthly" && selectedAccountData) {
+      return selectedAccountData.account.currency
+    }
+    return "VND"
+  }, [mode, selectedTransaction, selectedAccountData])
+
   const createMutation = useMutation({
     mutationFn: (request: CreditCardPaymentPlanRequest) =>
       creditCardPlansApi.create(request),
@@ -58,9 +125,25 @@ export function CreatePlanModal({ isOpen, onClose }: CreatePlanModalProps) {
     },
   })
 
+  const createBulkMutation = useMutation({
+    mutationFn: (request: BulkCreditCardPaymentPlanRequest) =>
+      creditCardPlansApi.createBulk(request),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["credit-card-plans"] })
+      queryClient.invalidateQueries({ queryKey: ["transactions"] })
+      if (data.failedCount > 0) {
+        console.warn(`${data.failedCount} plans failed to create`, data.errors)
+      }
+      handleClose()
+    },
+  })
+
   const handleClose = () => {
+    setMode("single")
     setStep("select")
     setSelectedTransaction(null)
+    setSelectedTransactionIds([])
+    setSelectedAccountId(null)
     setPaymentType("INSTALLMENT")
     setTotalInstallments(3)
     setInstallmentFeeRate(0)
@@ -75,29 +158,77 @@ export function CreatePlanModal({ isOpen, onClose }: CreatePlanModalProps) {
     setStep("configure")
   }
 
+  const handleSelectAccount = (accountId: string) => {
+    setSelectedAccountId(accountId)
+    const accountData = transactionsByAccount[accountId]
+    if (accountData) {
+      // Select all transactions by default
+      setSelectedTransactionIds(accountData.transactions.map((tx) => tx.id))
+      setMonthlyPayment(Math.ceil(accountData.total / 10))
+    }
+  }
+
+  const handleToggleTransaction = (txId: string) => {
+    setSelectedTransactionIds((prev) =>
+      prev.includes(txId) ? prev.filter((id) => id !== txId) : [...prev, txId]
+    )
+  }
+
+  const handleSelectAllTransactions = () => {
+    if (selectedAccountData) {
+      const allIds = selectedAccountData.transactions.map((tx) => tx.id)
+      if (selectedTransactionIds.length === allIds.length) {
+        setSelectedTransactionIds([])
+      } else {
+        setSelectedTransactionIds(allIds)
+      }
+    }
+  }
+
+  const handleProceedToConfigureMonthly = () => {
+    if (selectedTransactionIds.length > 0) {
+      setStep("configure")
+    }
+  }
+
   const handleSubmit = () => {
-    if (!selectedTransaction) return
+    if (mode === "single" && selectedTransaction) {
+      const request: CreditCardPaymentPlanRequest = {
+        transactionId: selectedTransaction.id,
+        paymentType,
+      }
 
-    const request: CreditCardPaymentPlanRequest = {
-      transactionId: selectedTransaction.id,
-      paymentType,
+      if (paymentType === "INSTALLMENT") {
+        request.totalInstallments = totalInstallments
+        request.installmentFeeRate = installmentFeeRate / 100
+      } else {
+        request.monthlyPayment = monthlyPayment
+        request.interestRate = interestRate / 100
+      }
+
+      createMutation.mutate(request)
+    } else if (mode === "monthly" && selectedTransactionIds.length > 0) {
+      const request: BulkCreditCardPaymentPlanRequest = {
+        transactionIds: selectedTransactionIds,
+        paymentType,
+      }
+
+      if (paymentType === "INSTALLMENT") {
+        request.totalInstallments = totalInstallments
+        request.installmentFeeRate = installmentFeeRate / 100
+      } else {
+        request.monthlyPayment = monthlyPayment
+        request.interestRate = interestRate / 100
+      }
+
+      createBulkMutation.mutate(request)
     }
-
-    if (paymentType === "INSTALLMENT") {
-      request.totalInstallments = totalInstallments
-      request.installmentFeeRate = installmentFeeRate / 100 // Convert to decimal
-    } else {
-      request.monthlyPayment = monthlyPayment
-      request.interestRate = interestRate / 100 // Convert to decimal
-    }
-
-    createMutation.mutate(request)
   }
 
   // Calculate preview
   const calculateInstallmentPreview = () => {
-    if (!selectedTransaction) return null
-    const amount = selectedTransaction.amount
+    if (totalSelectedAmount <= 0) return null
+    const amount = totalSelectedAmount
     const feePerInstallment = amount * (installmentFeeRate / 100)
     const totalFee = feePerInstallment * totalInstallments
     const totalAmount = amount + totalFee
@@ -106,8 +237,8 @@ export function CreatePlanModal({ isOpen, onClose }: CreatePlanModalProps) {
   }
 
   const calculateRevolvingPreview = () => {
-    if (!selectedTransaction) return null
-    const amount = selectedTransaction.amount
+    if (totalSelectedAmount <= 0) return null
+    const amount = totalSelectedAmount
     const monthlyRate = interestRate / 100 / 12
     let remaining = amount
     let totalInterest = 0
@@ -145,6 +276,38 @@ export function CreatePlanModal({ isOpen, onClose }: CreatePlanModalProps) {
 
         {step === "select" && (
           <div className="space-y-4">
+            {/* Mode selector */}
+            <div className="flex gap-2 rounded-lg bg-muted p-1">
+              <button
+                onClick={() => {
+                  setMode("single")
+                  setSelectedAccountId(null)
+                  setSelectedTransactionIds([])
+                }}
+                className={`flex-1 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                  mode === "single"
+                    ? "bg-background text-foreground shadow"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {t("creditCard.singleTransaction")}
+              </button>
+              <button
+                onClick={() => {
+                  setMode("monthly")
+                  setSelectedTransaction(null)
+                }}
+                className={`flex-1 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                  mode === "monthly"
+                    ? "bg-background text-foreground shadow"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Calendar className="mr-1 inline-block h-4 w-4" />
+                {t("creditCard.monthlyTotal")}
+              </button>
+            </div>
+
             {creditCardAccounts.length === 0 ? (
               <div className="py-8 text-center">
                 <CreditCard className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
@@ -154,52 +317,192 @@ export function CreatePlanModal({ isOpen, onClose }: CreatePlanModalProps) {
               <div className="flex h-32 items-center justify-center">
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
               </div>
-            ) : transactions?.length === 0 ? (
-              <div className="py-8 text-center">
-                <Search className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
-                <p className="text-muted-foreground">{t("creditCard.noEligibleTransactions")}</p>
-              </div>
-            ) : (
-              <div className="max-h-96 space-y-2 overflow-y-auto">
-                {transactions?.map((tx) => (
-                  <div
-                    key={tx.id}
-                    onClick={() => handleSelectTransaction(tx)}
-                    className="cursor-pointer rounded-lg border p-3 transition-colors hover:bg-muted"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">{tx.description || tx.categoryName || t("transactions.noDescription")}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {tx.accountName} • {new Date(tx.transactionDate).toLocaleDateString()}
+            ) : mode === "single" ? (
+              // Single transaction mode
+              transactions?.length === 0 ? (
+                <div className="py-8 text-center">
+                  <Search className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+                  <p className="text-muted-foreground">{t("creditCard.noEligibleTransactions")}</p>
+                </div>
+              ) : (
+                <div className="max-h-96 space-y-2 overflow-y-auto">
+                  {transactions?.map((tx) => (
+                    <div
+                      key={tx.id}
+                      onClick={() => handleSelectTransaction(tx)}
+                      className="cursor-pointer rounded-lg border p-3 transition-colors hover:bg-muted"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">{tx.description || tx.categoryName || t("transactions.noDescription")}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {tx.accountName} • {new Date(tx.transactionDate).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <p className="font-semibold text-expense">
+                          {formatCurrency(tx.amount, tx.currency)}
                         </p>
                       </div>
-                      <p className="font-semibold text-expense">
-                        {formatCurrency(tx.amount, tx.currency)}
+                    </div>
+                  ))}
+                </div>
+              )
+            ) : (
+              // Monthly mode
+              <>
+                {!selectedAccountId ? (
+                  // Select account
+                  Object.keys(transactionsByAccount).length === 0 ? (
+                    <div className="py-8 text-center">
+                      <Calendar className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+                      <p className="text-muted-foreground">{t("creditCard.noTransactionsThisMonth")}</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground">{t("creditCard.selectAccountForMonthly")}</p>
+                      {Object.values(transactionsByAccount).map(({ account, transactions: txs, total }) => (
+                        <div
+                          key={account.id}
+                          onClick={() => handleSelectAccount(account.id)}
+                          className="cursor-pointer rounded-lg border p-4 transition-colors hover:bg-muted"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium">{account.name}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {txs.length} {t("creditCard.transactions")}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-semibold text-expense">
+                                {formatCurrency(total, account.currency)}
+                              </p>
+                              <p className="text-xs text-muted-foreground">{t("creditCard.thisMonth")}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )
+                ) : (
+                  // Select transactions from account
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <button
+                        onClick={() => {
+                          setSelectedAccountId(null)
+                          setSelectedTransactionIds([])
+                        }}
+                        className="text-sm text-primary hover:underline"
+                      >
+                        ← {t("common.back")}
+                      </button>
+                      <button
+                        onClick={handleSelectAllTransactions}
+                        className="flex items-center gap-1 text-sm text-primary hover:underline"
+                      >
+                        {selectedTransactionIds.length === selectedAccountData?.transactions.length ? (
+                          <>
+                            <CheckSquare className="h-4 w-4" />
+                            {t("common.deselectAll")}
+                          </>
+                        ) : (
+                          <>
+                            <Square className="h-4 w-4" />
+                            {t("common.selectAll")}
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                    <div className="rounded-lg bg-muted p-3">
+                      <p className="text-sm text-muted-foreground">{t("creditCard.selectedTotal")}</p>
+                      <p className="text-xl font-bold text-expense">
+                        {formatCurrency(totalSelectedAmount, selectedCurrency)}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {selectedTransactionIds.length} / {selectedAccountData?.transactions.length} {t("creditCard.transactionsSelected")}
                       </p>
                     </div>
+
+                    <div className="max-h-60 space-y-2 overflow-y-auto">
+                      {selectedAccountData?.transactions.map((tx) => (
+                        <div
+                          key={tx.id}
+                          onClick={() => handleToggleTransaction(tx.id)}
+                          className={`cursor-pointer rounded-lg border p-3 transition-colors ${
+                            selectedTransactionIds.includes(tx.id)
+                              ? "border-primary bg-primary/5"
+                              : "hover:bg-muted"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-5 w-5 items-center justify-center">
+                              {selectedTransactionIds.includes(tx.id) ? (
+                                <CheckSquare className="h-5 w-5 text-primary" />
+                              ) : (
+                                <Square className="h-5 w-5 text-muted-foreground" />
+                              )}
+                            </div>
+                            <div className="flex-1">
+                              <p className="font-medium">{tx.description || tx.categoryName || t("transactions.noDescription")}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {new Date(tx.transactionDate).toLocaleDateString()}
+                              </p>
+                            </div>
+                            <p className="font-semibold text-expense">
+                              {formatCurrency(tx.amount, tx.currency)}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <Button
+                      className="w-full"
+                      onClick={handleProceedToConfigureMonthly}
+                      disabled={selectedTransactionIds.length === 0}
+                    >
+                      {t("common.continue")} ({selectedTransactionIds.length})
+                    </Button>
                   </div>
-                ))}
-              </div>
+                )}
+              </>
             )}
 
-            <div className="flex justify-end pt-4">
-              <Button variant="outline" onClick={handleClose}>
-                {t("common.cancel")}
-              </Button>
-            </div>
+            {mode === "single" && (
+              <div className="flex justify-end pt-4">
+                <Button variant="outline" onClick={handleClose}>
+                  {t("common.cancel")}
+                </Button>
+              </div>
+            )}
           </div>
         )}
 
-        {step === "configure" && selectedTransaction && (
+        {step === "configure" && (
           <div className="space-y-4">
             {/* Selected Transaction Info */}
             <div className="rounded-lg bg-muted p-4">
-              <p className="font-medium">{selectedTransaction.description || selectedTransaction.categoryName}</p>
-              <p className="text-sm text-muted-foreground">{selectedTransaction.accountName}</p>
-              <p className="mt-2 text-xl font-bold">
-                {formatCurrency(selectedTransaction.amount, selectedTransaction.currency)}
-              </p>
+              {mode === "single" && selectedTransaction ? (
+                <>
+                  <p className="font-medium">{selectedTransaction.description || selectedTransaction.categoryName}</p>
+                  <p className="text-sm text-muted-foreground">{selectedTransaction.accountName}</p>
+                  <p className="mt-2 text-xl font-bold">
+                    {formatCurrency(selectedTransaction.amount, selectedTransaction.currency)}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="font-medium">{t("creditCard.bulkPlanTitle")}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedTransactionIds.length} {t("creditCard.transactions")} • {selectedAccountData?.account.name}
+                  </p>
+                  <p className="mt-2 text-xl font-bold">
+                    {formatCurrency(totalSelectedAmount, selectedCurrency)}
+                  </p>
+                </>
+              )}
             </div>
 
             {/* Payment Type */}
@@ -266,15 +569,15 @@ export function CreatePlanModal({ isOpen, onClose }: CreatePlanModalProps) {
                       <div className="space-y-1 text-sm">
                         <div className="flex justify-between">
                           <span>{t("creditCard.totalFee")}:</span>
-                          <span>{formatCurrency(preview.totalFee, selectedTransaction.currency)}</span>
+                          <span>{formatCurrency(preview.totalFee, selectedCurrency)}</span>
                         </div>
                         <div className="flex justify-between">
                           <span>{t("creditCard.totalAmount")}:</span>
-                          <span className="font-semibold">{formatCurrency(preview.totalAmount, selectedTransaction.currency)}</span>
+                          <span className="font-semibold">{formatCurrency(preview.totalAmount, selectedCurrency)}</span>
                         </div>
                         <div className="flex justify-between">
                           <span>{t("creditCard.amountPerInstallment")}:</span>
-                          <span className="font-semibold">{formatCurrency(preview.amountPerInstallment, selectedTransaction.currency)}</span>
+                          <span className="font-semibold">{formatCurrency(preview.amountPerInstallment, selectedCurrency)}</span>
                         </div>
                       </div>
                     </div>
@@ -326,11 +629,11 @@ export function CreatePlanModal({ isOpen, onClose }: CreatePlanModalProps) {
                         </div>
                         <div className="flex justify-between">
                           <span>{t("creditCard.totalInterest")}:</span>
-                          <span>{formatCurrency(preview.totalInterest, selectedTransaction.currency)}</span>
+                          <span>{formatCurrency(preview.totalInterest, selectedCurrency)}</span>
                         </div>
                         <div className="flex justify-between">
                           <span>{t("creditCard.totalAmount")}:</span>
-                          <span className="font-semibold">{formatCurrency(preview.totalAmount, selectedTransaction.currency)}</span>
+                          <span className="font-semibold">{formatCurrency(preview.totalAmount, selectedCurrency)}</span>
                         </div>
                       </div>
                     </div>
@@ -343,8 +646,14 @@ export function CreatePlanModal({ isOpen, onClose }: CreatePlanModalProps) {
               <Button variant="outline" onClick={() => setStep("select")}>
                 {t("common.back")}
               </Button>
-              <Button onClick={handleSubmit} isLoading={createMutation.isPending}>
-                {t("creditCard.createPlan")}
+              <Button
+                onClick={handleSubmit}
+                isLoading={createMutation.isPending || createBulkMutation.isPending}
+              >
+                {mode === "monthly"
+                  ? t("creditCard.createPlans", { count: selectedTransactionIds.length })
+                  : t("creditCard.createPlan")
+                }
               </Button>
             </div>
           </div>

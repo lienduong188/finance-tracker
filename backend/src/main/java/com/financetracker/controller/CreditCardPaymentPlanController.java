@@ -54,6 +54,15 @@ public class CreditCardPaymentPlanController {
                 .body(planService.create(userDetails.getId(), request));
     }
 
+    @PostMapping("/bulk")
+    public ResponseEntity<BulkCreditCardPaymentPlanResponse> createBulk(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody BulkCreditCardPaymentPlanRequest request
+    ) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(planService.createBulk(userDetails.getId(), request));
+    }
+
     @PostMapping("/{planId}/payments/{paymentId}/pay")
     public ResponseEntity<CreditCardPaymentResponse> markPaymentAsPaid(
             @AuthenticationPrincipal CustomUserDetails userDetails,

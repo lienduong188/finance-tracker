@@ -701,6 +701,29 @@ export interface CreditCardPaymentPlanRequest {
   startDate?: string
 }
 
+export interface BulkCreditCardPaymentPlanRequest {
+  transactionIds: string[]
+  paymentType: PaymentType
+  totalInstallments?: number
+  installmentFeeRate?: number
+  monthlyPayment?: number
+  interestRate?: number
+  startDate?: string
+}
+
+export interface BulkCreditCardPaymentPlanResponse {
+  totalRequested: number
+  successCount: number
+  failedCount: number
+  createdPlans: CreditCardPaymentPlan[]
+  errors: BulkCreateError[]
+}
+
+export interface BulkCreateError {
+  transactionId: string
+  error: string
+}
+
 export interface UpcomingPayment {
   paymentId: string
   planId: string
