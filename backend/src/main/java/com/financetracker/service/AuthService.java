@@ -57,8 +57,13 @@ public class AuthService {
             throw new ApiException(ErrorCode.AUTH_002);
         }
 
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new ApiException(ErrorCode.AUTH_009);
+        }
+
         User user = User.builder()
                 .email(request.getEmail())
+                .username(request.getUsername())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .fullName(request.getFullName())
                 .defaultCurrency(request.getDefaultCurrency() != null ? request.getDefaultCurrency() : "VND")
@@ -83,12 +88,20 @@ public class AuthService {
 
     @Transactional
     public AuthResponse login(LoginRequest request, HttpServletRequest httpRequest) {
+        String loginIdentifier = request.getLogin();
+
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+                new UsernamePasswordAuthenticationToken(loginIdentifier, request.getPassword())
         );
 
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> ApiException.notFound("User"));
+        User user;
+        if (loginIdentifier.contains("@")) {
+            user = userRepository.findByEmail(loginIdentifier)
+                    .orElseThrow(() -> ApiException.notFound("User"));
+        } else {
+            user = userRepository.findByUsername(loginIdentifier)
+                    .orElseThrow(() -> ApiException.notFound("User"));
+        }
 
         if (!user.getEmailVerified()) {
             throw new ApiException(ErrorCode.AUTH_006);
@@ -120,6 +133,7 @@ public class AuthService {
                 .tokenType("Bearer")
                 .userId(user.getId())
                 .email(user.getEmail())
+                .username(user.getUsername())
                 .fullName(user.getFullName())
                 .defaultCurrency(user.getDefaultCurrency())
                 .role(user.getRole().name())
@@ -192,6 +206,7 @@ public class AuthService {
                 .tokenType("Bearer")
                 .userId(user.getId())
                 .email(user.getEmail())
+                .username(user.getUsername())
                 .fullName(user.getFullName())
                 .defaultCurrency(user.getDefaultCurrency())
                 .role(user.getRole().name())

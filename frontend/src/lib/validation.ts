@@ -10,11 +10,16 @@ export const VALIDATION = {
   BILLING_DAY_MAX: 31,
   ALERT_THRESHOLD_MIN: 1,
   ALERT_THRESHOLD_MAX: 100,
+  USERNAME_MIN: 3,
+  USERNAME_MAX: 50,
 } as const;
 
 // Password strength regex - matches backend @StrongPassword validator
 // Must have: at least 8 chars, 1 uppercase, 1 lowercase, 1 number
 export const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+// Username regex - matches backend @Pattern validator
+export const USERNAME_REGEX = /^[a-zA-Z0-9._-]+$/;
 
 // Validate strong password
 export function isStrongPassword(password: string): boolean {

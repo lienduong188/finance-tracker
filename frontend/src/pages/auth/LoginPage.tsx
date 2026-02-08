@@ -8,7 +8,7 @@ import { useAuth } from "@/context/AuthContext"
 import { Button, Input, Label, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui"
 import { LanguageSwitch } from "@/components/LanguageSwitch"
 
-const REMEMBERED_EMAIL_KEY = "rememberedEmail"
+const REMEMBERED_LOGIN_KEY = "rememberedLogin"
 
 export function LoginPage() {
   const { t } = useTranslation()
@@ -21,7 +21,7 @@ export function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false)
 
   const loginSchema = z.object({
-    email: z.string().email(t("validation.emailInvalid")),
+    login: z.string().min(1, t("validation.required")),
     password: z.string().min(8, t("validation.passwordMin", { min: 8 })),
   })
 
@@ -50,9 +50,15 @@ export function LoginPage() {
   }, [searchParams, setSearchParams])
 
   useEffect(() => {
-    const savedEmail = localStorage.getItem(REMEMBERED_EMAIL_KEY)
-    if (savedEmail) {
-      setValue("email", savedEmail)
+    // Migrate old key
+    const oldSaved = localStorage.getItem("rememberedEmail")
+    if (oldSaved) {
+      localStorage.setItem(REMEMBERED_LOGIN_KEY, oldSaved)
+      localStorage.removeItem("rememberedEmail")
+    }
+    const savedLogin = localStorage.getItem(REMEMBERED_LOGIN_KEY)
+    if (savedLogin) {
+      setValue("login", savedLogin)
       setRememberMe(true)
     }
   }, [setValue])
@@ -68,9 +74,9 @@ export function LoginPage() {
     try {
       await login(data)
       if (rememberMe) {
-        localStorage.setItem(REMEMBERED_EMAIL_KEY, data.email)
+        localStorage.setItem(REMEMBERED_LOGIN_KEY, data.login)
       } else {
-        localStorage.removeItem(REMEMBERED_EMAIL_KEY)
+        localStorage.removeItem(REMEMBERED_LOGIN_KEY)
       }
     } catch {
       setError(t("auth.loginFailed"))
@@ -110,13 +116,14 @@ export function LoginPage() {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="email" required>{t("auth.email")}</Label>
+              <Label htmlFor="login" required>{t("auth.usernameOrEmail")}</Label>
               <Input
-                id="email"
-                type="email"
-                placeholder="email@example.com"
-                error={errors.email?.message}
-                {...register("email")}
+                id="login"
+                type="text"
+                autoComplete="username"
+                placeholder={t("auth.usernameOrEmailPlaceholder")}
+                error={errors.login?.message}
+                {...register("login")}
               />
             </div>
 
@@ -145,7 +152,7 @@ export function LoginPage() {
                 className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
               />
               <label htmlFor="rememberMe" className="text-sm text-muted-foreground cursor-pointer">
-                {t("auth.rememberEmail")}
+                {t("auth.rememberLogin")}
               </label>
             </div>
           </CardContent>

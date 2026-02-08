@@ -7,6 +7,7 @@ import com.financetracker.dto.user.UpdateProfileRequest;
 import com.financetracker.dto.user.UserResponse;
 import com.financetracker.entity.User;
 import com.financetracker.exception.ApiException;
+import com.financetracker.exception.ErrorCode;
 import com.financetracker.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +40,12 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> ApiException.notFound("User"));
 
+        if (request.getUsername() != null) {
+            if (!request.getUsername().equals(user.getUsername()) && userRepository.existsByUsername(request.getUsername())) {
+                throw new ApiException(ErrorCode.AUTH_009);
+            }
+            user.setUsername(request.getUsername());
+        }
         if (request.getFullName() != null) {
             user.setFullName(request.getFullName());
         }
@@ -127,6 +134,7 @@ public class UserService {
         return UserResponse.builder()
                 .id(user.getId())
                 .email(user.getEmail())
+                .username(user.getUsername())
                 .fullName(user.getFullName())
                 .defaultCurrency(user.getDefaultCurrency())
                 .createdAt(user.getCreatedAt())

@@ -189,6 +189,7 @@ public class AdminUserService {
         return AdminUserResponse.builder()
                 .id(user.getId())
                 .email(user.getEmail())
+                .username(user.getUsername())
                 .fullName(user.getFullName())
                 .defaultCurrency(user.getDefaultCurrency())
                 .role(user.getRole())

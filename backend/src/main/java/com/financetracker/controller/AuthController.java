@@ -49,7 +49,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    @Operation(summary = "Login with email and password")
+    @Operation(summary = "Login with username/email and password")
     public ResponseEntity<AuthResponse> login(
             @Valid @RequestBody LoginRequest request,
             HttpServletRequest httpRequest) {
@@ -97,6 +97,7 @@ public class AuthController {
         return ResponseEntity.ok(AuthResponse.builder()
                 .userId(userDetails.getId())
                 .email(userDetails.getEmail())
+                .username(userDetails.getUsernameField())
                 .fullName(userDetails.getFullName())
                 .defaultCurrency(userDetails.getDefaultCurrency())
                 .role(userDetails.getRole().name())

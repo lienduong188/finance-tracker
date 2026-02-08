@@ -19,12 +19,17 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     Optional<User> findByEmail(String email);
 
+    Optional<User> findByUsername(String username);
+
     boolean existsByEmail(String email);
+
+    boolean existsByUsername(String username);
 
     // Admin methods
     @Query("SELECT u FROM User u WHERE " +
            "LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-           "LOWER(u.fullName) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+           "LOWER(u.fullName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(u.username) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     Page<User> searchUsers(@Param("keyword") String keyword, Pageable pageable);
 
     List<User> findByRole(Role role);

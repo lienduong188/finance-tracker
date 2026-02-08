@@ -16,6 +16,7 @@ public class CustomUserDetails implements UserDetails {
 
     private final UUID id;
     private final String email;
+    private final String usernameField;
     private final String password;
     private final String fullName;
     private final String defaultCurrency;
@@ -26,6 +27,7 @@ public class CustomUserDetails implements UserDetails {
     public CustomUserDetails(User user) {
         this.id = user.getId();
         this.email = user.getEmail();
+        this.usernameField = user.getUsername();
         this.password = user.getPasswordHash();
         this.fullName = user.getFullName();
         this.defaultCurrency = user.getDefaultCurrency();

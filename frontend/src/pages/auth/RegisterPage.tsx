@@ -8,7 +8,7 @@ import { useAuth } from "@/context/AuthContext"
 import { authApi } from "@/api"
 import { Button, Input, Label, Select, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui"
 import { LanguageSwitch } from "@/components/LanguageSwitch"
-import { VALIDATION, PASSWORD_REGEX } from "@/lib/validation"
+import { VALIDATION, PASSWORD_REGEX, USERNAME_REGEX } from "@/lib/validation"
 import { generateSecurePassword, copyToClipboard } from "@/lib/password-generator"
 
 export function RegisterPage() {
@@ -27,6 +27,10 @@ export function RegisterPage() {
     fullName: z.string()
       .min(VALIDATION.NAME_MIN, t("validation.nameMin", { min: VALIDATION.NAME_MIN }))
       .max(VALIDATION.NAME_MAX, t("errors.validation.maxLength", { field: t("auth.fullName"), max: VALIDATION.NAME_MAX })),
+    username: z.string()
+      .min(VALIDATION.USERNAME_MIN, t("validation.usernameMin", { min: VALIDATION.USERNAME_MIN }))
+      .max(VALIDATION.USERNAME_MAX, t("validation.usernameMax", { max: VALIDATION.USERNAME_MAX }))
+      .regex(USERNAME_REGEX, t("validation.usernameFormat")),
     email: z.string().email(t("validation.emailInvalid")),
     password: z.string()
       .min(VALIDATION.PASSWORD_MIN, t("validation.passwordMin", { min: VALIDATION.PASSWORD_MIN }))
@@ -75,6 +79,7 @@ export function RegisterPage() {
 
     try {
       await registerUser({
+        username: data.username,
         email: data.email,
         password: data.password,
         fullName: data.fullName,
@@ -182,6 +187,18 @@ export function RegisterPage() {
                 error={errors.fullName?.message}
                 {...register("fullName")}
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="username" required>{t("auth.username")}</Label>
+              <Input
+                id="username"
+                autoComplete="username"
+                placeholder={t("auth.usernamePlaceholder")}
+                error={errors.username?.message}
+                {...register("username")}
+              />
+              <p className="text-xs text-muted-foreground">{t("auth.usernameHint")}</p>
             </div>
 
             <div className="space-y-2">

@@ -5,6 +5,7 @@ export type Role = "USER" | "ADMIN"
 export interface User {
   id: string
   email: string
+  username: string
   fullName: string
   defaultCurrency: string
   role: Role
@@ -15,11 +16,12 @@ export interface User {
 
 // Auth types
 export interface LoginRequest {
-  email: string
+  login: string
   password: string
 }
 
 export interface RegisterRequest {
+  username: string
   email: string
   password: string
   fullName: string
@@ -33,12 +35,14 @@ export interface AuthResponse {
   tokenType: string
   userId: string
   email: string
+  username: string
   fullName: string
   defaultCurrency: string
   role: Role
 }
 
 export interface UpdateProfileRequest {
+  username?: string
   fullName: string
   defaultCurrency: string
 }
@@ -263,6 +267,7 @@ export type DeletionStatus = "ACTIVE" | "PENDING_DELETION" | "DELETED"
 export interface AdminUser {
   id: string
   email: string
+  username: string
   fullName: string
   defaultCurrency: string
   role: Role
@@ -736,4 +741,97 @@ export interface UpcomingPayment {
   currency: string
   dueDate: string
   status: PaymentStatus
+}
+
+// Spending Plan types
+export type SpendingPlanStatus = "PLANNING" | "ACTIVE" | "COMPLETED" | "CANCELLED"
+
+export interface SpendingPlan {
+  id: string
+  name: string
+  description: string | null
+  currency: string
+  icon: string | null
+  color: string | null
+  startDate: string | null
+  endDate: string | null
+  status: SpendingPlanStatus
+  totalEstimated: number
+  totalActual: number
+  remainingAmount: number
+  progressPercentage: number
+  itemsCount: number
+  familyId: string | null
+  familyName: string | null
+  userId: string | null
+  userName: string | null
+  createdAt: string
+}
+
+export interface SpendingPlanRequest {
+  name: string
+  description?: string
+  currency?: string
+  icon?: string
+  color?: string
+  startDate?: string
+  endDate?: string
+  familyId?: string
+}
+
+export interface SpendingPlanItem {
+  id: string
+  planId: string
+  name: string
+  estimatedAmount: number
+  actualAmount: number
+  remainingAmount: number
+  progressPercentage: number
+  overBudget: boolean
+  categoryId: string | null
+  categoryName: string | null
+  categoryIcon: string | null
+  icon: string | null
+  notes: string | null
+  sortOrder: number
+  expensesCount: number
+  createdAt: string
+}
+
+export interface SpendingPlanItemRequest {
+  name: string
+  estimatedAmount: number
+  categoryId?: string
+  icon?: string
+  notes?: string
+  sortOrder?: number
+}
+
+export interface SpendingPlanExpense {
+  id: string
+  itemId: string
+  itemName: string
+  userId: string
+  userName: string
+  accountId: string
+  accountName: string
+  accountCurrency: string
+  transactionId: string | null
+  amount: number
+  amountInPlanCurrency: number
+  planCurrency: string
+  note: string | null
+  expenseDate: string
+  createdAt: string
+}
+
+export interface SpendingPlanExpenseRequest {
+  amount: number
+  accountId: string
+  note?: string
+  expenseDate?: string
+}
+
+export interface SpendingPlanDetail extends SpendingPlan {
+  items: SpendingPlanItem[]
 }

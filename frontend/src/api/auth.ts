@@ -25,6 +25,7 @@ export const authApi = {
     return {
       id: data.userId,
       email: data.email,
+      username: data.username,
       fullName: data.fullName,
       defaultCurrency: data.defaultCurrency || "VND",
       role: data.role || "USER",

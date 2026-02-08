@@ -141,6 +141,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser({
       id: response.userId,
       email: response.email,
+      username: response.username,
       fullName: response.fullName,
       defaultCurrency: response.defaultCurrency || "VND",
       role: response.role || "USER",
