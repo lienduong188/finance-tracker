@@ -15,6 +15,7 @@ import { DebtsPage } from "./pages/debts"
 import { SettingsPage } from "./pages/settings"
 import { FamilyPage, FamilyDetailPage } from "./pages/family"
 import { SavingsPage, SavingsDetailPage } from "./pages/savings"
+import { SpendingPlansPage, SpendingPlanDetailPage } from "./pages/spendingPlans"
 import NotificationsPage from "./pages/notifications/NotificationsPage"
 import { AdminDashboardPage, AdminUsersPage, AdminCategoriesPage, AdminTokenUsagePage } from "./pages/admin"
 
@@ -58,6 +59,8 @@ function App() {
               <Route path="/invitations" element={<NotificationsPage />} />
               <Route path="/savings" element={<SavingsPage />} />
               <Route path="/savings/:id" element={<SavingsDetailPage />} />
+              <Route path="/spending-plans" element={<SpendingPlansPage />} />
+              <Route path="/spending-plans/:id" element={<SpendingPlanDetailPage />} />
               <Route path="/settings" element={<SettingsPage />} />
             </Route>
 

@@ -18,6 +18,7 @@ import {
   Bell,
   Banknote,
   ClipboardList,
+  ClipboardCheck,
   CreditCard,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -130,6 +131,7 @@ export function Sidebar({ isOpen = true, onClose, onOpenChat }: SidebarProps) {
               items={[
                 { to: "/budgets", icon: PiggyBank, label: t("nav.budgets") },
                 { to: "/savings", icon: Target, label: t("nav.savings") },
+                { to: "/spending-plans", icon: ClipboardCheck, label: t("nav.spendingPlans") },
                 { to: "/debts", icon: HandCoins, label: t("nav.debts") },
               ]}
             />

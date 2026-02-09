@@ -96,3 +96,7 @@ coverage/
 
 CLAUDE.md
 .claude/settings.local.json
+
+# Local docs (không push lên GitHub)
+docs/
+SYSTEM_ARCHITECTURE_GUIDE.md

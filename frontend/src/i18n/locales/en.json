@@ -109,6 +109,7 @@
     "debts": "Debts",
     "family": "Groups",
     "savings": "Savings",
+    "spendingPlans": "Spending Plans",
     "notifications": "Notifications",
     "categories": "Categories",
     "settings": "Settings",
@@ -768,6 +769,80 @@
       "nameRequired": "Goal name is required",
       "amountPositive": "Amount must be positive",
       "accountRequired": "Please select a source account"
+    }
+  },
+  "spendingPlans": {
+    "title": "Spending Plans",
+    "subtitle": "Plan and track expenses for events",
+    "addPlan": "Create Plan",
+    "editPlan": "Edit Plan",
+    "noPlans": "No plans yet",
+    "noPlansHint": "Create a plan to track spending for trips, weddings, birthdays...",
+    "createFirst": "Create your first plan",
+    "personal": "Personal",
+    "notFound": "Plan not found",
+    "noDescription": "No description",
+    "planName": "Plan Name",
+    "planNamePlaceholder": "e.g. Trip to Japan, Wedding...",
+    "planDescription": "Description",
+    "planDescriptionPlaceholder": "Plan description",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "group": "Group (optional)",
+    "personalPlan": "Personal Plan",
+    "groupPlanHint": "Select a group to create a shared plan",
+    "confirmDelete": "Are you sure you want to delete \"{{name}}\"?",
+    "estimated": "Estimated",
+    "actual": "Actual",
+    "remaining": "Remaining",
+    "progress": "Progress",
+    "overBudget": "Over budget",
+    "statuses": {
+      "PLANNING": "Planning",
+      "ACTIVE": "Active",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled"
+    },
+    "items": {
+      "title": "Expense Items",
+      "add": "Add Item",
+      "edit": "Edit Item",
+      "noItems": "No items yet",
+      "noItemsHint": "Add expected expense items",
+      "name": "Item Name",
+      "namePlaceholder": "e.g. Flight tickets, Hotel, Food...",
+      "estimatedAmount": "Estimated Amount",
+      "category": "Category",
+      "notes": "Notes",
+      "confirmDelete": "Delete item \"{{name}}\"? All actual expenses will be refunded."
+    },
+    "expenses": {
+      "title": "Actual Expenses",
+      "record": "Record Expense",
+      "recordFor": "Record expense for \"{{name}}\"",
+      "noExpenses": "No expenses yet",
+      "all": "All Expenses",
+      "recentExpenses": "Recent Expenses",
+      "sourceAccount": "Source Account",
+      "selectAccount": "Select account",
+      "currentBalance": "Current balance",
+      "amount": "Amount",
+      "date": "Expense Date",
+      "note": "Note (optional)",
+      "hint": "Amount will be deducted from the account and recorded to the item",
+      "hintDifferentCurrency": "Will deduct {{accountAmount}} from account and record {{planAmount}} to the plan",
+      "confirmDelete": "Delete expense {{amount}}? The amount will be refunded to the account."
+    },
+    "actions": {
+      "activate": "Start Plan",
+      "complete": "Complete",
+      "cancel": "Cancel Plan"
+    },
+    "validation": {
+      "nameRequired": "Plan name is required",
+      "itemNameRequired": "Item name is required",
+      "amountPositive": "Amount must be greater than 0",
+      "accountRequired": "Please select an account"
     }
   },
   "notifications": {

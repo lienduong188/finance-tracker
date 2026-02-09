@@ -15,6 +15,7 @@ A personal finance management application to help individuals and families track
 - **Recurring Transactions**: Automate regular income/expenses (daily, weekly, monthly, yearly)
 - **Savings Goals**: Set and track personal or group savings targets
 - **Debts Tracking**: Manage money lent and borrowed with payment history
+- **Spending Plans**: Plan and track expenses for events (trips, weddings, birthdays) with estimated vs actual comparison
 
 ### Collaboration
 - **Family/Group Management**: Share finances with family or friends

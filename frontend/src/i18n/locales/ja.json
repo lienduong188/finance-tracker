@@ -109,6 +109,7 @@
     "debts": "貸借",
     "family": "グループ",
     "savings": "貯金",
+    "spendingPlans": "支出計画",
     "notifications": "通知",
     "categories": "カテゴリー",
     "settings": "設定",
@@ -768,6 +769,80 @@
       "nameRequired": "目標名は必須です",
       "amountPositive": "金額は正の数である必要があります",
       "accountRequired": "引き落とし口座を選択してください"
+    }
+  },
+  "spendingPlans": {
+    "title": "支出計画",
+    "subtitle": "イベントの支出を計画・追跡",
+    "addPlan": "計画を作成",
+    "editPlan": "計画を編集",
+    "noPlans": "計画がありません",
+    "noPlansHint": "旅行、結婚式、誕生日などの支出を追跡する計画を作成しましょう",
+    "createFirst": "最初の計画を作成",
+    "personal": "個人",
+    "notFound": "計画が見つかりません",
+    "noDescription": "説明なし",
+    "planName": "計画名",
+    "planNamePlaceholder": "例：日本旅行、結婚式...",
+    "planDescription": "説明",
+    "planDescriptionPlaceholder": "計画の説明",
+    "startDate": "開始日",
+    "endDate": "終了日",
+    "group": "グループ（任意）",
+    "personalPlan": "個人計画",
+    "groupPlanHint": "共有計画を作成するにはグループを選択してください",
+    "confirmDelete": "「{{name}}」を削除してもよろしいですか？",
+    "estimated": "見積もり",
+    "actual": "実績",
+    "remaining": "残り",
+    "progress": "進捗",
+    "overBudget": "予算超過",
+    "statuses": {
+      "PLANNING": "計画中",
+      "ACTIVE": "実行中",
+      "COMPLETED": "完了",
+      "CANCELLED": "キャンセル"
+    },
+    "items": {
+      "title": "支出項目",
+      "add": "項目を追加",
+      "edit": "項目を編集",
+      "noItems": "項目がありません",
+      "noItemsHint": "予定の支出項目を追加してください",
+      "name": "項目名",
+      "namePlaceholder": "例：航空券、ホテル、食事...",
+      "estimatedAmount": "見積もり金額",
+      "category": "カテゴリー",
+      "notes": "メモ",
+      "confirmDelete": "項目「{{name}}」を削除しますか？すべての実際の支出が返金されます。"
+    },
+    "expenses": {
+      "title": "実際の支出",
+      "record": "支出を記録",
+      "recordFor": "「{{name}}」の支出を記録",
+      "noExpenses": "支出がありません",
+      "all": "すべての支出",
+      "recentExpenses": "最近の支出",
+      "sourceAccount": "引き落とし口座",
+      "selectAccount": "口座を選択",
+      "currentBalance": "現在の残高",
+      "amount": "金額",
+      "date": "支出日",
+      "note": "メモ（任意）",
+      "hint": "金額は口座から差し引かれ、項目に記録されます",
+      "hintDifferentCurrency": "口座から{{accountAmount}}を引き落とし、計画に{{planAmount}}を記録します",
+      "confirmDelete": "支出{{amount}}を削除しますか？金額は口座に返金されます。"
+    },
+    "actions": {
+      "activate": "実行開始",
+      "complete": "完了",
+      "cancel": "計画をキャンセル"
+    },
+    "validation": {
+      "nameRequired": "計画名は必須です",
+      "itemNameRequired": "項目名は必須です",
+      "amountPositive": "金額は0より大きい必要があります",
+      "accountRequired": "口座を選択してください"
     }
   },
   "notifications": {
