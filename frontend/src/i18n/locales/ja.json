@@ -814,6 +814,8 @@
       "estimatedAmount": "見積もり金額",
       "category": "カテゴリー",
       "notes": "メモ",
+      "plannedDate": "支出予定日",
+      "plannedAccount": "支出予定口座",
       "confirmDelete": "項目「{{name}}」を削除しますか？すべての実際の支出が返金されます。"
     },
     "expenses": {

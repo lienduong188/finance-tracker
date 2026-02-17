@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
-import { spendingPlansApi, categoriesApi } from "@/api"
+import { spendingPlansApi, categoriesApi, accountsApi } from "@/api"
 import type { SpendingPlanItem } from "@/types"
 import { Button, Input, Dialog, DialogContent, DialogHeader, DialogTitle, CurrencyInput } from "@/components/ui"
 
@@ -14,6 +14,8 @@ const createItemSchema = (t: (key: string) => string) => z.object({
   categoryId: z.string().optional(),
   icon: z.string().optional(),
   notes: z.string().optional(),
+  plannedDate: z.string().optional(),
+  plannedAccountId: z.string().optional(),
 })
 
 type ItemForm = z.infer<ReturnType<typeof createItemSchema>>
@@ -39,6 +41,13 @@ export default function ItemFormModal({ isOpen, onClose, planId, item }: ItemFor
 
   const expenseCategories = categories?.filter(c => c.type === "EXPENSE") || []
 
+  const { data: accounts } = useQuery({
+    queryKey: ["accounts"],
+    queryFn: accountsApi.getAll,
+  })
+
+  const activeAccounts = accounts?.filter((a: any) => a.isActive) || []
+
   const itemSchema = createItemSchema(t)
 
   const {
@@ -57,6 +66,8 @@ export default function ItemFormModal({ isOpen, onClose, planId, item }: ItemFor
       categoryId: "",
       icon: "📦",
       notes: "",
+      plannedDate: "",
+      plannedAccountId: "",
     },
   })
 
@@ -70,6 +81,8 @@ export default function ItemFormModal({ isOpen, onClose, planId, item }: ItemFor
         categoryId: item.categoryId || "",
         icon: item.icon || "📦",
         notes: item.notes || "",
+        plannedDate: item.plannedDate || "",
+        plannedAccountId: item.plannedAccountId || "",
       })
     } else {
       reset({
@@ -78,6 +91,8 @@ export default function ItemFormModal({ isOpen, onClose, planId, item }: ItemFor
         categoryId: "",
         icon: "📦",
         notes: "",
+        plannedDate: "",
+        plannedAccountId: "",
       })
     }
   }, [item, reset])
@@ -86,6 +101,8 @@ export default function ItemFormModal({ isOpen, onClose, planId, item }: ItemFor
     mutationFn: (data: ItemForm) => spendingPlansApi.addItem(planId, {
       ...data,
       categoryId: data.categoryId || undefined,
+      plannedDate: data.plannedDate || undefined,
+      plannedAccountId: data.plannedAccountId || undefined,
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["spending-plan", planId] })
@@ -98,6 +115,8 @@ export default function ItemFormModal({ isOpen, onClose, planId, item }: ItemFor
     mutationFn: (data: ItemForm) => spendingPlansApi.updateItem(planId, item!.id, {
       ...data,
       categoryId: data.categoryId || undefined,
+      plannedDate: data.plannedDate || undefined,
+      plannedAccountId: data.plannedAccountId || undefined,
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["spending-plan", planId] })
@@ -176,6 +195,23 @@ export default function ItemFormModal({ isOpen, onClose, planId, item }: ItemFor
               {expenseCategories.map((category) => (
                 <option key={category.id} value={category.id}>
                   {category.icon} {category.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">{t("spendingPlans.items.plannedDate")}</label>
+            <Input {...register("plannedDate")} type="date" />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">{t("spendingPlans.items.plannedAccount")}</label>
+            <select {...register("plannedAccountId")} className="w-full border rounded-md p-2 bg-background">
+              <option value="">-- {t("common.select")} --</option>
+              {activeAccounts.map((account: any) => (
+                <option key={account.id} value={account.id}>
+                  {account.name} ({account.currency})
                 </option>
               ))}
             </select>

@@ -793,6 +793,9 @@ export interface SpendingPlanItem {
   categoryIcon: string | null
   icon: string | null
   notes: string | null
+  plannedDate: string | null
+  plannedAccountId: string | null
+  plannedAccountName: string | null
   sortOrder: number
   expensesCount: number
   createdAt: string
@@ -804,6 +807,8 @@ export interface SpendingPlanItemRequest {
   categoryId?: string
   icon?: string
   notes?: string
+  plannedDate?: string
+  plannedAccountId?: string
   sortOrder?: number
 }
 

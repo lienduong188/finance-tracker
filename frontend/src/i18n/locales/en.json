@@ -814,6 +814,8 @@
       "estimatedAmount": "Estimated Amount",
       "category": "Category",
       "notes": "Notes",
+      "plannedDate": "Planned Date",
+      "plannedAccount": "Planned Account",
       "confirmDelete": "Delete item \"{{name}}\"? All actual expenses will be refunded."
     },
     "expenses": {

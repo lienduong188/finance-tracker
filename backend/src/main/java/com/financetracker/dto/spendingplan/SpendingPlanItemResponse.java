@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -27,6 +28,9 @@ public class SpendingPlanItemResponse {
     private String categoryIcon;
     private String icon;
     private String notes;
+    private LocalDate plannedDate;
+    private UUID plannedAccountId;
+    private String plannedAccountName;
     private Integer sortOrder;
     private int expensesCount;
     private OffsetDateTime createdAt;

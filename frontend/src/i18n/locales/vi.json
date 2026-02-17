@@ -814,6 +814,8 @@
       "estimatedAmount": "Số tiền dự kiến",
       "category": "Danh mục",
       "notes": "Ghi chú",
+      "plannedDate": "Ngày dự định chi tiêu",
+      "plannedAccount": "Tài khoản dự định",
       "confirmDelete": "Xóa hạng mục \"{{name}}\"? Tất cả chi tiêu thực tế sẽ được hoàn lại."
     },
     "expenses": {

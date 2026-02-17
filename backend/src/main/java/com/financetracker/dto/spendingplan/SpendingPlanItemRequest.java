@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Data
@@ -31,6 +32,10 @@ public class SpendingPlanItemRequest {
     private String icon;
 
     private String notes;
+
+    private LocalDate plannedDate;
+
+    private UUID plannedAccountId;
 
     private Integer sortOrder;
 }

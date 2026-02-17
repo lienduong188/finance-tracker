@@ -159,6 +159,7 @@ public class SpendingPlanService {
                 .estimatedAmount(request.getEstimatedAmount())
                 .icon(request.getIcon())
                 .notes(request.getNotes())
+                .plannedDate(request.getPlannedDate())
                 .sortOrder(sortOrder)
                 .build();
 
@@ -166,6 +167,12 @@ public class SpendingPlanService {
             Category category = categoryRepository.findById(request.getCategoryId())
                     .orElseThrow(() -> new ApiException("Không tìm thấy danh mục", HttpStatus.NOT_FOUND));
             item.setCategory(category);
+        }
+
+        if (request.getPlannedAccountId() != null) {
+            Account plannedAccount = accountRepository.findById(request.getPlannedAccountId())
+                    .orElseThrow(() -> new ApiException("Không tìm thấy tài khoản", HttpStatus.NOT_FOUND));
+            item.setPlannedAccount(plannedAccount);
         }
 
         item = itemRepository.save(item);
@@ -195,6 +202,7 @@ public class SpendingPlanService {
         item.setEstimatedAmount(request.getEstimatedAmount());
         item.setIcon(request.getIcon());
         item.setNotes(request.getNotes());
+        item.setPlannedDate(request.getPlannedDate());
         if (request.getSortOrder() != null) {
             item.setSortOrder(request.getSortOrder());
         }
@@ -205,6 +213,14 @@ public class SpendingPlanService {
             item.setCategory(category);
         } else {
             item.setCategory(null);
+        }
+
+        if (request.getPlannedAccountId() != null) {
+            Account plannedAccount = accountRepository.findById(request.getPlannedAccountId())
+                    .orElseThrow(() -> new ApiException("Không tìm thấy tài khoản", HttpStatus.NOT_FOUND));
+            item.setPlannedAccount(plannedAccount);
+        } else {
+            item.setPlannedAccount(null);
         }
 
         item = itemRepository.save(item);
@@ -506,6 +522,9 @@ public class SpendingPlanService {
                 .categoryIcon(item.getCategory() != null ? item.getCategory().getIcon() : null)
                 .icon(item.getIcon())
                 .notes(item.getNotes())
+                .plannedDate(item.getPlannedDate())
+                .plannedAccountId(item.getPlannedAccount() != null ? item.getPlannedAccount().getId() : null)
+                .plannedAccountName(item.getPlannedAccount() != null ? item.getPlannedAccount().getName() : null)
                 .sortOrder(item.getSortOrder())
                 .expensesCount(item.getExpenses().size())
                 .createdAt(item.getCreatedAt())

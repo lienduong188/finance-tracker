@@ -278,6 +278,16 @@ export default function SpendingPlanDetailPage() {
                       {item.progressPercentage.toFixed(1)}%
                     </span>
                   </div>
+                  {(item.plannedDate || item.plannedAccountName) && (
+                    <div className="flex gap-4 text-xs text-muted-foreground mt-2">
+                      {item.plannedDate && (
+                        <span>📅 {new Date(item.plannedDate).toLocaleDateString("vi-VN")}</span>
+                      )}
+                      {item.plannedAccountName && (
+                        <span>💳 {item.plannedAccountName}</span>
+                      )}
+                    </div>
+                  )}
                   {item.notes && (
                     <p className="text-sm text-muted-foreground mt-2">{item.notes}</p>
                   )}
