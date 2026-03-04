@@ -58,6 +58,7 @@ public class DataSeeder implements CommandLineRunner {
 
         // Create demo user
         User demoUser = User.builder()
+                .username("demo")
                 .email("demo@example.com")
                 .passwordHash(passwordEncoder.encode("demo1234"))
                 .fullName("Demo User")
@@ -338,6 +339,7 @@ public class DataSeeder implements CommandLineRunner {
 
         // Create Japanese demo user
         User jpUser = User.builder()
+                .username("demo-jp")
                 .email("demo.jp@example.com")
                 .passwordHash(passwordEncoder.encode("demo1234"))
                 .fullName("田中太郎")
@@ -970,6 +972,7 @@ public class DataSeeder implements CommandLineRunner {
         }
 
         User admin = User.builder()
+                .username("admin")
                 .email(adminEmail)
                 .passwordHash(passwordEncoder.encode(adminPassword))
                 .fullName("Administrator")
