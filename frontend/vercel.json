@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "${VITE_API_URL}/api/:path*"
+      "destination": "https://finance-tracker-9dob.onrender.com/api/:path*"
     },
     {
       "source": "/(.*)",
