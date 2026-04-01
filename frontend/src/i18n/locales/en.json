@@ -913,6 +913,13 @@
     "exportSuccess": "Download successful",
     "exportFailed": "Export failed",
     "withCurrentFilters": "With current filters",
-    "allTransactions": "All transactions"
+    "allTransactions": "All transactions",
+    "autoBackup": "Auto Backup",
+    "autoBackupDesc": "System automatically backs up your data daily at 2:00 AM and keeps the last 3 copies",
+    "backupHistory": "Backup history",
+    "noBackups": "No backups yet",
+    "download": "Download",
+    "backupSize": "Size",
+    "backupDate": "Backup date"
   }
 }

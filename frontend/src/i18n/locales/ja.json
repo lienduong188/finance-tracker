@@ -913,6 +913,13 @@
     "exportSuccess": "ダウンロード完了",
     "exportFailed": "エクスポート失敗",
     "withCurrentFilters": "現在のフィルターで",
-    "allTransactions": "すべての取引"
+    "allTransactions": "すべての取引",
+    "autoBackup": "自動バックアップ",
+    "autoBackupDesc": "毎日2:00 AMに自動バックアップし、最新3件を保存します",
+    "backupHistory": "バックアップ履歴",
+    "noBackups": "バックアップなし",
+    "download": "ダウンロード",
+    "backupSize": "サイズ",
+    "backupDate": "バックアップ日"
   }
 }

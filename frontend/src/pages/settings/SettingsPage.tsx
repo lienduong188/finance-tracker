@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { usersApi, categoriesApi, exportApi } from "@/api"
+import type { BackupInfo } from "@/api/export"
 import { useAuth } from "@/context/AuthContext"
 import { Button, Input, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui"
 import { User, Lock, Check, AlertCircle, Tags, Plus, Pencil, Trash2, CheckSquare, Square, UserX, Download, DatabaseBackup } from "lucide-react"
@@ -609,7 +610,8 @@ export function SettingsPage() {
           </CardTitle>
           <CardDescription>{t("export.exportDescription")}</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
+          {/* Manual export */}
           <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
             <div className="flex-1 rounded-lg border p-4">
               <div className="flex items-center gap-2 mb-1">
@@ -634,6 +636,9 @@ export function SettingsPage() {
               </Button>
             </div>
           </div>
+
+          {/* Auto backup history */}
+          <BackupHistorySection />
         </CardContent>
       </Card>
 
@@ -868,6 +873,69 @@ export function SettingsPage() {
         message={alertDialog.message}
         variant="warning"
       />
+    </div>
+  )
+}
+
+function BackupHistorySection() {
+  const { t } = useTranslation()
+  const [downloadingId, setDownloadingId] = useState<string | null>(null)
+
+  const { data: backups, isLoading } = useQuery<BackupInfo[]>({
+    queryKey: ["backups"],
+    queryFn: exportApi.listBackups,
+  })
+
+  const handleDownload = async (backup: BackupInfo) => {
+    setDownloadingId(backup.id)
+    try {
+      await exportApi.downloadBackup(backup.id, backup.fileName)
+    } finally {
+      setDownloadingId(null)
+    }
+  }
+
+  const formatSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+  }
+
+  return (
+    <div>
+      <div className="flex items-center gap-2 mb-3">
+        <DatabaseBackup className="h-4 w-4 text-muted-foreground" />
+        <span className="font-medium text-sm">{t("export.autoBackup")}</span>
+      </div>
+      <p className="text-xs text-muted-foreground mb-3">{t("export.autoBackupDesc")}</p>
+      <div className="rounded-lg border">
+        {isLoading ? (
+          <div className="p-4 text-center text-sm text-muted-foreground">{t("common.loading")}</div>
+        ) : !backups || backups.length === 0 ? (
+          <div className="p-4 text-center text-sm text-muted-foreground">{t("export.noBackups")}</div>
+        ) : (
+          <div className="divide-y">
+            {backups.map((backup) => (
+              <div key={backup.id} className="flex items-center justify-between px-4 py-3">
+                <div>
+                  <p className="text-sm font-medium">{backup.fileName}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(backup.createdAt).toLocaleString()} · {formatSize(backup.fileSize)}
+                  </p>
+                </div>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => handleDownload(backup)}
+                  disabled={downloadingId === backup.id}
+                >
+                  <Download className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

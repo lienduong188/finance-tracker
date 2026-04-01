@@ -1,5 +1,12 @@
 import { apiClient } from "./client"
 
+export interface BackupInfo {
+  id: string
+  fileName: string
+  fileSize: number
+  createdAt: string
+}
+
 function downloadBlob(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob)
   const a = document.createElement("a")
@@ -32,5 +39,17 @@ export const exportApi = {
       responseType: "blob",
     })
     downloadBlob(new Blob([response.data], { type: "application/json" }), `backup_${today}.json`)
+  },
+
+  async listBackups(): Promise<BackupInfo[]> {
+    const response = await apiClient.get("/backups")
+    return response.data
+  },
+
+  async downloadBackup(id: string, fileName: string) {
+    const response = await apiClient.get(`/backups/${id}/download`, {
+      responseType: "blob",
+    })
+    downloadBlob(new Blob([response.data], { type: "application/json" }), fileName)
   },
 }

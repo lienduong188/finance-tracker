@@ -913,6 +913,13 @@
     "exportSuccess": "Tải xuống thành công",
     "exportFailed": "Xuất dữ liệu thất bại",
     "withCurrentFilters": "Theo bộ lọc hiện tại",
-    "allTransactions": "Tất cả giao dịch"
+    "allTransactions": "Tất cả giao dịch",
+    "autoBackup": "Backup tự động",
+    "autoBackupDesc": "Hệ thống tự động backup dữ liệu mỗi ngày lúc 2:00 AM và lưu 3 bản gần nhất",
+    "backupHistory": "Lịch sử backup",
+    "noBackups": "Chưa có backup nào",
+    "download": "Tải xuống",
+    "backupSize": "Kích thước",
+    "backupDate": "Ngày backup"
   }
 }
