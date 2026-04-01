@@ -2,9 +2,8 @@ name: Backup Database
 
 on:
   schedule:
-    # Chạy mỗi Chủ Nhật lúc 2:00 AM UTC (9:00 AM Vietnam)
     - cron: '0 2 * * 0'
-  workflow_dispatch: # Cho phép chạy thủ công từ GitHub UI
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -17,43 +16,53 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Detect PostgreSQL server version and install matching client
-        env:
-          PGHOST: ${{ secrets.PGHOST }}
-          PGPORT: ${{ secrets.PGPORT }}
-          PGUSER: ${{ secrets.PGUSER }}
-          PGPASSWORD: ${{ secrets.PGPASSWORD }}
-          PGDATABASE: ${{ secrets.PGDATABASE }}
-          PGSSLMODE: require
+      - name: Install PostgreSQL clients (multiple versions)
         run: |
-          # Get server major version
-          PG_VERSION=$(psql -h $PGHOST -p $PGPORT -U $PGUSER -d $PGDATABASE \
-            -t -c "SELECT current_setting('server_version_num')::int / 10000;" 2>/dev/null | tr -d ' ')
-          echo "Detected PostgreSQL server version: $PG_VERSION"
-
-          # Install matching pg client
           sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
           wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
           sudo apt-get update -q
-          sudo apt-get install -y postgresql-client-${PG_VERSION}
-
-          echo "PG_CLIENT_VERSION=$PG_VERSION" >> $GITHUB_ENV
+          sudo apt-get install -y postgresql-client-14 postgresql-client-15 postgresql-client-16 postgresql-client-17
 
       - name: Create backup
         env:
-          PGHOST: ${{ secrets.PGHOST }}
-          PGPORT: ${{ secrets.PGPORT }}
-          PGUSER: ${{ secrets.PGUSER }}
           PGPASSWORD: ${{ secrets.PGPASSWORD }}
-          PGDATABASE: ${{ secrets.PGDATABASE }}
           PGSSLMODE: require
         run: |
+          set -e
+
+          PGHOST="${{ secrets.PGHOST }}"
+          PGPORT="${{ secrets.PGPORT }}"
+          PGUSER="${{ secrets.PGUSER }}"
+          PGDATABASE="${{ secrets.PGDATABASE }}"
+
+          # Build connection URL with sslmode
+          PG_URL="postgresql://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE?sslmode=require"
+
+          # Detect server version
+          PG_VERSION=$(psql "$PG_URL" -t -c "SELECT current_setting('server_version_num')::int / 10000;" 2>/dev/null | tr -d ' \n')
+          echo "Server PostgreSQL version: $PG_VERSION"
+
+          # Pick matching pg_dump
+          if [ -z "$PG_VERSION" ]; then
+            echo "Could not detect version, using pg_dump from PATH"
+            PG_DUMP_CMD="pg_dump"
+          elif command -v "/usr/lib/postgresql/$PG_VERSION/bin/pg_dump" &>/dev/null; then
+            PG_DUMP_CMD="/usr/lib/postgresql/$PG_VERSION/bin/pg_dump"
+          else
+            echo "No matching pg_dump for version $PG_VERSION, using default"
+            PG_DUMP_CMD="pg_dump"
+          fi
+
+          echo "Using: $PG_DUMP_CMD"
+          $PG_DUMP_CMD --version
+
           BACKUP_FILE="backup_$(date +%Y%m%d_%H%M%S).sql"
-          pg_dump -h $PGHOST -p $PGPORT -U $PGUSER -d $PGDATABASE \
-            --schema=public -F p -f $BACKUP_FILE
-          gzip $BACKUP_FILE
-          echo "BACKUP_FILE=${BACKUP_FILE}.gz" >> $GITHUB_ENV
-          echo "Backup size: $(du -sh ${BACKUP_FILE}.gz | cut -f1)"
+          $PG_DUMP_CMD "$PG_URL" --schema=public -F p -f "$BACKUP_FILE"
+          gzip "$BACKUP_FILE"
+
+          BACKUP_GZ="${BACKUP_FILE}.gz"
+          echo "BACKUP_FILE=$BACKUP_GZ" >> $GITHUB_ENV
+          echo "Backup size: $(du -sh $BACKUP_GZ | cut -f1)"
 
       - name: Upload backup as artifact
         uses: actions/upload-artifact@v4
@@ -66,7 +75,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: backup-${{ github.run_number }}
-          name: Database Backup ${{ github.run_number }}
+          name: "Database Backup #${{ github.run_number }}"
           body: |
             Automated database backup
             Date: ${{ github.event.repository.updated_at }}
