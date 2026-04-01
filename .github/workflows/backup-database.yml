@@ -31,9 +31,11 @@ jobs:
           PGUSER: ${{ secrets.PGUSER }}
           PGPASSWORD: ${{ secrets.PGPASSWORD }}
           PGDATABASE: ${{ secrets.PGDATABASE }}
+          PGSSLMODE: require
         run: |
           BACKUP_FILE="backup_$(date +%Y%m%d_%H%M%S).sql"
-          pg_dump -h $PGHOST -p $PGPORT -U $PGUSER -d $PGDATABASE -F p -f $BACKUP_FILE
+          pg_dump -h $PGHOST -p $PGPORT -U $PGUSER -d $PGDATABASE \
+            --no-password --schema=public -F p -f $BACKUP_FILE
           gzip $BACKUP_FILE
           echo "BACKUP_FILE=${BACKUP_FILE}.gz" >> $GITHUB_ENV
 
