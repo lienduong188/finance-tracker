@@ -16,50 +16,39 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install PostgreSQL clients (multiple versions)
-        run: |
-          sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
-          wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-          sudo apt-get update -q
-          sudo apt-get install -y postgresql-client-14 postgresql-client-15 postgresql-client-16 postgresql-client-17
-
-      - name: Create backup
+      - name: Login and download backup
         env:
-          PGPASSWORD: ${{ secrets.PGPASSWORD }}
-          PGSSLMODE: require
+          API_URL: https://finance-tracker-9dob.onrender.com
+          ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
         run: |
           set -e
 
-          PGHOST="${{ secrets.PGHOST }}"
-          PGPORT="${{ secrets.PGPORT }}"
-          PGUSER="${{ secrets.PGUSER }}"
-          PGDATABASE="${{ secrets.PGDATABASE }}"
+          echo "Logging in..."
+          LOGIN_RESPONSE=$(curl -sf -X POST "$API_URL/api/auth/login" \
+            -H "Content-Type: application/json" \
+            -d "{\"login\":\"$ADMIN_USERNAME\",\"password\":\"$ADMIN_PASSWORD\"}")
 
-          # Build connection URL with sslmode
-          PG_URL="postgresql://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE?sslmode=require"
+          ACCESS_TOKEN=$(echo "$LOGIN_RESPONSE" | grep -o '"accessToken":"[^"]*"' | cut -d'"' -f4)
 
-          # Detect server version
-          PG_VERSION=$(psql "$PG_URL" -t -c "SELECT current_setting('server_version_num')::int / 10000;" 2>/dev/null | tr -d ' \n')
-          echo "Server PostgreSQL version: $PG_VERSION"
-
-          # Pick matching pg_dump
-          if [ -z "$PG_VERSION" ]; then
-            echo "Could not detect version, using pg_dump from PATH"
-            PG_DUMP_CMD="pg_dump"
-          elif command -v "/usr/lib/postgresql/$PG_VERSION/bin/pg_dump" &>/dev/null; then
-            PG_DUMP_CMD="/usr/lib/postgresql/$PG_VERSION/bin/pg_dump"
-          else
-            echo "No matching pg_dump for version $PG_VERSION, using default"
-            PG_DUMP_CMD="pg_dump"
+          if [ -z "$ACCESS_TOKEN" ]; then
+            echo "Login failed: $LOGIN_RESPONSE"
+            exit 1
           fi
 
-          echo "Using: $PG_DUMP_CMD"
-          $PG_DUMP_CMD --version
+          echo "Login OK. Downloading backup..."
+          BACKUP_FILE="backup_$(date +%Y%m%d_%H%M%S).json"
 
-          BACKUP_FILE="backup_$(date +%Y%m%d_%H%M%S).sql"
-          $PG_DUMP_CMD "$PG_URL" --schema=public -F p -f "$BACKUP_FILE"
+          HTTP_STATUS=$(curl -sf -o "$BACKUP_FILE" -w "%{http_code}" \
+            "$API_URL/api/export/backup" \
+            -H "Authorization: Bearer $ACCESS_TOKEN")
+
+          if [ "$HTTP_STATUS" != "200" ]; then
+            echo "Backup download failed with status $HTTP_STATUS"
+            exit 1
+          fi
+
           gzip "$BACKUP_FILE"
-
           BACKUP_GZ="${BACKUP_FILE}.gz"
           echo "BACKUP_FILE=$BACKUP_GZ" >> $GITHUB_ENV
           echo "Backup size: $(du -sh $BACKUP_GZ | cut -f1)"
@@ -77,7 +66,7 @@ jobs:
           tag_name: backup-${{ github.run_number }}
           name: "Database Backup #${{ github.run_number }}"
           body: |
-            Automated database backup
+            Automated database backup (JSON format)
             Date: ${{ github.event.repository.updated_at }}
           files: ${{ env.BACKUP_FILE }}
         env:
