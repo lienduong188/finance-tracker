@@ -19,4 +19,4 @@ COPY --from=build /app/target/*.jar app.jar
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-Xmx384m", "-Xms256m", "-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=75.0", "-XX:+UseSerialGC", "-XX:MaxMetaspaceSize=128m", "-Xss256k", "-XX:+ExitOnOutOfMemoryError", "-Dspring.main.lazy-initialization=true", "-Dspring.profiles.active=prod", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-Xmx450m", "-Xms256m", "-XX:+UseContainerSupport", "-XX:+UseG1GC", "-XX:MaxMetaspaceSize=128m", "-XX:+ExitOnOutOfMemoryError", "-Dspring.profiles.active=prod", "-jar", "app.jar"]
