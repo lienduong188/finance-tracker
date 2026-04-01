@@ -17,12 +17,27 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install PostgreSQL 17 client
+      - name: Detect PostgreSQL server version and install matching client
+        env:
+          PGHOST: ${{ secrets.PGHOST }}
+          PGPORT: ${{ secrets.PGPORT }}
+          PGUSER: ${{ secrets.PGUSER }}
+          PGPASSWORD: ${{ secrets.PGPASSWORD }}
+          PGDATABASE: ${{ secrets.PGDATABASE }}
+          PGSSLMODE: require
         run: |
+          # Get server major version
+          PG_VERSION=$(psql -h $PGHOST -p $PGPORT -U $PGUSER -d $PGDATABASE \
+            -t -c "SELECT current_setting('server_version_num')::int / 10000;" 2>/dev/null | tr -d ' ')
+          echo "Detected PostgreSQL server version: $PG_VERSION"
+
+          # Install matching pg client
           sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
           wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-          sudo apt-get update
-          sudo apt-get install -y postgresql-client-17
+          sudo apt-get update -q
+          sudo apt-get install -y postgresql-client-${PG_VERSION}
+
+          echo "PG_CLIENT_VERSION=$PG_VERSION" >> $GITHUB_ENV
 
       - name: Create backup
         env:
@@ -35,9 +50,10 @@ jobs:
         run: |
           BACKUP_FILE="backup_$(date +%Y%m%d_%H%M%S).sql"
           pg_dump -h $PGHOST -p $PGPORT -U $PGUSER -d $PGDATABASE \
-            --no-password --schema=public -F p -f $BACKUP_FILE
+            --schema=public -F p -f $BACKUP_FILE
           gzip $BACKUP_FILE
           echo "BACKUP_FILE=${BACKUP_FILE}.gz" >> $GITHUB_ENV
+          echo "Backup size: $(du -sh ${BACKUP_FILE}.gz | cut -f1)"
 
       - name: Upload backup as artifact
         uses: actions/upload-artifact@v4
