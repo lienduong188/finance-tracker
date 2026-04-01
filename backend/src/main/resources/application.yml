@@ -64,7 +64,7 @@ ai:
 
 # Exchange Rate Configuration
 exchange-rate:
-  api-url: https://api.frankfurter.app
+  api-key: ${EXCHANGE_RATE_API_KEY:}
   update-cron: "0 0 * * * *"  # Every hour
   cache-duration-minutes: 60
   fallback-enabled: true
