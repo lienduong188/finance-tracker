@@ -14,6 +14,7 @@ import {
   Wallet,
   ChevronLeft,
   ChevronRight,
+  Download,
 } from "lucide-react"
 import {
   PieChart as RechartsPie,
@@ -41,7 +42,7 @@ import {
 } from "date-fns"
 import { vi, enUS, ja } from "date-fns/locale"
 import { Button, Card, CardContent, CardHeader, CardTitle, Select, Input, Label, ConfirmDialog } from "@/components/ui"
-import { transactionsApi, accountsApi } from "@/api"
+import { transactionsApi, accountsApi, exportApi } from "@/api"
 import { formatCurrency, formatFullDate, cn } from "@/lib/utils"
 import { useAuth } from "@/context/AuthContext"
 import type { Transaction, TransactionType } from "@/types"
@@ -109,6 +110,21 @@ export function TransactionsPage() {
     isOpen: false,
     id: null,
   })
+  const [exportingCsv, setExportingCsv] = useState(false)
+
+  const handleExportCsv = async () => {
+    setExportingCsv(true)
+    try {
+      await exportApi.exportTransactionsCsv({
+        startDate: filters.startDate || undefined,
+        endDate: filters.endDate || undefined,
+        accountId: filters.accountId || undefined,
+        type: filters.type || undefined,
+      })
+    } finally {
+      setExportingCsv(false)
+    }
+  }
 
   const { data: transactions, isLoading } = useQuery({
     queryKey: ["transactions", filters],
@@ -1050,6 +1066,16 @@ export function TransactionsPage() {
                 {t("transactions.clearFilters")}
               </Button>
             )}
+            <Button
+              variant="outline"
+              size="sm"
+              className="ml-auto text-xs"
+              onClick={handleExportCsv}
+              disabled={exportingCsv}
+            >
+              <Download className="mr-1 h-3 w-3" />
+              {exportingCsv ? t("export.exportingCsv") : t("export.exportCsv")}
+            </Button>
           </CardContent>
         </Card>
       )}

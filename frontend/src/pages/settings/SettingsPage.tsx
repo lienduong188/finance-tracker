@@ -4,10 +4,10 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { usersApi, categoriesApi } from "@/api"
+import { usersApi, categoriesApi, exportApi } from "@/api"
 import { useAuth } from "@/context/AuthContext"
 import { Button, Input, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui"
-import { User, Lock, Check, AlertCircle, Tags, Plus, Pencil, Trash2, CheckSquare, Square, UserX } from "lucide-react"
+import { User, Lock, Check, AlertCircle, Tags, Plus, Pencil, Trash2, CheckSquare, Square, UserX, Download, DatabaseBackup } from "lucide-react"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
 import { AlertDialog } from "@/components/ui/AlertDialog"
 import type { Category, CategoryType, CategoryRequest } from "@/types"
@@ -56,6 +56,20 @@ export function SettingsPage() {
   const [selectedCategories, setSelectedCategories] = useState<Set<string>>(new Set())
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null)
+
+  // Export state
+  const [exportingCsv, setExportingCsv] = useState(false)
+  const [exportingBackup, setExportingBackup] = useState(false)
+
+  const handleExportCsv = async () => {
+    setExportingCsv(true)
+    try { await exportApi.exportTransactionsCsv() } finally { setExportingCsv(false) }
+  }
+
+  const handleExportBackup = async () => {
+    setExportingBackup(true)
+    try { await exportApi.exportBackup() } finally { setExportingBackup(false) }
+  }
 
   // Delete account state
   const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false)
@@ -582,6 +596,43 @@ export function SettingsPage() {
                 </div>
               ))
             )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Export & Backup */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <DatabaseBackup className="h-5 w-5" />
+            {t("export.exportTitle")}
+          </CardTitle>
+          <CardDescription>{t("export.exportDescription")}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
+            <div className="flex-1 rounded-lg border p-4">
+              <div className="flex items-center gap-2 mb-1">
+                <Download className="h-4 w-4 text-muted-foreground" />
+                <span className="font-medium text-sm">{t("export.transactionsCsv")}</span>
+              </div>
+              <p className="text-xs text-muted-foreground mb-3">{t("export.transactionsCsvDesc")}</p>
+              <Button size="sm" variant="outline" onClick={handleExportCsv} disabled={exportingCsv}>
+                <Download className="mr-1 h-3 w-3" />
+                {exportingCsv ? t("export.exportingCsv") : t("export.exportCsv")}
+              </Button>
+            </div>
+            <div className="flex-1 rounded-lg border p-4">
+              <div className="flex items-center gap-2 mb-1">
+                <DatabaseBackup className="h-4 w-4 text-muted-foreground" />
+                <span className="font-medium text-sm">{t("export.fullBackup")}</span>
+              </div>
+              <p className="text-xs text-muted-foreground mb-3">{t("export.fullBackupDesc")}</p>
+              <Button size="sm" variant="outline" onClick={handleExportBackup} disabled={exportingBackup}>
+                <Download className="mr-1 h-3 w-3" />
+                {exportingBackup ? t("export.exportingBackup") : t("export.exportBackup")}
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>

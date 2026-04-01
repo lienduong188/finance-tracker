@@ -898,5 +898,21 @@
       "MEMBER_LEFT": "{{memberName}} đã rời khỏi nhóm \"{{familyName}}\"",
       "USER_ACCOUNT_DELETED": "Người dùng {{userFullName}} ({{userEmail}}) đã yêu cầu xóa tài khoản. Dữ liệu sẽ bị xóa sau 7 ngày."
     }
+  },
+  "export": {
+    "exportCsv": "Xuất CSV",
+    "exportBackup": "Xuất backup",
+    "exportTitle": "Xuất & Sao lưu dữ liệu",
+    "exportDescription": "Tải xuống dữ liệu của bạn",
+    "transactionsCsv": "Giao dịch (CSV)",
+    "transactionsCsvDesc": "Xuất danh sách giao dịch ra file CSV, có thể mở bằng Excel",
+    "fullBackup": "Toàn bộ dữ liệu (JSON)",
+    "fullBackupDesc": "Xuất toàn bộ dữ liệu bao gồm tài khoản, giao dịch, ngân sách, nợ, tiết kiệm...",
+    "exportingCsv": "Đang xuất CSV...",
+    "exportingBackup": "Đang xuất backup...",
+    "exportSuccess": "Tải xuống thành công",
+    "exportFailed": "Xuất dữ liệu thất bại",
+    "withCurrentFilters": "Theo bộ lọc hiện tại",
+    "allTransactions": "Tất cả giao dịch"
   }
 }

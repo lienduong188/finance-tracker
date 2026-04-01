@@ -898,5 +898,21 @@
       "MEMBER_LEFT": "{{memberName}}さんが「{{familyName}}」を退出しました",
       "USER_ACCOUNT_DELETED": "ユーザー{{userFullName}}（{{userEmail}}）が退会をリクエストしました。データは7日後に削除されます。"
     }
+  },
+  "export": {
+    "exportCsv": "CSVエクスポート",
+    "exportBackup": "バックアップ",
+    "exportTitle": "エクスポート＆バックアップ",
+    "exportDescription": "データをダウンロード",
+    "transactionsCsv": "取引履歴 (CSV)",
+    "transactionsCsvDesc": "取引リストをCSVファイルでエクスポート、Excelで開けます",
+    "fullBackup": "全データ (JSON)",
+    "fullBackupDesc": "口座、取引、予算、負債、貯蓄など全データをエクスポート",
+    "exportingCsv": "CSVエクスポート中...",
+    "exportingBackup": "バックアップ中...",
+    "exportSuccess": "ダウンロード完了",
+    "exportFailed": "エクスポート失敗",
+    "withCurrentFilters": "現在のフィルターで",
+    "allTransactions": "すべての取引"
   }
 }

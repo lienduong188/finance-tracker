@@ -898,5 +898,21 @@
       "MEMBER_LEFT": "{{memberName}} left \"{{familyName}}\"",
       "USER_ACCOUNT_DELETED": "User {{userFullName}} ({{userEmail}}) requested account deletion. Data will be deleted in 7 days."
     }
+  },
+  "export": {
+    "exportCsv": "Export CSV",
+    "exportBackup": "Export Backup",
+    "exportTitle": "Export & Backup",
+    "exportDescription": "Download your data",
+    "transactionsCsv": "Transactions (CSV)",
+    "transactionsCsvDesc": "Export transaction list as CSV file, can be opened in Excel",
+    "fullBackup": "Full Data (JSON)",
+    "fullBackupDesc": "Export all data including accounts, transactions, budgets, debts, savings...",
+    "exportingCsv": "Exporting CSV...",
+    "exportingBackup": "Exporting backup...",
+    "exportSuccess": "Download successful",
+    "exportFailed": "Export failed",
+    "withCurrentFilters": "With current filters",
+    "allTransactions": "All transactions"
   }
 }
