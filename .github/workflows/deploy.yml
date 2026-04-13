@@ -1,0 +1,58 @@
+name: Deploy Backend to DigitalOcean
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Build JAR
+        run: |
+          cd backend
+          mvn clean package -DskipTests -q
+          echo "Build OK: $(ls -lh target/*.jar | awk '{print $5, $9}')"
+
+      - name: Deploy JAR to DO server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: 165.232.161.229
+          username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: backend/target/finance-tracker-api-0.0.1-SNAPSHOT.jar
+          target: /var/www/finance-tracker/backend/target/
+          strip_components: 2
+
+      - name: Restart service
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 165.232.161.229
+          username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            systemctl restart finance-tracker
+            sleep 10
+            systemctl is-active finance-tracker && echo "Service running OK" || echo "Service failed"
+
+      - name: Health check
+        run: |
+          sleep 30
+          HTTP=$(curl -s -o /dev/null -w "%{http_code}" https://finance-tracker.duonglien.com/api-docs)
+          echo "Health check: HTTP $HTTP"
+          [ "$HTTP" = "200" ] && echo "Deploy successful!" || echo "Warning: health check returned $HTTP"
