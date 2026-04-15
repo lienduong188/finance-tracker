@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://finance-tracker.duonglien.com/api/:path*"
+      "destination": "https://api.duonglien.com/api/:path*"
     },
     {
       "source": "/(.*)",
