@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:postgresql://${PGHOST}:${PGPORT:5432}/${PGDATABASE}
-    username: ${PGUSER:postgres}
-    password: ${PGPASSWORD}
+    url: ${DATABASE_URL:jdbc:postgresql://${PGHOST:localhost}:${PGPORT:5432}/${PGDATABASE:finance_tracker}}
+    username: ${DATABASE_USERNAME:${PGUSER:postgres}}
+    password: ${DATABASE_PASSWORD:${PGPASSWORD:postgres}}
     hikari:
       maximum-pool-size: 5
 
