@@ -39,20 +39,41 @@ jobs:
           target: /var/www/finance-tracker/backend/target/
           strip_components: 2
 
-      - name: Restart service
+      - name: Update service file and restart
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: 165.232.161.229
           username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            cat > /etc/systemd/system/finance-tracker.service << 'EOF'
+            [Unit]
+            Description=Finance Tracker Spring Boot App
+            After=network.target postgresql.service
+
+            [Service]
+            Type=simple
+            User=root
+            WorkingDirectory=/var/www/finance-tracker/backend
+            EnvironmentFile=/etc/finance-tracker/application.env
+            ExecStart=/usr/bin/java -Xms256m -Xmx512m -Dspring.profiles.active=prod -jar target/finance-tracker-api-0.0.1-SNAPSHOT.jar
+            SuccessExitStatus=143
+            TimeoutStartSec=120
+            TimeoutStopSec=30
+            Restart=on-failure
+            RestartSec=5
+
+            [Install]
+            WantedBy=multi-user.target
+            EOF
+            systemctl daemon-reload
             systemctl restart finance-tracker
-            sleep 10
-            systemctl is-active finance-tracker && echo "Service running OK" || echo "Service failed"
+            sleep 15
+            systemctl is-active finance-tracker && echo "Service running OK" || (journalctl -u finance-tracker -n 30 --no-pager && exit 1)
 
       - name: Health check
         run: |
           sleep 30
-          HTTP=$(curl -s -o /dev/null -w "%{http_code}" https://finance-tracker.duonglien.com/api-docs)
+          HTTP=$(curl -s -o /dev/null -w "%{http_code}" https://api.duonglien.com/actuator/health)
           echo "Health check: HTTP $HTTP"
           [ "$HTTP" = "200" ] && echo "Deploy successful!" || echo "Warning: health check returned $HTTP"
